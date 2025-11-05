@@ -22,13 +22,16 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 export default function CustomizedDialogs({ open, handleClose ,children}) {
   return (
     <BootstrapDialog
-      onClose={handleClose}
-      aria-labelledby="customized-dialog-title"
-      open={open}
-    >
-      <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
+  onClose={handleClose}
+  aria-labelledby="customized-dialog-title"
+  open={open}
+  fullWidth
+  maxWidth="lg"  // can be 'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
+>
+
+      {/* <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
         Add Medicine
-      </DialogTitle>
+      </DialogTitle> */}
       <IconButton
         aria-label="close"
         onClick={handleClose}
@@ -44,11 +47,11 @@ export default function CustomizedDialogs({ open, handleClose ,children}) {
       <DialogContent dividers>
        {children}
       </DialogContent>
-      <DialogActions>
+      {/* <DialogActions>
         <Button autoFocus onClick={handleClose}>
           Save changes
         </Button>
-      </DialogActions>
+      </DialogActions> */}
     </BootstrapDialog>
   );
 }

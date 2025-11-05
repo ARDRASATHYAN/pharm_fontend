@@ -1,13 +1,9 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import {
-  RxDashboard,
-  RxClipboard,
-} from "react-icons/rx";
-import { LogOut } from "lucide-react";
-import { FaUserMd, FaUsers, FaPills, FaTruck } from "react-icons/fa";
+import { RxDashboard, RxClipboard } from "react-icons/rx";
+import { LogOut, ChevronDown, ChevronRight, Tag } from "lucide-react";
+import { FaUserMd, FaUsers, FaPills, FaTruck, FaStore } from "react-icons/fa";
 import { MdPointOfSale } from "react-icons/md";
-// import logo from "../../assets/pharma-logo.png"; // replace with your logo
 
 function cn(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -15,17 +11,61 @@ function cn(...classes) {
 
 export default function Sidebar() {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [openSubmenu, setOpenSubmenu] = useState(null); // Track which submenu is open
   const location = useLocation();
   const navigate = useNavigate();
 
   const navigationItems = [
     { icon: <RxDashboard />, name: "Dashboard", href: "/dashboard" },
-    { icon: <FaPills />, name: "Medicines", href: "/medicines" },
+    {
+      icon: <FaPills />,
+      name: "Medicines",
+      href: "/medicines",
+      subLinks: [
+        { name: "Add Medicine", href: "/medicines/add" },
+        { name: "Stock List", href: "/medicines/stock" },
+        { name: "Categories", href: "/medicines/categories" },
+      ],
+    },
     { icon: <MdPointOfSale />, name: "Sales", href: "/sales" },
     { icon: <FaTruck />, name: "Suppliers", href: "/suppliers" },
     { icon: <FaUserMd />, name: "Customers", href: "/customers" },
-    { icon: <RxClipboard />, name: "Reports", href: "/reports" },
-    { icon: <FaUsers />, name: "Staff", href: "/staff" },
+    {
+      icon: <RxClipboard />,
+      name: "Reports",
+      href: "/reports",
+      subLinks: [
+        { name: "Sales Report", href: "/reports/sales" },
+        { name: "Stock Report", href: "/reports/stock" },
+      ],
+    },
+    {
+      icon: <FaUsers />,
+      name: "Staff",
+      href: "/staff",
+      subLinks: [
+        { name: "Add Staff", href: "/staff/add" },
+        { name: "Attendance", href: "/staff/attendance" },
+      ],
+    },
+    {
+      icon: <FaStore />,
+      name: "Store",
+      href: "/store",
+      subLinks: [
+        { name: "Add store", href: "/store/add" },
+        { name: "store List", href: "/store/stock" },
+      ],
+    },
+     {
+      icon: <Tag />,
+      name: "Hsn",
+      href: "/Hsn",
+      subLinks: [
+        { name: "Add Hsn", href: "/Hsn/add" },
+        { name: "Hsn List", href: "/Hsn/stock" },
+      ],
+    },
   ];
 
   const sidebarWidth = isExpanded ? "w-64" : "w-16";
@@ -33,6 +73,10 @@ export default function Sidebar() {
   const handleLogout = () => {
     localStorage.clear();
     navigate("/");
+  };
+
+  const toggleSubmenu = (name) => {
+    setOpenSubmenu((prev) => (prev === name ? null : name));
   };
 
   return (
@@ -48,7 +92,11 @@ export default function Sidebar() {
       >
         {/* Logo Section */}
         <div className="flex items-center border-b border-gray-200 p-4">
-          <img src="https://cdn-icons-png.flaticon.com/512/2966/2966486.png" alt="PharmaPro" className="h-[40px] w-[40px] rounded-md" />
+          <img
+            src="https://cdn-icons-png.flaticon.com/512/2966/2966486.png"
+            alt="PharmaPro"
+            className="h-[40px] w-[40px] rounded-md"
+          />
           {isExpanded && (
             <span className="ml-2">
               <p className="text-[18px] text-blue-700 font-bold whitespace-nowrap">
@@ -62,27 +110,71 @@ export default function Sidebar() {
         </div>
 
         {/* Menu */}
-        <ul className="flex-1 p-3 space-y-1">
+        <ul className="flex-1 p-3 space-y-1 overflow-y-auto">
           {navigationItems.map((item) => {
-            const isActive = location.pathname === item.href;
+            const isActive =
+              location.pathname === item.href ||
+              item.subLinks?.some((s) => s.href === location.pathname);
+            const isOpen = openSubmenu === item.name;
+
             return (
               <li key={item.name}>
-                <button
-                  onClick={() => navigate(item.href)}
-                  className={cn(
-                    "flex items-center gap-3 p-2 rounded-md transition-all w-full text-left",
-                    isActive
-                      ? "bg-blue-50 text-blue-600 border-l-4 border-blue-600"
-                      : "text-gray-700 hover:bg-gray-100"
+                <div>
+                  <button
+                    onClick={() =>
+                      item.subLinks ? toggleSubmenu(item.name) : navigate(item.href)
+                    }
+                    className={cn(
+                      "flex items-center justify-between p-2 rounded-md w-full text-left transition-all",
+                      isActive
+                        ? "bg-blue-50 text-blue-600 border-l-4 border-blue-600"
+                        : "text-gray-700 hover:bg-gray-100"
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{item.icon}</span>
+                      {isExpanded && (
+                        <span className="text-sm font-medium whitespace-nowrap">
+                          {item.name}
+                        </span>
+                      )}
+                    </div>
+
+                    {item.subLinks && isExpanded && (
+                      <span className="ml-auto">
+                        {isOpen ? (
+                          <ChevronDown size={16} className="text-gray-500" />
+                        ) : (
+                          <ChevronRight size={16} className="text-gray-500" />
+                        )}
+                      </span>
+                    )}
+                  </button>
+
+                  {/* Submenu */}
+                  {item.subLinks && isOpen && isExpanded && (
+                    <ul className="pl-10 mt-1 space-y-1 transition-all duration-200">
+                      {item.subLinks.map((sub) => {
+                        const subActive = location.pathname === sub.href;
+                        return (
+                          <li key={sub.name}>
+                            <button
+                              onClick={() => navigate(sub.href)}
+                              className={cn(
+                                "block w-full text-left text-sm p-2 rounded-md",
+                                subActive
+                                  ? "text-blue-600 bg-blue-50"
+                                  : "text-gray-700 hover:bg-gray-100"
+                              )}
+                            >
+                              {sub.name}
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
                   )}
-                >
-                  <span className="text-2xl">{item.icon}</span>
-                  {isExpanded && (
-                    <span className="text-sm font-medium whitespace-nowrap">
-                      {item.name}
-                    </span>
-                  )}
-                </button>
+                </div>
               </li>
             );
           })}
@@ -100,10 +192,12 @@ export default function Sidebar() {
         </div>
       </nav>
 
-      {/* === Mobile Floating Navbar === */}
+      {/* === Mobile Navbar === */}
       <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 bg-white border border-gray-200 shadow-lg rounded-full px-5 py-2 flex justify-around items-center w-[90%] max-w-[380px] md:hidden">
         {navigationItems.map((item) => {
-          const isActive = location.pathname === item.href;
+          const isActive =
+            location.pathname === item.href ||
+            item.subLinks?.some((s) => s.href === location.pathname);
           return (
             <button
               key={item.name}
@@ -130,7 +224,6 @@ export default function Sidebar() {
           );
         })}
 
-        {/* Logout */}
         <button
           onClick={handleLogout}
           className="flex flex-col items-center justify-center text-center text-gray-600 hover:text-red-500"

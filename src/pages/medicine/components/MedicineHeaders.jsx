@@ -1,7 +1,9 @@
+import { IconButton } from "@mui/material";
+import { Delete, Edit } from "lucide-react";
 
 
 
-export const getMedicineColumns = () => [
+export const getMedicineColumns = (onEdit, onDelete) => [
     {
         header: "medicineId",
         accessorKey: "medicineId"
@@ -64,10 +66,31 @@ export const getMedicineColumns = () => [
         header: "status",
         accessorKey: "status",
     },
-    {
-        header: "action",
-        accessorKey: "action",
-    },
+   {
+  header: "Actions",
+  id: "actions",
+  cell: ({ row }) => (
+    <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+      <IconButton
+        color="primary"
+        size="small"
+        onClick={() => onEdit(row.original)}
+        sx={{ padding: "4px" }} // reduce default 8px
+      >
+        <Edit size={16} />
+      </IconButton>
+      <IconButton
+        color="error"
+        size="small"
+        onClick={() => onDelete(row.original.id)}
+        sx={{ padding: "4px" }}
+      >
+        <Delete size={16} />
+      </IconButton>
+    </div>
+  ),
+}
+
 
 
 ];

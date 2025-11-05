@@ -7,7 +7,7 @@ export default function Layout() {
     <div className="flex bg-gray-50 min-h-screen">
       <Sidebar />
       <div className="flex flex-col flex-1 md:ml-16 transition-all duration-300 over ">
-        <Topbar />
+        {/* <Topbar /> */}
         <main className="flex-1 p-6 overflow-y-auto">
           <Outlet />
         </main>

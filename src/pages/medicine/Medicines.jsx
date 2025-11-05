@@ -13,7 +13,7 @@ export default function Medicines() {
     setOpen(true);
   };
 
-   const handleClose = () => {
+  const handleClose = () => {
     setOpen(false);
   };
 
@@ -29,7 +29,10 @@ export default function Medicines() {
 
   return (
     <div>
-      <div className="flex gap-2 mb-4">
+      <h2 className="text-xl font-bold text-blue-700 tracking-wide mb-2">
+        Stock list
+      </h2>
+      <div className="flex gap-2 mb-2">
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -42,7 +45,7 @@ export default function Medicines() {
       </div>
       <DataTable columns={columns} data={data} />
 
-        <MedicineForm
+      <MedicineForm
         open={open}
         handleClose={handleClose}
         onSubmit={handleMedicineSubmit}

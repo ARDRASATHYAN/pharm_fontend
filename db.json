@@ -1,0 +1,325 @@
+{
+  "users": [
+  {
+    "id": "1",
+    "username": "user1",
+    "password_hash": "pass1",
+    "full_name": "User One",
+    "role": "Admin",
+    "is_active": true,
+    "created_at": 1762338000
+  },
+  {
+    "id": "2",
+    "username": "user2",
+    "password_hash": "pass2",
+    "full_name": "User Two",
+    "role": "Manager",
+    "is_active": true,
+    "created_at": 1762338600
+  },
+  {
+    "id": "3",
+    "username": "user3",
+    "password_hash": "pass3",
+    "full_name": "User Three",
+    "role": "Pharmacist",
+    "is_active": true,
+    "created_at": 1762339200
+  },
+  {
+    "id": "4",
+    "username": "user4",
+    "password_hash": "pass4",
+    "full_name": "User Four",
+    "role": "Billing",
+    "is_active": true,
+    "created_at": 1762339800
+  },
+  {
+    "id": "5",
+    "username": "user5",
+    "password_hash": "pass5",
+    "full_name": "User Five",
+    "role": "StoreKeeper",
+    "is_active": false,
+    "created_at": 1762340400
+  },
+  {
+    "id": "6",
+    "username": "user6",
+    "password_hash": "pass6",
+    "full_name": "User Six",
+    "role": "Admin",
+    "is_active": true,
+    "created_at": 1762341000
+  },
+  {
+    "id": "7",
+    "username": "user7",
+    "password_hash": "pass7",
+    "full_name": "User Seven",
+    "role": "Manager",
+    "is_active": false,
+    "created_at": 1762341600
+  },
+  {
+    "id": "8",
+    "username": "user8",
+    "password_hash": "pass8",
+    "full_name": "User Eight",
+    "role": "Pharmacist",
+    "is_active": true,
+    "created_at": 1762342200
+  },
+  {
+    "id": "9",
+    "username": "user9",
+    "password_hash": "pass9",
+    "full_name": "User Nine",
+    "role": "Billing",
+    "is_active": false,
+    "created_at": 1762342800
+  },
+  {
+    "id": "10",
+    "username": "user10",
+    "password_hash": "pass10",
+    "full_name": "User Ten",
+    "role": "StoreKeeper",
+    "is_active": true,
+    "created_at": 1762343400
+  },
+  {
+    "id": "11",
+    "username": "user11",
+    "password_hash": "pass11",
+    "full_name": "User Eleven",
+    "role": "Admin",
+    "is_active": false,
+    "created_at": 1762344000
+  },
+  {
+    "id": "12",
+    "username": "user12",
+    "password_hash": "pass12",
+    "full_name": "User Twelve",
+    "role": "Manager",
+    "is_active": true,
+    "created_at": 1762344600
+  },
+  {
+    "id": "13",
+    "username": "user13",
+    "password_hash": "pass13",
+    "full_name": "User Thirteen",
+    "role": "Pharmacist",
+    "is_active": true,
+    "created_at": 1762345200
+  },
+  {
+    "id": "14",
+    "username": "user14",
+    "password_hash": "pass14",
+    "full_name": "User Fourteen",
+    "role": "Billing",
+    "is_active": true,
+    "created_at": 1762345800
+  },
+  {
+    "id": "15",
+    "username": "user15",
+    "password_hash": "pass15",
+    "full_name": "User Fifteen",
+    "role": "StoreKeeper",
+    "is_active": false,
+    "created_at": 1762346400
+  }
+],
+  "stores": [
+  {
+    "id": "1",
+    "store_name": "store_name 1",
+    "address": "address 1",
+    "city": "city 1",
+    "state": "state 1",
+    "gst_no": "gst_no 1",
+    "phone": "phone 1",
+    "email": "email1@example.com",
+    "created_at": "2025-11-05T10:00:00Z"
+  },
+  {
+    "id": "2",
+    "store_name": "store_name 2",
+    "address": "address 2",
+    "city": "city 2",
+    "state": "state 2",
+    "gst_no": "gst_no 2",
+    "phone": "phone 2",
+    "email": "email2@example.com",
+    "created_at": "2025-11-05T10:05:00Z"
+  },
+  {
+    "id": "3",
+    "store_name": "store_name 3",
+    "address": "address 3",
+    "city": "city 3",
+    "state": "state 3",
+    "gst_no": "gst_no 3",
+    "phone": "phone 3",
+    "email": "email3@example.com",
+    "created_at": "2025-11-05T10:10:00Z"
+  },
+  {
+    "id": "4",
+    "store_name": "store_name 4",
+    "address": "address 4",
+    "city": "city 4",
+    "state": "state 4",
+    "gst_no": "gst_no 4",
+    "phone": "phone 4",
+    "email": "email4@example.com",
+    "created_at": "2025-11-05T10:15:00Z"
+  },
+  {
+    "id": "5",
+    "store_name": "store_name 5",
+    "address": "address 5",
+    "city": "city 5",
+    "state": "state 5",
+    "gst_no": "gst_no 5",
+    "phone": "phone 5",
+    "email": "email5@example.com",
+    "created_at": "2025-11-05T10:20:00Z"
+  },
+  {
+    "id": "6",
+    "store_name": "store_name 6",
+    "address": "address 6",
+    "city": "city 6",
+    "state": "state 6",
+    "gst_no": "gst_no 6",
+    "phone": "phone 6",
+    "email": "email6@example.com",
+    "created_at": "2025-11-05T10:25:00Z"
+  },
+  {
+    "id": "7",
+    "store_name": "store_name 7",
+    "address": "address 7",
+    "city": "city 7",
+    "state": "state 7",
+    "gst_no": "gst_no 7",
+    "phone": "phone 7",
+    "email": "email7@example.com",
+    "created_at": "2025-11-05T10:30:00Z"
+  },
+  {
+    "id": "8",
+    "store_name": "store_name 8",
+    "address": "address 8",
+    "city": "city 8",
+    "state": "state 8",
+    "gst_no": "gst_no 8",
+    "phone": "phone 8",
+    "email": "email8@example.com",
+    "created_at": "2025-11-05T10:35:00Z"
+  },
+  {
+    "id": "9",
+    "store_name": "store_name 9",
+    "address": "address 9",
+    "city": "city 9",
+    "state": "state 9",
+    "gst_no": "gst_no 9",
+    "phone": "phone 9",
+    "email": "email9@example.com",
+    "created_at": "2025-11-05T10:40:00Z"
+  },
+  {
+    "id": "10",
+    "store_name": "store_name 10",
+    "address": "address 10",
+    "city": "city 10",
+    "state": "state 10",
+    "gst_no": "gst_no 10",
+    "phone": "phone 10",
+    "email": "email10@example.com",
+    "created_at": "2025-11-05T10:45:00Z"
+  },
+  {
+    "id": "11",
+    "store_name": "store_name 11",
+    "address": "address 11",
+    "city": "city 11",
+    "state": "state 11",
+    "gst_no": "gst_no 11",
+    "phone": "phone 11",
+    "email": "email11@example.com",
+    "created_at": "2025-11-05T10:50:00Z"
+  },
+  {
+    "id": "12",
+    "store_name": "store_name 12",
+    "address": "address 12",
+    "city": "city 12",
+    "state": "state 12",
+    "gst_no": "gst_no 12",
+    "phone": "phone 12",
+    "email": "email12@example.com",
+    "created_at": "2025-11-05T10:55:00Z"
+  },
+  {
+    "id": "13",
+    "store_name": "store_name 13",
+    "address": "address 13",
+    "city": "city 13",
+    "state": "state 13",
+    "gst_no": "gst_no 13",
+    "phone": "phone 13",
+    "email": "email13@example.com",
+    "created_at": "2025-11-05T11:00:00Z"
+  },
+  {
+    "id": "14",
+    "store_name": "store_name 14",
+    "address": "address 14",
+    "city": "city 14",
+    "state": "state 14",
+    "gst_no": "gst_no 14",
+    "phone": "phone 14",
+    "email": "email14@example.com",
+    "created_at": "2025-11-05T11:05:00Z"
+  },
+  {
+    "id": "15",
+    "store_name": "store_name 15",
+    "address": "address 15",
+    "city": "city 15",
+    "state": "state 15",
+    "gst_no": "gst_no 15",
+    "phone": "phone 15",
+    "email": "email15@example.com",
+    "created_at": "2025-11-05T11:10:00Z"
+  }
+],
+"hsn":[
+  { "id": "1", "hsn_code": "1001", "description": "Wheat Flour", "gst_rate": 5.00, "created_at": "2025-11-05T10:00:00Z" },
+  { "id": "2", "hsn_code": "1002", "description": "Rice", "gst_rate": 5.00, "created_at": "2025-11-05T10:05:00Z" },
+  { "id": "3", "hsn_code": "1003", "description": "Sugar", "gst_rate": 5.00, "created_at": "2025-11-05T10:10:00Z" },
+  { "id": "4", "hsn_code": "2001", "description": "Medicinal Tablets", "gst_rate": 12.00, "created_at": "2025-11-05T10:15:00Z" },
+  { "id": "5", "hsn_code": "2002", "description": "Medicinal Syrups", "gst_rate": 12.00, "created_at": "2025-11-05T10:20:00Z" },
+  { "id": "6", "hsn_code": "3001", "description": "Cosmetics", "gst_rate": 18.00, "created_at": "2025-11-05T10:25:00Z" },
+  { "id": "7", "hsn_code": "3002", "description": "Perfumes", "gst_rate": 18.00, "created_at": "2025-11-05T10:30:00Z" },
+  { "id": "8", "hsn_code": "4001", "description": "Electrical Appliances", "gst_rate": 18.00, "created_at": "2025-11-05T10:35:00Z" },
+  { "id": "9", "hsn_code": "4002", "description": "LED Lights", "gst_rate": 18.00, "created_at": "2025-11-05T10:40:00Z" },
+  { "id": "10", "hsn_code": "5001", "description": "Furniture", "gst_rate": 12.00, "created_at": "2025-11-05T10:45:00Z" },
+  { "id": "11", "hsn_code": "5002", "description": "Office Chairs", "gst_rate": 12.00, "created_at": "2025-11-05T10:50:00Z" },
+  { "id": "12", "hsn_code": "6001", "description": "Clothing", "gst_rate": 5.00, "created_at": "2025-11-05T10:55:00Z" },
+  { "id": "13", "hsn_code": "6002", "description": "Footwear", "gst_rate": 5.00, "created_at": "2025-11-05T11:00:00Z" },
+  { "id": "14", "hsn_code": "7001", "description": "Stationery", "gst_rate": 12.00, "created_at": "2025-11-05T11:05:00Z" },
+  { "id": "15", "hsn_code": "7002", "description": "Books", "gst_rate": 5.00, "created_at": "2025-11-05T11:10:00Z" }
+]
+
+
+}

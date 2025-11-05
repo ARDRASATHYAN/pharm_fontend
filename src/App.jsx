@@ -9,6 +9,11 @@ import Reports from "./pages/Reports";
 import Medicines from "./pages/medicine/Medicines";
 import Sales from "./pages/sales/Sales";
 import BasicTabs from "./pages/sales/components/Tab";
+import MedicineForm from "./pages/medicine/MedicineForm";
+import CategoryPage from "./pages/medicine/category/CategoryPage";
+import UserMockApiHeader from "./pages/user";
+import StoreMockApiHeader from "./pages/store";
+
 
 
 function App() {
@@ -17,9 +22,13 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route element={<Layout />}>
+
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/medicines" element={<Medicines />} />
-          <Route path="/sale" element={<Sales />} />
+          <Route path="/medicines/stock" element={<Medicines />} />
+          <Route path="/medicines/add" element={<MedicineForm />} />
+          <Route path="/medicines/categories" element={<CategoryPage />} />
+          <Route path="/staff/add" element={< UserMockApiHeader/>} />
+          <Route path="/store/add" element={< StoreMockApiHeader/>} />
           <Route path="/sales" element={<BasicTabs />} />
           <Route path="/suppliers" element={<Suppliers />} />
           <Route path="/customers" element={<Customers />} />
