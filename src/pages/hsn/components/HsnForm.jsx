@@ -15,7 +15,7 @@ import DraggableDialog from "../../../components/commen/DraggableDialog";
 
 const roles = ["Admin", "Manager", "Pharmacist", "Billing", "StoreKeeper"];
 
-export default function StoreForm({
+export default function HsnForm({
   open,
   onClose,
   onSubmit,

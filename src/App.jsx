@@ -13,6 +13,7 @@ import MedicineForm from "./pages/medicine/MedicineForm";
 import CategoryPage from "./pages/medicine/category/CategoryPage";
 import UserMockApiHeader from "./pages/user";
 import StoreMockApiHeader from "./pages/store";
+import HsnMockApiHeader from "./pages/hsn";
 
 
 
@@ -29,6 +30,7 @@ function App() {
           <Route path="/medicines/categories" element={<CategoryPage />} />
           <Route path="/staff/add" element={< UserMockApiHeader/>} />
           <Route path="/store/add" element={< StoreMockApiHeader/>} />
+            <Route path="/hsn/add" element={< HsnMockApiHeader/>} />
           <Route path="/sales" element={<BasicTabs />} />
           <Route path="/suppliers" element={<Suppliers />} />
           <Route path="/customers" element={<Customers />} />

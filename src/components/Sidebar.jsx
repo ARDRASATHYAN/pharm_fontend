@@ -62,8 +62,8 @@ export default function Sidebar() {
       name: "Hsn",
       href: "/Hsn",
       subLinks: [
-        { name: "Add Hsn", href: "/Hsn/add" },
-        { name: "Hsn List", href: "/Hsn/stock" },
+        { name: "Add Hsn", href: "/hsn/add" },
+        { name: "Hsn List", href: "/hsn/stock" },
       ],
     },
   ];

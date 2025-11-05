@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Button } from "@mui/material";
 import DataTable from "../../components/commen/Datatable";
 import { createStore, deleteStore, getStores, updateStore } from "../../services/storeApi";
-import StoreForm from "./components/StoreForm";
-import { getStoreColumns } from "./components/StoreHeader";
+import HsnForm from "./components/HsnForm";
+import { getHsnColumns } from "./components/HsnHeader";
 
 export default function HsnMockApiHeader() {
   const [open, setOpen] = useState(false);
@@ -90,7 +90,7 @@ export default function HsnMockApiHeader() {
   <DataTable columns={columns} data={users} />
 
 
-      <StoreForm
+      <HsnForm
         open={open}
         onClose={() => {
           setOpen(false);
