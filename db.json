@@ -319,7 +319,146 @@
   { "id": "13", "hsn_code": "6002", "description": "Footwear", "gst_rate": 5.00, "created_at": "2025-11-05T11:00:00Z" },
   { "id": "14", "hsn_code": "7001", "description": "Stationery", "gst_rate": 12.00, "created_at": "2025-11-05T11:05:00Z" },
   { "id": "15", "hsn_code": "7002", "description": "Books", "gst_rate": 5.00, "created_at": "2025-11-05T11:10:00Z" }
-]
-
-
+],
+  "drug_schedule_master": [
+    {
+      "schedule_id": 1,
+      "schedule_code": "SCH-I",
+      "schedule_name": "Narcotic Analgesics",
+      "description": "Highly controlled drugs with potential for abuse and addiction.",
+      "requires_prescription": 1,
+      "restricted_sale": 1,
+      "created_at": "2025-01-10T09:45:00"
+    },
+    {
+      "schedule_id": 2,
+      "schedule_code": "SCH-II",
+      "schedule_name": "Psychotropic Substances",
+      "description": "Drugs affecting mental activity, behavior, or perception.",
+      "requires_prescription": 1,
+      "restricted_sale": 1,
+      "created_at": "2025-01-11T10:20:00"
+    },
+    {
+      "schedule_id": 3,
+      "schedule_code": "SCH-III",
+      "schedule_name": "Antibiotics",
+      "description": "Commonly prescribed antibiotics requiring medical supervision.",
+      "requires_prescription": 1,
+      "restricted_sale": 0,
+      "created_at": "2025-01-12T08:30:00"
+    },
+    {
+      "schedule_id": 4,
+      "schedule_code": "SCH-IV",
+      "schedule_name": "Cough Syrups with Codeine",
+      "description": "Cough formulations containing codeine derivatives.",
+      "requires_prescription": 1,
+      "restricted_sale": 1,
+      "created_at": "2025-01-13T11:10:00"
+    },
+    {
+      "schedule_id": 5,
+      "schedule_code": "SCH-V",
+      "schedule_name": "Steroids",
+      "description": "Hormonal drugs used in specific medical conditions.",
+      "requires_prescription": 1,
+      "restricted_sale": 0,
+      "created_at": "2025-01-14T09:00:00"
+    },
+    {
+      "schedule_id": 6,
+      "schedule_code": "SCH-VI",
+      "schedule_name": "Antidepressants",
+      "description": "Drugs used to treat depression and anxiety disorders.",
+      "requires_prescription": 1,
+      "restricted_sale": 0,
+      "created_at": "2025-01-15T12:05:00"
+    },
+    {
+      "schedule_id": 7,
+      "schedule_code": "SCH-VII",
+      "schedule_name": "Pain Relievers (OTC)",
+      "description": "Over-the-counter pain medications with mild effects.",
+      "requires_prescription": 0,
+      "restricted_sale": 0,
+      "created_at": "2025-01-16T14:45:00"
+    },
+    {
+      "schedule_id": 8,
+      "schedule_code": "SCH-VIII",
+      "schedule_name": "Antacids",
+      "description": "Drugs used to relieve heartburn and acid reflux.",
+      "requires_prescription": 0,
+      "restricted_sale": 0,
+      "created_at": "2025-01-17T15:30:00"
+    },
+    {
+      "schedule_id": 9,
+      "schedule_code": "SCH-IX",
+      "schedule_name": "Vitamins and Supplements",
+      "description": "General supplements available without prescription.",
+      "requires_prescription": 0,
+      "restricted_sale": 0,
+      "created_at": "2025-01-18T09:40:00"
+    },
+    {
+      "schedule_id": 10,
+      "schedule_code": "SCH-X",
+      "schedule_name": "Antihistamines",
+      "description": "Used for allergy relief; some require prescription.",
+      "requires_prescription": 0,
+      "restricted_sale": 0,
+      "created_at": "2025-01-19T13:25:00"
+    },
+    {
+      "schedule_id": 11,
+      "schedule_code": "SCH-XI",
+      "schedule_name": "Sedatives",
+      "description": "Central nervous system depressants requiring careful usage.",
+      "requires_prescription": 1,
+      "restricted_sale": 1,
+      "created_at": "2025-01-20T10:55:00"
+    },
+    {
+      "schedule_id": 12,
+      "schedule_code": "SCH-XII",
+      "schedule_name": "Vaccines",
+      "description": "Immunization products regulated under public health laws.",
+      "requires_prescription": 0,
+      "restricted_sale": 0,
+      "created_at": "2025-01-21T09:15:00"
+    },
+    {
+      "schedule_id": 13,
+      "schedule_code": "SCH-XIII",
+      "schedule_name": "Antifungals",
+      "description": "Topical and oral antifungal medications.",
+      "requires_prescription": 1,
+      "restricted_sale": 0,
+      "created_at": "2025-01-22T11:00:00"
+    },
+    {
+      "schedule_id": 14,
+      "schedule_code": "SCH-XIV",
+      "schedule_name": "Antivirals",
+      "description": "Medications used for viral infections like influenza or HIV.",
+      "requires_prescription": 1,
+      "restricted_sale": 0,
+      "created_at": "2025-01-23T14:10:00"
+    },
+    {
+      "schedule_id": 15,
+      "schedule_code": "SCH-XV",
+      "schedule_name": "Insulins",
+      "description": "Hormone therapy for diabetes management, strictly regulated.",
+      "requires_prescription": 1,
+      "restricted_sale": 1,
+      "created_at": "2025-01-24T16:00:00"
+    }
+  ]
 }
+
+
+
+

@@ -4,6 +4,7 @@ import { RxDashboard, RxClipboard } from "react-icons/rx";
 import { LogOut, ChevronDown, ChevronRight, Tag } from "lucide-react";
 import { FaUserMd, FaUsers, FaPills, FaTruck, FaStore } from "react-icons/fa";
 import { MdPointOfSale } from "react-icons/md";
+import { GiMedicinePills } from "react-icons/gi";
 
 function cn(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -17,28 +18,28 @@ export default function Sidebar() {
 
   const navigationItems = [
     { icon: <RxDashboard />, name: "Dashboard", href: "/dashboard" },
-    {
-      icon: <FaPills />,
-      name: "Medicines",
-      href: "/medicines",
-      subLinks: [
-        { name: "Add Medicine", href: "/medicines/add" },
-        { name: "Stock List", href: "/medicines/stock" },
-        { name: "Categories", href: "/medicines/categories" },
-      ],
-    },
-    { icon: <MdPointOfSale />, name: "Sales", href: "/sales" },
-    { icon: <FaTruck />, name: "Suppliers", href: "/suppliers" },
-    { icon: <FaUserMd />, name: "Customers", href: "/customers" },
-    {
-      icon: <RxClipboard />,
-      name: "Reports",
-      href: "/reports",
-      subLinks: [
-        { name: "Sales Report", href: "/reports/sales" },
-        { name: "Stock Report", href: "/reports/stock" },
-      ],
-    },
+    // {
+    //   icon: <FaPills />,
+    //   name: "Medicines",
+    //   href: "/medicines",
+    //   subLinks: [
+    //     { name: "Add Medicine", href: "/medicines/add" },
+    //     { name: "Stock List", href: "/medicines/stock" },
+    //     { name: "Categories", href: "/medicines/categories" },
+    //   ],
+    // },
+    // { icon: <MdPointOfSale />, name: "Sales", href: "/sales" },
+    // { icon: <FaTruck />, name: "Suppliers", href: "/suppliers" },
+    // { icon: <FaUserMd />, name: "Customers", href: "/customers" },
+    // {
+    //   icon: <RxClipboard />,
+    //   name: "Reports",
+    //   href: "/reports",
+    //   subLinks: [
+    //     { name: "Sales Report", href: "/reports/sales" },
+    //     { name: "Stock Report", href: "/reports/stock" },
+    //   ],
+    // },
     {
       icon: <FaUsers />,
       name: "Staff",
@@ -64,6 +65,15 @@ export default function Sidebar() {
       subLinks: [
         { name: "Add Hsn", href: "/hsn/add" },
         { name: "Hsn List", href: "/hsn/stock" },
+      ],
+    },
+    {
+      icon: <GiMedicinePills />,
+      name: "DrugSchedule",
+      href: "/drug",
+      subLinks: [
+        { name: "Add drug", href: "/drug/add" },
+        { name: "drug List", href: "/drug/stock" },
       ],
     },
   ];

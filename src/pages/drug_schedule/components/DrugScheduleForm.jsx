@@ -15,7 +15,7 @@ import DraggableDialog from "../../../components/commen/DraggableDialog";
 
 const roles = ["Admin", "Manager", "Pharmacist", "Billing", "StoreKeeper"];
 
-export default function StoreForm({
+export default function DrugScheduleForm({
   open,
   onClose,
   onSubmit,
@@ -29,19 +29,28 @@ export default function StoreForm({
       onClose={onClose}
       onSubmit={onSubmit}
       editMode={editMode}
-      title={editMode ? "Edit Store" : "Add New store"}
+      title={editMode ? "Edit Drug Schedule" : "Add New Drug Schedule"}
     >
       <Box display="flex" flexDirection="column" gap={2}>
-        <TextField
-          label="store_name"
-          name="store_name"
-          value={formData.username}
-          onChange={onChange}
-          fullWidth
-          size="small"
-          required
-        />
-
+        <Box display="flex" gap={2}>
+          <TextField
+            label="schedule_code"
+            name="schedule_code"
+            value={formData.username}
+            onChange={onChange}
+            fullWidth
+            size="small"
+            required
+          />
+          <TextField
+            label="schedule_name"
+            name="schedule_name"
+            value={formData.full_name}
+            onChange={onChange}
+            fullWidth
+            size="small"
+          />
+        </Box>
         {!editMode && (
           <TextField
             label="address"
@@ -51,59 +60,29 @@ export default function StoreForm({
             type="password"
             fullWidth
             multiline
-            rows={3}
+            rows={4}
             size="small"
             required
           />
         )}
-        <TextField
-          label="email"
-          name="email"
-          value={formData.full_name}
-          onChange={onChange}
-          fullWidth
-          size="small"
-        />
         <Box display="flex" gap={2}>
           <TextField
-            label="city"
-            name="city"
+            label="requires_prescription	"
+            name="requires_prescription	"
             value={formData.full_name}
             onChange={onChange}
             fullWidth
             size="small"
           />
-
           <TextField
-            label="state"
-            name="state"
+            label="restricted_sale"
+            name="restricted_sale"
             value={formData.full_name}
             onChange={onChange}
             fullWidth
             size="small"
           />
         </Box>
-        <Box display="flex" gap={2}>
-          <TextField
-            label="gst_no"
-            name="gst_no"
-            value={formData.full_name}
-            onChange={onChange}
-            fullWidth
-            size="small"
-          />
-          <TextField
-            label="phone"
-            name="phone"
-            value={formData.full_name}
-            onChange={onChange}
-            fullWidth
-            size="small"
-          />
-        </Box>
-
-
-
       </Box>
     </DraggableDialog>
 

@@ -24,14 +24,15 @@ export default function UserForm({
   editMode,
 }) {
   return (
-   <DraggableDialog
-        open={open}
-        onClose={onClose}
-        onSubmit={onSubmit}
-        editMode={editMode}
-        title={editMode ? "Edit User" : "Add New User"}
-      >
-        <Box display="flex" flexDirection="column" gap={2}>
+    <DraggableDialog
+      open={open}
+      onClose={onClose}
+      onSubmit={onSubmit}
+      editMode={editMode}
+      title={editMode ? "Edit User" : "Add New User"}
+    >
+      <Box display="flex" flexDirection="column" gap={2}>
+        <Box display="flex" gap={2}>
           <TextField
             label="Username"
             name="username"
@@ -42,19 +43,6 @@ export default function UserForm({
             required
           />
 
-          {!editMode && (
-            <TextField
-              label="Password"
-              name="password_hash"
-              value={formData.password_hash}
-              onChange={onChange}
-              type="password"
-              fullWidth
-              size="small"
-              required
-            />
-          )}
-
           <TextField
             label="Full Name"
             name="full_name"
@@ -63,38 +51,53 @@ export default function UserForm({
             fullWidth
             size="small"
           />
-
+        </Box>
+        {!editMode && (
           <TextField
-            select
-            label="Role"
-            name="role"
-            value={formData.role}
+            label="Password"
+            name="password_hash"
+            value={formData.password_hash}
             onChange={onChange}
+            type="password"
             fullWidth
             size="small"
-          >
-            {roles.map((role) => (
-              <MenuItem key={role} value={role}>
-                {role}
-              </MenuItem>
-            ))}
-          </TextField>
-
-          <FormControlLabel
-            control={
-              <Switch
-                checked={formData.is_active === 1}
-                onChange={(e) =>
-                  onChange({
-                    target: { name: "is_active", value: e.target.checked ? 1 : 0 },
-                  })
-                }
-              />
-            }
-            label={formData.is_active ? "Active" : "Inactive"}
+            required
           />
-        </Box>
-      </DraggableDialog>
-   
+        )}
+
+
+
+        <TextField
+          select
+          label="Role"
+          name="role"
+          value={formData.role}
+          onChange={onChange}
+          fullWidth
+          size="small"
+        >
+          {roles.map((role) => (
+            <MenuItem key={role} value={role}>
+              {role}
+            </MenuItem>
+          ))}
+        </TextField>
+
+        <FormControlLabel
+          control={
+            <Switch
+              checked={formData.is_active === 1}
+              onChange={(e) =>
+                onChange({
+                  target: { name: "is_active", value: e.target.checked ? 1 : 0 },
+                })
+              }
+            />
+          }
+          label={formData.is_active ? "Active" : "Inactive"}
+        />
+      </Box>
+    </DraggableDialog>
+
   );
 }

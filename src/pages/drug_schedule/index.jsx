@@ -1,26 +1,27 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "@mui/material";
-import UserForm from "./components/UserForm";
 import DataTable from "../../components/commen/Datatable";
-import { getUserColumns } from "./components/Userheader";
-import { createUser, deleteUser, getUsers, updateUser } from "../../services/api";
+import { getDrugScheduleColumns } from "./components/DrugScheduleHeader";
+import { createdrug, deletedrug, fetchdrug, updatedrug } from "../../services/drugscheduleapi";
+import DrugScheduleForm from "./components/DrugScheduleForm";
 
-export default function UserMockApiHeader() {
+export default function DrugScheduleMockApiHeader() {
   const [open, setOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [users, setUsers] = useState([]);
   const [formData, setFormData] = useState({
-    username: "",
-    password_hash: "",
-    full_name: "",
-    role: "Billing",
-    is_active: 1,
+    schedule_code: "",
+    schedule_name: "",
+    description: "",
+    requires_prescription: "",
+    restricted_sale: "",
+
   });
 
   // Fetch users
   const fetchUsers = async () => {
     try {
-      const data = await getUsers();
+      const data = await fetchdrug();
       setUsers(data);
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -31,9 +32,9 @@ export default function UserMockApiHeader() {
   const handleSubmit = async () => {
     try {
       if (editMode) {
-        await updateUser(formData.id, formData);
+        await updatedrug(formData.id, formData);
       } else {
-        await createUser(formData);
+        await createdrug(formData);
       }
       await fetchUsers();
       setOpen(false);
@@ -59,7 +60,7 @@ export default function UserMockApiHeader() {
   // Delete user
   const handleDelete = async (id) => {
     try {
-      await deleteUser(id);
+      await deletedrug(id);
       await fetchUsers();
     } catch (error) {
       console.error("Error deleting user:", error);
@@ -71,24 +72,24 @@ export default function UserMockApiHeader() {
   }, []);
 
   // ✅ pass handlers to columns (so edit/delete buttons work)
-  const columns = getUserColumns(handleEdit, handleDelete);
+  const columns = getDrugScheduleColumns(handleEdit, handleDelete);
 
   return (
     <>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
-       <h2 className="text-xl font-bold text-blue-700 tracking-wide">
-           User List
-          </h2>
+        <h2 className="text-xl font-bold text-blue-700 tracking-wide">
+          Drug Schedule List
+        </h2>
         <Button variant="contained" color="primary" onClick={() => setOpen(true)}>
-          Add User
+          Add Drug Schedule
         </Button>
       </div>
 
 
-  <DataTable columns={columns} data={users} />
+      <DataTable columns={columns} data={users} />
 
 
-      <UserForm
+      <DrugScheduleForm
         open={open}
         onClose={() => {
           setOpen(false);
