@@ -1,5 +1,7 @@
 "use client";
+import apiClient from "@/services/apiClient";
 import { BarChart2, ClipboardList, Package, ShoppingCart, Truck, Users, AlertTriangle, DollarSign, Calendar } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export default function PharmacyDashboard() {
   const stats = [
@@ -21,9 +23,30 @@ export default function PharmacyDashboard() {
     { name: "Amoxicillin", date: "05 Nov 2025" },
     { name: "Cetrizine", date: "20 Nov 2025" },
   ];
+  const [user, setUser] = useState(null);
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    const fetchProtected = async () => {
+      try {
+        const res = await apiClient.get("/auth/me");
+        setMessage(res.data.message);
+        setUser(res.data.user);
+      } catch (err) {
+        console.error("❌ Failed to fetch protected route", err);
+      }
+    };
+    fetchProtected();
+  }, []);
+
 
   return (
     <div className="">
+      {user && (
+        <pre style={{ background: "#eee", padding: "1rem" }}>
+          {JSON.stringify(user, null, 2)}
+        </pre>
+      )}
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 ></h1>
