@@ -1,26 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "@mui/material";
-import StoreForm from "./components/StoreForm";
-import { getStoreColumns } from "./components/StoreHeader";
+import {  getItemsColumns } from "./components/itemHeader";
 import BasicTable from "@/components/commen/BasicTable";
-import { useAddStore, useDeleteStore, useStores, useUpdateStore } from "@/hooks/useStore";
+import { useAdditem, useDeleteitem, useitem, useUpdateitem } from "@/hooks/useItem";
+import ItemForm from "./components/ItemForm";
 
-export default function StoreMockApiHeader() {
- const { data: stores = [], isLoading } = useStores();
-  const addStore = useAddStore();
-  const updateStore = useUpdateStore();
-  const deleteStore = useDeleteStore();
+export default function ItemMockApiHeader() {
+  const { data: item = [], isLoading } = useitem();
+  const additem = useAdditem();
+  const updateitem = useUpdateitem();
+  const deleteitem = useDeleteitem();
 
   const [open, setOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({
-    store_name: "",
-    address: "",
-    city: "",
-    state: "",
-    gst_no: "",
-    phone: "",
-    email: "",
+    schedule_code: "", schedule_name: "", description: "", requires_prescription: "", restricted_sale: ""
   });
 
   const handleChange = (e) => {
@@ -31,28 +25,28 @@ export default function StoreMockApiHeader() {
   // 🟢 Add or Update
   const handleSubmit = () => {
     if (editMode) {
-      updateStore.mutate(
-        { id: formData.store_id, data: formData },
+      updateitem.mutate(
+        { id: formData.schedule_id, data: formData },
         {
 
           onSuccess: () => setOpen(false),
         }
       );
     } else {
-      addStore.mutate(formData, {
+      additem.mutate(formData, {
         onSuccess: () => setOpen(false),
       });
     }
   };
 
 
-  
+
   // ✏️ Edit Handler
 
   const handleEdit = (row) => {
 
-    console.log("row",row);
-    
+    console.log("row", row);
+
     setFormData(row);
     setEditMode(true);
     setOpen(true);
@@ -61,32 +55,33 @@ export default function StoreMockApiHeader() {
   // ❌ Delete Handler
   const handleDelete = (id) => {
     if (window.confirm("Are you sure you want to delete this user?")) {
-      deleteStore.mutate(id);
+      deleteitem.mutate(id);
     }
   };
 
 
-  if (isLoading) return <p>Loading stores...</p>;
+  if (isLoading) return <p>Loading hsns...</p>;
+
 
   // ✅ pass handlers to columns (so edit/delete buttons work)
-  const columns = getStoreColumns(handleEdit, handleDelete);
+  const columns = getItemsColumns(handleEdit, handleDelete);
 
   return (
     <>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
-       <h2 className="text-xl font-bold text-blue-700 tracking-wide">
-            Store List
-          </h2>
+        <h2 className="text-xl font-bold text-blue-700 tracking-wide">
+          Drug Schedule List
+        </h2>
         <Button variant="contained" color="primary" onClick={() => setOpen(true)}>
-          Add Store
+          Add Drug Schedule
         </Button>
       </div>
 
 
-  <BasicTable columns={columns} data={stores} />
+      <BasicTable columns={columns} data={item} />
 
 
-      <StoreForm
+      <ItemForm
         open={open}
         onClose={() => {
           setOpen(false);
@@ -95,7 +90,6 @@ export default function StoreMockApiHeader() {
         onSubmit={handleSubmit}
         formData={formData}
         onChange={handleChange}
-        
         editMode={editMode}
       />
     </>

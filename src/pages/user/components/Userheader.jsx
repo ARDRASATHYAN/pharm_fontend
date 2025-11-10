@@ -6,7 +6,7 @@ import { Delete, Edit } from "lucide-react";
 export const getUserColumns = (onEdit, onDelete) => [
     {
         header: "userId",
-        accessorKey: "id"
+        accessorKey: "user_id"
     },
     {
         header: "username",
@@ -45,7 +45,7 @@ export const getUserColumns = (onEdit, onDelete) => [
       <IconButton
         color="error"
         size="small"
-        onClick={() => onDelete(row.original.id)}
+        onClick={() => onDelete(row.original.user_id)}
         sx={{ padding: "4px" }}
       >
         <Delete size={16} />

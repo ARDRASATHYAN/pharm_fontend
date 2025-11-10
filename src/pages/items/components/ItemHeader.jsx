@@ -3,31 +3,52 @@ import { Delete, Edit } from "lucide-react";
 
 
 
-export const getDrugScheduleColumns = (onEdit, onDelete) => [
+export const getItemsColumns = (onEdit, onDelete) => [
     {
         header: "Id",
-        accessorKey: "schedule_id"
+        accessorKey: "item_id"
     },
       {
-        header: "schedule_code",
-        accessorKey: "schedule_code"
+        header: "sku",
+        accessorKey: "sku"
     },
       {
-        header: "schedule_name",
-        accessorKey: "schedule_name"
+        header: "barcode",
+        accessorKey: "barcode"
     },
 
     {
-        header: "description",
-        accessorKey: "description",
+        header: "name",
+        accessorKey: "name",
     },
     {
-        header: "requires_prescription",
-        accessorKey: "requires_prescription"
+        header: "brand",
+        accessorKey: "brand"
     },
     {
-        header: "restricted_sale",
-        accessorKey: "restricted_sale"
+        header: "generic_name",
+        accessorKey: "generic_name"
+    },
+      {
+        header: "hsn_id",
+        accessorKey: "hsn_id"
+    },
+
+    {
+        header: "is_active",
+        accessorKey: "is_active",
+    },
+    {
+        header: "pack_size",
+        accessorKey: "pack_size"
+    },
+    {
+        header: "schedule_id",
+        accessorKey: "schedule_id"
+    },
+    {
+        header: "manufacturer",
+        accessorKey: "manufacturer"
     },
   {
         header: "created_at",

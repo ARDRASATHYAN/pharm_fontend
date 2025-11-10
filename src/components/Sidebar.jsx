@@ -44,37 +44,47 @@ export default function Sidebar() {
       icon: <FaUsers />,
       name: "Staff",
       href: "/staff",
-      subLinks: [
-        { name: "Add Staff", href: "/staff/add" },
-        { name: "Attendance", href: "/staff/attendance" },
-      ],
+      // subLinks: [
+      //   { name: "Add Staff", href: "/staff/add" },
+      //   { name: "Attendance", href: "/staff/attendance" },
+      // ],
     },
     {
       icon: <FaStore />,
       name: "Store",
       href: "/store",
-      subLinks: [
-        { name: "Add store", href: "/store/add" },
-        { name: "store List", href: "/store/stock" },
-      ],
+      // subLinks: [
+      //   { name: "Add store", href: "/store/add" },
+      //   { name: "store List", href: "/store/stock" },
+      // ],
     },
      {
       icon: <Tag />,
       name: "Hsn",
       href: "/Hsn",
-      subLinks: [
-        { name: "Add Hsn", href: "/hsn/add" },
-        { name: "Hsn List", href: "/hsn/stock" },
-      ],
+      // subLinks: [
+      //   { name: "Add Hsn", href: "/hsn/add" },
+      //   { name: "Hsn List", href: "/hsn/stock" },
+      // ],
     },
     {
       icon: <GiMedicinePills />,
       name: "DrugSchedule",
       href: "/drug",
-      subLinks: [
-        { name: "Add drug", href: "/drug/add" },
-        { name: "drug List", href: "/drug/stock" },
-      ],
+      // subLinks: [
+      //   { name: "Add drug", href: "/drug/add" },
+      //   { name: "drug List", href: "/drug/stock" },
+      // ],
+    },
+     {
+      icon: <GiMedicinePills />,
+    name: "Items",
+      href: "/items",
+
+      // subLinks: [
+      //   { name: "Add drug", href: "/drug/add" },
+      //   { name: "drug List", href: "/drug/stock" },
+      // ],
     },
   ];
 

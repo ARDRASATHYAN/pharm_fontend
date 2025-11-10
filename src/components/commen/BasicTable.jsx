@@ -1,5 +1,4 @@
 import React, { useLayoutEffect, useEffect, useState } from "react";
-import "./table.css";
 import {
   useReactTable,
   flexRender,
@@ -27,7 +26,7 @@ const BasicTable = ({ columns, data, onRowClick, striped = true }) => {
   const adjustRowsByHeight = () => {
     const screenHeight = window.innerHeight;
     const headerHeight = 140; // adjust for your topbar/sidebar
-    const rowHeight = 44; // average row height
+    const rowHeight = 34; // average row height
     const availableHeight = screenHeight - headerHeight;
     const rows = Math.floor(availableHeight / rowHeight);
     const pageSize = Math.max(5, Math.min(rows, 100));
@@ -47,14 +46,14 @@ const BasicTable = ({ columns, data, onRowClick, striped = true }) => {
 
   return (
     <>
-      <table className="w-full border-collapse">
+      <table className="w-full border-collapse border">
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
                 <th
                   key={header.id}
-                  className="p-2 border-b bg-gray-100 text-left"
+                  className="p-2 border-b bg-gray-100 text-left  text-xs font-semibold text-gray-600 uppercase tracking-wider"
                 >
                   {flexRender(
                     header.column.columnDef.header,
@@ -70,13 +69,11 @@ const BasicTable = ({ columns, data, onRowClick, striped = true }) => {
           {table.getRowModel().rows.map((row) => (
             <tr
               key={row.id}
-              className={`${
-                striped && row.index % 2 === 0 ? "bg-gray-50" : ""
-              } hover:bg-gray-100 cursor-pointer`}
+              className=" even:bg-gray-100 hover:bg-gray-200 cursor-pointer"
               onClick={() => onRowClick?.(row.original)}
             >
               {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} className="p-2 border-b">
+                <td key={cell.id} className="py-1 px-2 text-xs text-gray-800 ">
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}
@@ -111,11 +108,10 @@ const BasicTable = ({ columns, data, onRowClick, striped = true }) => {
           {Array.from({ length: table.getPageCount() }).map((_, i) => (
             <button
               key={i}
-              className={`px-2 py-1 border rounded text-sm ${
-                i === pagination.pageIndex
+              className={`px-2 py-1 border rounded text-sm ${i === pagination.pageIndex
                   ? "bg-blue-500 text-white"
                   : "bg-white hover:bg-gray-100"
-              }`}
+                }`}
               onClick={() => table.setPageIndex(i)}
             >
               {i + 1}

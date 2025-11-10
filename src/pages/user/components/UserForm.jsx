@@ -1,19 +1,17 @@
 import React from "react";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
+
   TextField,
   MenuItem,
-  Button,
   FormControlLabel,
   Switch,
   Box,
 } from "@mui/material";
 import DraggableDialog from "../../../components/commen/DraggableDialog";
+import { useRoles } from "@/hooks/useRoles";
 
-const roles = ["Admin", "Manager", "Pharmacist", "Billing", "StoreKeeper"];
+
+// const roles = ["Admin", "Manager", "Pharmacist", "Billing", "StoreKeeper"];
 
 export default function UserForm({
   open,
@@ -23,6 +21,8 @@ export default function UserForm({
   onChange,
   editMode,
 }) {
+
+   const { data: roles = [], isLoading } = useRoles();
   return (
     <DraggableDialog
       open={open}
@@ -50,12 +50,13 @@ export default function UserForm({
             onChange={onChange}
             fullWidth
             size="small"
+            required
           />
         </Box>
         {!editMode && (
           <TextField
             label="Password"
-            name="password_hash"
+            name="password"
             value={formData.password_hash}
             onChange={onChange}
             type="password"
@@ -75,6 +76,7 @@ export default function UserForm({
           onChange={onChange}
           fullWidth
           size="small"
+          required
         >
           {roles.map((role) => (
             <MenuItem key={role} value={role}>
@@ -83,19 +85,21 @@ export default function UserForm({
           ))}
         </TextField>
 
-        <FormControlLabel
-          control={
-            <Switch
-              checked={formData.is_active === 1}
-              onChange={(e) =>
-                onChange({
-                  target: { name: "is_active", value: e.target.checked ? 1 : 0 },
-                })
-              }
-            />
-          }
-          label={formData.is_active ? "Active" : "Inactive"}
-        />
+       <FormControlLabel
+  control={
+    
+    <Switch
+      checked={!!formData.is_active} // converts any truthy/falsy value to real boolean
+      onChange={(e) =>
+        onChange({
+          target: { name: "is_active", value: e.target.checked ? 1 : 0 },
+        })
+      }
+    />
+  }
+  label={formData.is_active ? "Active" : "Inactive"} // will now work properly
+/>
+
       </Box>
     </DraggableDialog>
 

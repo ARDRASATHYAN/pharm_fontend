@@ -1,19 +1,13 @@
 import React from "react";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
+  
   TextField,
-  MenuItem,
-  Button,
-  FormControlLabel,
-  Switch,
+  
   Box,
 } from "@mui/material";
 import DraggableDialog from "../../../components/commen/DraggableDialog";
 
-const roles = ["Admin", "Manager", "Pharmacist", "Billing", "StoreKeeper"];
+
 
 export default function HsnForm({
   open,
@@ -36,7 +30,7 @@ export default function HsnForm({
           <TextField
             label="hsn_code"
             name="hsn_code"
-            value={formData.username}
+            value={formData.hsn_code}
             onChange={onChange}
             fullWidth
             size="small"
@@ -44,8 +38,8 @@ export default function HsnForm({
           />
           <TextField
             label="gst_rate"
-            name="gst_rate"
-            value={formData.full_name}
+            name="gst_percent"
+            value={formData.gst_percent}
             onChange={onChange}
             fullWidth
             size="small"
@@ -55,9 +49,9 @@ export default function HsnForm({
           <TextField
             label="description"
             name="description"
-            value={formData.password_hash}
+            value={formData.description}
             onChange={onChange}
-            type="password"
+            type="text"
             fullWidth
             multiline
             rows={4}

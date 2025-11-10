@@ -1,77 +1,66 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "@mui/material";
 import UserForm from "./components/UserForm";
-import DataTable from "../../components/commen/Datatable";
 import { getUserColumns } from "./components/Userheader";
-import { createUser, deleteUser, getUsers, updateUser } from "../../services/api";
+import BasicTable from "@/components/commen/BasicTable";
+import { useAddUser, useDeleteUser, useUpdateUser, useUsers } from "@/hooks/useUsers";
 
 export default function UserMockApiHeader() {
+ const { data: users = [], isLoading } = useUsers();
+  const addUser = useAddUser();
+  const updateUser = useUpdateUser();
+  const deleteUser = useDeleteUser();
+
   const [open, setOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [users, setUsers] = useState([]);
   const [formData, setFormData] = useState({
     username: "",
-    password_hash: "",
+    password: "",
     full_name: "",
     role: "Billing",
-    is_active: 1,
+    is_active: true,
   });
 
-  // Fetch users
-  const fetchUsers = async () => {
-    try {
-      const data = await getUsers();
-      setUsers(data);
-    } catch (error) {
-      console.error("Error fetching users:", error);
-    }
-  };
-
-  // Handle submit (Add/Edit)
-  const handleSubmit = async () => {
-    try {
-      if (editMode) {
-        await updateUser(formData.id, formData);
-      } else {
-        await createUser(formData);
-      }
-      await fetchUsers();
-      setOpen(false);
-      setEditMode(false);
-    } catch (error) {
-      console.error("Error submitting user:", error);
-    }
-  };
-
-  // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Edit user
-  const handleEdit = (user) => {
-    setFormData(user);
+  // 🟢 Add or Update
+  const handleSubmit = () => {
+    if (editMode) {
+      updateUser.mutate(
+        { id: formData.user_id, data: formData },
+        {
+          onSuccess: () => setOpen(false),
+        }
+      );
+    } else {
+      addUser.mutate(formData, {
+        onSuccess: () => setOpen(false),
+      });
+    }
+  };
+
+  // ✏️ Edit Handler
+  const handleEdit = (row) => {
+    setFormData(row);
     setEditMode(true);
     setOpen(true);
   };
 
-  // Delete user
-  const handleDelete = async (id) => {
-    try {
-      await deleteUser(id);
-      await fetchUsers();
-    } catch (error) {
-      console.error("Error deleting user:", error);
+  // ❌ Delete Handler
+  const handleDelete = (id) => {
+    if (window.confirm("Are you sure you want to delete this user?")) {
+      deleteUser.mutate(id);
     }
   };
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  // ✅ pass handlers to columns (so edit/delete buttons work)
   const columns = getUserColumns(handleEdit, handleDelete);
+
+  if (isLoading) return <p>Loading users...</p>;
+
+ 
 
   return (
     <>
@@ -79,13 +68,23 @@ export default function UserMockApiHeader() {
        <h2 className="text-xl font-bold text-blue-700 tracking-wide">
            User List
           </h2>
-        <Button variant="contained" color="primary" onClick={() => setOpen(true)}>
+        <Button variant="contained" color="primary" onClick={() => {
+            setOpen(true);
+            setEditMode(false);
+            setFormData({
+              username: "",
+              password: "",
+              full_name: "",
+                role: "Billing",
+              is_active: true,
+            });
+          }}>
           Add User
         </Button>
       </div>
 
 
-  <DataTable columns={columns} data={users} />
+  <BasicTable columns={columns} data={users} />
 
 
       <UserForm
@@ -97,6 +96,7 @@ export default function UserMockApiHeader() {
         onSubmit={handleSubmit}
         formData={formData}
         onChange={handleChange}
+
         editMode={editMode}
       />
     </>

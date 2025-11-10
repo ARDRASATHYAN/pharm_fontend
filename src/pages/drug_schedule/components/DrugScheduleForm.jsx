@@ -36,7 +36,7 @@ export default function DrugScheduleForm({
           <TextField
             label="schedule_code"
             name="schedule_code"
-            value={formData.username}
+            value={formData.schedule_code}
             onChange={onChange}
             fullWidth
             size="small"
@@ -45,7 +45,7 @@ export default function DrugScheduleForm({
           <TextField
             label="schedule_name"
             name="schedule_name"
-            value={formData.full_name}
+            value={formData.schedule_name}
             onChange={onChange}
             fullWidth
             size="small"
@@ -55,9 +55,9 @@ export default function DrugScheduleForm({
           <TextField
             label="address"
             name="address"
-            value={formData.password_hash}
+            value={formData.address}
             onChange={onChange}
-            type="password"
+            type="text"
             fullWidth
             multiline
             rows={4}
@@ -65,11 +65,23 @@ export default function DrugScheduleForm({
             required
           />
         )}
+        <TextField
+            label="description"
+            name="description"
+            value={formData.description}
+            onChange={onChange}
+            type="text"
+            fullWidth
+            multiline
+            rows={2}
+            size="small"
+            required
+          />
         <Box display="flex" gap={2}>
           <TextField
-            label="requires_prescription	"
-            name="requires_prescription	"
-            value={formData.full_name}
+            label="requires_prescription"
+            name="requires_prescription"
+            value={formData.requires_prescription}
             onChange={onChange}
             fullWidth
             size="small"
@@ -77,7 +89,7 @@ export default function DrugScheduleForm({
           <TextField
             label="restricted_sale"
             name="restricted_sale"
-            value={formData.full_name}
+            value={formData.restricted_sale}
             onChange={onChange}
             fullWidth
             size="small"

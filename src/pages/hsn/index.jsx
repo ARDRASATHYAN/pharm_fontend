@@ -2,73 +2,68 @@ import React, { useEffect, useState } from "react";
 import { Button } from "@mui/material";
 import DataTable from "../../components/commen/Datatable";
 import { getHsnColumns } from "./components/HsnHeader";
-import { createHsn, deleteHsn, fetchHsn, updateHsn } from "../../services/hsnapi";
 import HsnForm from "./components/HsnForm";
-import BasicTable from "@/components/commen/PaginationTable";
+import BasicTable from "@/components/commen/BasicTable";
+import { useAddHsn, useDeleteHsn, useHsn, useUpdateHsn } from "@/hooks/useHsn";
+
 
 export default function HsnMockApiHeader() {
-  const [open, setOpen] = useState(false);
-  const [editMode, setEditMode] = useState(false);
-  const [users, setUsers] = useState([]);
- const [formData, setFormData] = useState({
-    hsn_code: "",
-    description: "",
-    gst_rate: "",
-   created_at:"",
-  });
-
-  // Fetch users
-  const fetchUsers = async () => {
-    try {
-      const data = await fetchHsn();
-      setUsers(data);
-    } catch (error) {
-      console.error("Error fetching users:", error);
-    }
-  };
-
-  // Handle submit (Add/Edit)
-  const handleSubmit = async () => {
-    try {
-      if (editMode) {
-        await updateHsn(formData.id, formData);
-      } else {
-        await createHsn(formData);
-      }
-      await fetchUsers();
-      setOpen(false);
-      setEditMode(false);
-    } catch (error) {
-      console.error("Error submitting user:", error);
-    }
-  };
-
-  // Handle input changes
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  // Edit user
-  const handleEdit = (user) => {
-    setFormData(user);
-    setEditMode(true);
-    setOpen(true);
-  };
-
-  // Delete user
-  const handleDelete = async (id) => {
-    try {
-      await deleteHsn(id);
-      await fetchUsers();
-    } catch (error) {
-      console.error("Error deleting user:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+ const { data: hsns = [], isLoading } = useHsn();
+   const addHsn = useAddHsn();
+   const updateHsn = useUpdateHsn();
+   const deleteHsn = useDeleteHsn();
+ 
+   const [open, setOpen] = useState(false);
+   const [editMode, setEditMode] = useState(false);
+   const [formData, setFormData] = useState({
+     hsn_code:"", description:"", gst_percent:""
+   });
+ 
+   const handleChange = (e) => {
+     const { name, value } = e.target;
+     setFormData((prev) => ({ ...prev, [name]: value }));
+   };
+ 
+   // 🟢 Add or Update
+   const handleSubmit = () => {
+     if (editMode) {
+       updateHsn.mutate(
+         { id: formData.hsn_id, data: formData },
+         {
+ 
+           onSuccess: () => setOpen(false),
+         }
+       );
+     } else {
+       addHsn.mutate(formData, {
+         onSuccess: () => setOpen(false),
+       });
+     }
+   };
+ 
+ 
+   
+   // ✏️ Edit Handler
+ 
+   const handleEdit = (row) => {
+ 
+     console.log("row",row);
+     
+     setFormData(row);
+     setEditMode(true);
+     setOpen(true);
+   };
+ 
+   // ❌ Delete Handler
+   const handleDelete = (id) => {
+     if (window.confirm("Are you sure you want to delete this user?")) {
+       deleteHsn.mutate(id);
+     }
+   };
+ 
+ 
+   if (isLoading) return <p>Loading hsns...</p>;
+ 
 
   // ✅ pass handlers to columns (so edit/delete buttons work)
   const columns = getHsnColumns(handleEdit, handleDelete);
@@ -85,7 +80,7 @@ export default function HsnMockApiHeader() {
       </div>
 
 
-  <BasicTable columns={columns} data={users} />
+  <BasicTable columns={columns} data={hsns} />
 
 
       <HsnForm

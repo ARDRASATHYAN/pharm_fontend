@@ -6,7 +6,7 @@ import { Delete, Edit } from "lucide-react";
 export const getStoreColumns = (onEdit, onDelete) => [
     {
         header: "storeId",
-        accessorKey: "id"
+        accessorKey: "store_id"
     },
       {
         header: "store_name",
@@ -54,7 +54,7 @@ export const getStoreColumns = (onEdit, onDelete) => [
       <IconButton
         color="error"
         size="small"
-        onClick={() => onDelete(row.original.id)}
+        onClick={() => onDelete(row.original.store_id)}
         sx={{ padding: "4px" }}
       >
         <Delete size={16} />

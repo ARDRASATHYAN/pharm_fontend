@@ -6,7 +6,7 @@ import { Delete, Edit } from "lucide-react";
 export const getHsnColumns = (onEdit, onDelete) => [
     {
         header: "HsnId",
-        accessorKey: "id"
+        accessorKey: "hsn_id"
     },
       {
         header: "hsn_code",
@@ -19,7 +19,7 @@ export const getHsnColumns = (onEdit, onDelete) => [
 
     {
         header: "gst_rate",
-        accessorKey: "gst_rate",
+        accessorKey: "gst_percent",
     },
     {
         header: "created_at",
@@ -43,7 +43,7 @@ export const getHsnColumns = (onEdit, onDelete) => [
       <IconButton
         color="error"
         size="small"
-        onClick={() => onDelete(row.original.id)}
+        onClick={() => onDelete(row.original.hsn_id)}
         sx={{ padding: "4px" }}
       >
         <Delete size={16} />

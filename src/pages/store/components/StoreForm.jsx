@@ -35,7 +35,7 @@ export default function StoreForm({
         <TextField
           label="store_name"
           name="store_name"
-          value={formData.username}
+          value={formData.store_name}
           onChange={onChange}
           fullWidth
           size="small"
@@ -45,10 +45,12 @@ export default function StoreForm({
         {!editMode && (
           <TextField
             label="address"
+
             name="address"
-            value={formData.password_hash}
+            
+            value={formData.address}
             onChange={onChange}
-            type="password"
+          type="text"
             fullWidth
             multiline
             rows={3}
@@ -59,7 +61,7 @@ export default function StoreForm({
         <TextField
           label="email"
           name="email"
-          value={formData.full_name}
+          value={formData.email}
           onChange={onChange}
           fullWidth
           size="small"
@@ -68,7 +70,9 @@ export default function StoreForm({
           <TextField
             label="city"
             name="city"
-            value={formData.full_name}
+            
+            
+            value={formData.city}
             onChange={onChange}
             fullWidth
             size="small"
@@ -77,7 +81,8 @@ export default function StoreForm({
           <TextField
             label="state"
             name="state"
-            value={formData.full_name}
+
+            value={formData.state}
             onChange={onChange}
             fullWidth
             size="small"
@@ -86,8 +91,8 @@ export default function StoreForm({
         <Box display="flex" gap={2}>
           <TextField
             label="gst_no"
-            name="gst_no"
-            value={formData.full_name}
+            name="gst_no"            
+            value={formData.gst_no}
             onChange={onChange}
             fullWidth
             size="small"
@@ -95,15 +100,12 @@ export default function StoreForm({
           <TextField
             label="phone"
             name="phone"
-            value={formData.full_name}
+            value={formData.phone}
             onChange={onChange}
             fullWidth
             size="small"
           />
         </Box>
-
-
-
       </Box>
     </DraggableDialog>
 
