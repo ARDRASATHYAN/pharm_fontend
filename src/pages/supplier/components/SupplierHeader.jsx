@@ -50,10 +50,6 @@ export const getItemsColumns = (onEdit, onDelete) => [
         header: "manufacturer",
         accessorKey: "manufacturer"
     },
-    {
-        header: "item_type",
-        accessorKey: "item_type"
-    },
   {
         header: "created_at",
         accessorKey: "created_at"

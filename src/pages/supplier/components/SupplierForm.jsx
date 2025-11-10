@@ -112,22 +112,14 @@ const { data: drugschedule = [], isLoading: loadingSchedule } = useDrugSchedule(
             fullWidth
             size="small"
           />
-        <TextField
-  select
-  label="Item Type"
-  name="item_type"
-  value={formData.item_type || "Medicine"}  // default
-  onChange={onChange}
-  fullWidth
-  size="small"
->
-  <MenuItem value="Medicine">Medicine</MenuItem>
-  <MenuItem value="OTC">OTC</MenuItem>
-  <MenuItem value="Consumable">Consumable</MenuItem>
-  <MenuItem value="Accessory">Accessory</MenuItem>
-  <MenuItem value="Other">Other</MenuItem>
-</TextField>
-
+          <TextField
+            label="item_type"
+            name="item_type"
+            value={formData.item_type}
+            onChange={onChange}
+            fullWidth
+            size="small"
+          />
         </Box>
          <Box display="flex" gap={2}>
           <TextField

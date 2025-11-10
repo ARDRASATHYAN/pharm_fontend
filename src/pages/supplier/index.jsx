@@ -4,12 +4,13 @@ import {  getItemsColumns } from "./components/itemHeader";
 import BasicTable from "@/components/commen/BasicTable";
 import { useAdditem, useDeleteitem, useitem, useUpdateitem } from "@/hooks/useItem";
 import ItemForm from "./components/ItemForm";
+import { useAddSupplier, useDeleteSupplier, useSupplier, useUpdateSupplier } from "@/hooks/useSupplier";
 
-export default function ItemMockApiHeader() {
-  const { data: item = [], isLoading } = useitem();
-  const additem = useAdditem();
-  const updateitem = useUpdateitem();
-  const deleteitem = useDeleteitem();
+export default function SupplierMockApiHeader() {
+  const { data: supplier = [], isLoading } = useSupplier();
+  const addSupplier = useAddSupplier();
+  const updateSupplier = useUpdateSupplier();
+  const deleteSupplier = useDeleteSupplier();
 
   const [open, setOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -36,7 +37,7 @@ export default function ItemMockApiHeader() {
   // 🟢 Add or Update
   const handleSubmit = () => {
     if (editMode) {
-      updateitem.mutate(
+      updateSupplier.mutate(
         { id: formData.item_id, data: formData },
         {
 
@@ -44,7 +45,7 @@ export default function ItemMockApiHeader() {
         }
       );
     } else {
-      additem.mutate(formData, {
+      addSupplier.mutate(formData, {
         onSuccess: () => setOpen(false),
       });
     }
@@ -66,7 +67,7 @@ export default function ItemMockApiHeader() {
   // ❌ Delete Handler
   const handleDelete = (id) => {
     if (window.confirm("Are you sure you want to delete this user?")) {
-      deleteitem.mutate(id);
+      deleteSupplier.mutate(id);
     }
   };
 
@@ -102,7 +103,7 @@ export default function ItemMockApiHeader() {
     setEditMode(false);
     setOpen(true);
   }}>
-          Add Drug Schedule
+          Add supplier
         </Button>
       </div>
 
