@@ -42,11 +42,11 @@ export default function PharmacyDashboard() {
 
   return (
     <div className="">
-      {user && (
+      {/* {user && (
         <pre style={{ background: "#eee", padding: "1rem" }}>
           {JSON.stringify(user, null, 2)}
         </pre>
-      )}
+      )} */}
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 ></h1>
