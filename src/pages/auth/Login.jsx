@@ -53,8 +53,8 @@ export default function Login() {
                     />
 
                     {/* Title */}
-                    <div className="text-2xl font-normal text-gray-800 my-5 text-center">
-                        Login to Kite
+                    <div className="text-2xl font-bold text-gray-800 my-5 text-center">
+                        Login 
                     </div>
 
                     {/* Input & Button Section */}
