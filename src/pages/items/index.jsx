@@ -6,7 +6,7 @@ import ItemForm from "./components/ItemForm";
 import { getItemsColumns } from "./components/ItemHeader";
 
 export default function ItemMockApiHeader() {
-  const { data: item = [], isLoading } = useitem();
+  const { data: item = [], isLoading ,isFetching} = useitem();
   const additem = useAdditem();
   const updateitem = useUpdateitem();
   const deleteitem = useDeleteitem();
@@ -71,7 +71,7 @@ export default function ItemMockApiHeader() {
   };
 
 
-  if (isLoading) return <p>Loading hsns...</p>;
+  
 
 
   // ✅ pass handlers to columns (so edit/delete buttons work)
@@ -107,7 +107,7 @@ export default function ItemMockApiHeader() {
       </div>
 
 
-      <BasicTable columns={columns} data={item} />
+      <BasicTable columns={columns} data={item} loading={isLoading || isFetching}/>
 
 
       <ItemForm

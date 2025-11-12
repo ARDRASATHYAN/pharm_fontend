@@ -47,10 +47,10 @@ export default function Login() {
                 <div className="p-[40px] sm:p-8 flex flex-col items-center">
                     {/* Logo */}
                     <img
-                        src="/kite-logo.svg"
-                        alt="Zerodha Logo"
-                        className="w-[60px] h-[60px]  "
-                    />
+            src="https://cdn-icons-png.flaticon.com/512/2966/2966486.png"
+            alt="PharmaPro"
+            className="h-[40px] w-[40px] rounded-md"
+          />
 
                     {/* Title */}
                     <div className="text-2xl font-normal text-gray-800 my-5 text-center">

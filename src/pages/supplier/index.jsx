@@ -6,7 +6,7 @@ import SupplierForm from "./components/SupplierForm";
 import { getSupplierColumns } from "./components/SupplierHeader";
 
 export default function SupplierMockApiHeader() {
-  const { data: supplier = [], isLoading } = useSupplier();
+  const { data: supplier = [], isLoading,isFetching } = useSupplier();
   const addSupplier = useAddSupplier();
   const updateSupplier = useUpdateSupplier();
   const deleteSupplier = useDeleteSupplier();
@@ -60,7 +60,7 @@ export default function SupplierMockApiHeader() {
   };
 
 
-  if (isLoading) return <p>Loading hsns...</p>;
+ 
 
 
   // ✅ pass handlers to columns (so edit/delete buttons work)
@@ -85,7 +85,7 @@ export default function SupplierMockApiHeader() {
       </div>
 
 
-      <BasicTable columns={columns} data={supplier} />
+      <BasicTable columns={columns} data={supplier} loading={isLoading || isFetching}/>
 
 
       <SupplierForm

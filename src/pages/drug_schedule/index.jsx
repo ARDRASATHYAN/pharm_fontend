@@ -6,7 +6,7 @@ import BasicTable from "@/components/commen/BasicTable";
 import { useAddDrugSchedule, useDeleteDrugSchedule, useDrugSchedule, useUpdateDrugSchedule } from "@/hooks/useDrugSchedule";
 
 export default function DrugScheduleMockApiHeader() {
-  const { data:  drugschedule= [], isLoading } = useDrugSchedule();
+  const { data:  drugschedule= [], isLoading,isFetching } = useDrugSchedule();
      const addDrugSchedule = useAddDrugSchedule();
      const updateDrugSchedule = useUpdateDrugSchedule();
      const deleteDrugSchedule = useDeleteDrugSchedule();
@@ -60,7 +60,7 @@ export default function DrugScheduleMockApiHeader() {
      };
    
    
-     if (isLoading) return <p>Loading hsns...</p>;
+  
    
 
   // ✅ pass handlers to columns (so edit/delete buttons work)
@@ -85,7 +85,7 @@ export default function DrugScheduleMockApiHeader() {
       </div>
 
 
-      <BasicTable columns={columns} data={drugschedule} />
+      <BasicTable columns={columns} data={drugschedule} loading={isLoading || isFetching}/>
 
 
       <DrugScheduleForm

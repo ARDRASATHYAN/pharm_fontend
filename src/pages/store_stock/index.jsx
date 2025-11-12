@@ -6,7 +6,7 @@ import StoreStockForm from "./components/StoreStockForm";
 import { getStoreStockColumns } from "./components/StoreStockHeader";
 
 export default function StoreStockMockApiHeader() {
-  const { data: storestock = [], isLoading } = useStoreStock();
+  const { data: storestock = [], isLoading ,isFetching} = useStoreStock();
   console.log('storestock',storestock);
   const storestocks = storestock?.data || [];
   
@@ -63,7 +63,7 @@ export default function StoreStockMockApiHeader() {
   };
 
 
-  if (isLoading) return <p>Loading hsns...</p>;
+
 
 
   // ✅ pass handlers to columns (so edit/delete buttons work)
@@ -88,7 +88,7 @@ export default function StoreStockMockApiHeader() {
       </div>
 
 
-      <BasicTable columns={columns} data={storestocks} />
+      <BasicTable columns={columns} data={storestocks} loading={isLoading || isFetching} />
 
 
       <StoreStockForm

@@ -6,7 +6,7 @@ import BasicTable from "@/components/commen/BasicTable";
 import { useAddStore, useDeleteStore, useStores, useUpdateStore } from "@/hooks/useStore";
 
 export default function StoreMockApiHeader() {
-  const { data: stores = [], isLoading } = useStores();
+  const { data: stores = [], isLoading,isFetching } = useStores();
   const addStore = useAddStore();
   const updateStore = useUpdateStore();
   const deleteStore = useDeleteStore();
@@ -66,7 +66,7 @@ export default function StoreMockApiHeader() {
   };
 
 
-  if (isLoading) return <p>Loading stores...</p>;
+
 
   // ✅ pass handlers to columns (so edit/delete buttons work)
   const columns = getStoreColumns(handleEdit, handleDelete);
@@ -95,7 +95,7 @@ export default function StoreMockApiHeader() {
       </div>
 
 
-      <BasicTable columns={columns} data={stores} />
+      <BasicTable columns={columns} data={stores} loading={isLoading || isFetching}/>
 
 
       <StoreForm

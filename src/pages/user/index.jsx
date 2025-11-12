@@ -6,7 +6,7 @@ import BasicTable from "@/components/commen/BasicTable";
 import { useAddUser, useDeleteUser, useUpdateUser, useUsers } from "@/hooks/useUsers";
 
 export default function UserMockApiHeader() {
- const { data: users = [], isLoading } = useUsers();
+ const { data: users = [], isLoading ,isFetching } = useUsers();
   const addUser = useAddUser();
   const updateUser = useUpdateUser();
   const deleteUser = useDeleteUser();
@@ -58,7 +58,7 @@ export default function UserMockApiHeader() {
 
   const columns = getUserColumns(handleEdit, handleDelete);
 
-  if (isLoading) return <p>Loading users...</p>;
+  // if (isLoading) return <p>Loading users...</p>;
 
  
 
@@ -84,7 +84,7 @@ export default function UserMockApiHeader() {
       </div>
 
 
-  <BasicTable columns={columns} data={users} />
+  <BasicTable columns={columns} data={users} loading={isLoading || isFetching} />
 
 
       <UserForm

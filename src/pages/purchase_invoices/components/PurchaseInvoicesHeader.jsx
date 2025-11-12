@@ -6,53 +6,47 @@ import { Delete, Edit } from "lucide-react";
 export const getPurchaseInvoiceColumns = (onEdit, onDelete) => [
     {
         header: "Id",
-        accessorKey: "item_id"
+        accessorKey: "purchase_id"
     },
       {
         header: "invoice_no",
         accessorKey: "invoice_no"
     },
       {
-        header: "barcode",
-        accessorKey: "barcode"
+        header: "invoice_date",
+        accessorKey: "invoice_date"
     },
 
     {
-        header: "name",
-        accessorKey: "name",
+        header: "store_id",
+        accessorKey: "store_id",
     },
     {
-        header: "brand",
-        accessorKey: "brand"
+        header: "created_by",
+        accessorKey: "created_by"
     },
     {
-        header: "generic_name",
-        accessorKey: "generic_name"
+        header: "total_amount",
+        accessorKey: "total_amount"
     },
       {
-        header: "hsn_id",
-        accessorKey: "hsn_id"
+        header: "total_discount",
+        accessorKey: "total_discount"
     },
 
     {
-        header: "is_active",
-        accessorKey: "is_active",
+        header: "total_gst",
+        accessorKey: "total_gst",
     },
+   
     {
-        header: "pack_size",
-        accessorKey: "pack_size"
+        header: "supplier_id",
+        accessorKey: "supplier_id"
     },
+   
     {
-        header: "schedule_id",
-        accessorKey: "schedule_id"
-    },
-    {
-        header: "manufacturer",
-        accessorKey: "manufacturer"
-    },
-    {
-        header: "item_type",
-        accessorKey: "item_type"
+        header: "net_amount",
+        accessorKey: "net_amount"
     },
   // {
   //       header: "created_at",
@@ -76,7 +70,7 @@ export const getPurchaseInvoiceColumns = (onEdit, onDelete) => [
       <IconButton
         color="error"
         size="small"
-        onClick={() => onDelete(row.original.schedule_id)}
+        onClick={() => onDelete(row.original.purchase_id)}
         sx={{ padding: "4px" }}
       >
         <Delete size={16} />

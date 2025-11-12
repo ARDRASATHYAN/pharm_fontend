@@ -118,6 +118,16 @@ export default function Sidebar() {
       //   { name: "drug List", href: "/drug/stock" },
       // ],
     },
+    {
+      icon: <Inventory2Icon  />,
+    name: "purchaceinvoice",
+      href: "/purchaceinvoice",
+
+      // subLinks: [
+      //   { name: "Add drug", href: "/drug/add" },
+      //   { name: "drug List", href: "/drug/stock" },
+      // ],
+    },
   ];
 
   const sidebarWidth = isExpanded ? "w-64" : "w-16";

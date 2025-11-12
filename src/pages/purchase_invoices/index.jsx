@@ -1,33 +1,30 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "@mui/material";
 import BasicTable from "@/components/commen/BasicTable";
-import { useAdditem, useDeleteitem, useitem, useUpdateitem } from "@/hooks/useItem";
-import ItemForm from "./components/ItemForm";
-import { getItemsColumns } from "./components/ItemHeader";
+
 import { useAddpurchaseinvoice, useDeletepurchaseinvoice, usepurchaseinvoice, useUpdatepurchaseinvoice } from "@/hooks/usePurchaseInvoice";
 import { getPurchaseInvoiceColumns } from "./components/PurchaseInvoicesHeader";
+import PurchaseInvoiceForm from "./components/PurchaseInvoicesForm";
 
 export default function PurchaseInvoiceMockApiHeader() {
-  const { data: purchaseinvoice = [], isLoading } = usepurchaseinvoice();
+  const { data: purchaseinvoice = [], isLoading, isFetching } = usepurchaseinvoice();
   const addpurchaseinvoice = useAddpurchaseinvoice();
-  const updatepurchaseinvoice= useUpdatepurchaseinvoice();
+  const updatepurchaseinvoice = useUpdatepurchaseinvoice();
   const deletepurchaseinvoice = useDeletepurchaseinvoice();
 
   const [open, setOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({
-    sku: "",
-      barcode: "",
-      name: "",
-      brand: "",
-      generic_name: "",
-      manufacturer: "",
-      hsn_id: "",
-      schedule_id: "",
-      description: "",
-      item_type: "",
-      pack_size: "",
-      is_active: true,
+    invoice_no: "",
+    invoice_date: "",
+    total_amount: "",
+    total_discount: "",
+    supplier_id: "",
+    store_id: "",
+    created_by: "",
+    total_gst: "",
+    net_amount: "",
+
   });
 
   const handleChange = (e) => {
@@ -39,7 +36,7 @@ export default function PurchaseInvoiceMockApiHeader() {
   const handleSubmit = () => {
     if (editMode) {
       updatepurchaseinvoice.mutate(
-        { id: formData.item_id, data: formData },
+        { id: formData.purchase_id, data: formData },
         {
 
           onSuccess: () => setOpen(false),
@@ -73,7 +70,7 @@ export default function PurchaseInvoiceMockApiHeader() {
   };
 
 
-  if (isLoading) return <p>Loading hsns...</p>;
+
 
 
   // ✅ pass handlers to columns (so edit/delete buttons work)
@@ -86,33 +83,30 @@ export default function PurchaseInvoiceMockApiHeader() {
           Purchase Invoice List
         </h2>
         <Button variant="contained" color="primary" onClick={() => {
-    // 🧹 Clear previous data before opening
-    setFormData({
-      sku: "",
-      barcode: "",
-      name: "",
-      brand: "",
-      generic_name: "",
-      manufacturer: "",
-      hsn_id: "",
-      schedule_id: "",
-      description: "",
-      item_type: "",
-      pack_size: "",
-      is_active: true,
-    });
-    setEditMode(false);
-    setOpen(true);
-  }}>
+          // 🧹 Clear previous data before opening
+          setFormData({
+            invoice_no: "",
+            invoice_date: "",
+            total_amount: "",
+            total_discount: "",
+            supplier_id: "",
+            store_id: "",
+            created_by: "",
+            total_gst: "",
+            net_amount: "",
+          });
+          setEditMode(false);
+          setOpen(true);
+        }}>
           Add PurchaseInvoice
         </Button>
       </div>
 
 
-      <BasicTable columns={columns} data={item} />
+      <BasicTable columns={columns} data={purchaseinvoice} loading={isLoading || isFetching} />
 
 
-      <ItemForm
+      <PurchaseInvoiceForm
         open={open}
         onClose={() => {
           setOpen(false);

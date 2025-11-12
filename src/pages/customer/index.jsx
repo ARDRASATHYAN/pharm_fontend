@@ -6,7 +6,7 @@ import CustomerForm from "./components/CustomerForm";
 import { getCustomerColumns } from "./components/CustomerHeader";
 
 export default function CustomerMockApiHeader() {
-    const { data: customer = [], isLoading } = useCustomer();
+    const { data: customer = [], isLoading,isFetching } = useCustomer();
     const addCustomer = useAddCustomer();
     const updateCustomer = useUpdateCustomer();
     const deleteCustomer = useDeleteCustomer();
@@ -60,7 +60,7 @@ export default function CustomerMockApiHeader() {
     };
 
 
-    if (isLoading) return <p>Loading hsns...</p>;
+  
 
 
     // ✅ pass handlers to columns (so edit/delete buttons work)
@@ -85,7 +85,7 @@ export default function CustomerMockApiHeader() {
             </div>
 
 
-            <BasicTable columns={columns} data={customer} />
+            <BasicTable columns={columns} data={customer} loading={isLoading || isFetching}/>
 
 
             <CustomerForm

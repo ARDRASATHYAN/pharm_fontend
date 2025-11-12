@@ -5,8 +5,9 @@ import {
   getCoreRowModel,
   getPaginationRowModel,
 } from "@tanstack/react-table";
+import { Skeleton } from "@mui/material";
 
-const BasicTable = ({ columns, data, onRowClick, striped = true }) => {
+const BasicTable = ({ columns, data, onRowClick, striped = true,loading = false }) => {
   // ✅ Control pagination state
   const [pagination, setPagination] = useState({
     pageIndex: 0,
@@ -44,6 +45,10 @@ const BasicTable = ({ columns, data, onRowClick, striped = true }) => {
     return () => window.removeEventListener("resize", adjustRowsByHeight);
   }, []);
 
+
+
+  const skeletonRows = Array.from({ length: pagination.pageSize });
+
   return (
     <>
       <table className="w-full border-collapse border">
@@ -66,7 +71,20 @@ const BasicTable = ({ columns, data, onRowClick, striped = true }) => {
         </thead>
 
         <tbody>
-          {table.getRowModel().rows.map((row) => (
+
+           {loading
+            ? //  MUI Skeleton rows
+              skeletonRows.map((_, i) => (
+                <tr key={i}>
+                  {columns.map((col, j) => (
+                    <td key={j} className="py-2 px-2 border-b">
+                      <div className="h-3 bg-gray-200 rounded w-[80%]"></div>
+                    </td>
+                  ))}
+                </tr>
+              ))
+            : //  Normal data rows
+          table.getRowModel().rows.map((row) => (
             <tr
               key={row.id}
               className=" even:bg-gray-100 hover:bg-gray-200 cursor-pointer"
@@ -80,6 +98,7 @@ const BasicTable = ({ columns, data, onRowClick, striped = true }) => {
             </tr>
           ))}
         </tbody>
+        
       </table>
 
       {/* ✅ Pagination Footer */}

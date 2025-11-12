@@ -10,6 +10,7 @@ import ItemMockApiHeader from "./pages/items";
 import SupplierMockApiHeader from "./pages/supplier";
 import CustomerMockApiHeader from "./pages/customer";
 import StoreStockMockApiHeader from "./pages/store_stock";
+import PurchaseInvoiceMockApiHeader from "./pages/purchase_invoices";
 
 
 
@@ -31,6 +32,7 @@ function App() {
           <Route path="/supplier" element={< SupplierMockApiHeader />} />
           <Route path="/customers" element={< CustomerMockApiHeader />} />
           <Route path="/stock" element={<StoreStockMockApiHeader />} />
+          <Route path="/purchaceinvoice" element={<PurchaseInvoiceMockApiHeader />} />
 
 
 

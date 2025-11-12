@@ -8,7 +8,7 @@ import { useAddHsn, useDeleteHsn, useHsn, useUpdateHsn } from "@/hooks/useHsn";
 
 
 export default function HsnMockApiHeader() {
- const { data: hsns = [], isLoading } = useHsn();
+ const { data: hsns = [], isLoading,isFetching } = useHsn();
    const addHsn = useAddHsn();
    const updateHsn = useUpdateHsn();
    const deleteHsn = useDeleteHsn();
@@ -62,7 +62,7 @@ export default function HsnMockApiHeader() {
    };
  
  
-   if (isLoading) return <p>Loading hsns...</p>;
+  
  
 
   // ✅ pass handlers to columns (so edit/delete buttons work)
@@ -87,7 +87,7 @@ export default function HsnMockApiHeader() {
       </div>
 
 
-  <BasicTable columns={columns} data={hsns} />
+  <BasicTable columns={columns} data={hsns} loading={isLoading || isFetching}/>
 
 
       <HsnForm
