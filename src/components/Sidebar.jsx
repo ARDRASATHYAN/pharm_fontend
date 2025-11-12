@@ -19,29 +19,7 @@ export default function Sidebar() {
 
   const navigationItems = [
     { icon: <RxDashboard />, name: "Dashboard", href: "/dashboard" },
-    // {
-    //   icon: <FaPills />,
-    //   name: "Medicines",
-    //   href: "/medicines",
-    //   subLinks: [
-    //     { name: "Add Medicine", href: "/medicines/add" },
-    //     { name: "Stock List", href: "/medicines/stock" },
-    //     { name: "Categories", href: "/medicines/categories" },
-    //   ],
-    // },
-    // { icon: <MdPointOfSale />, name: "Sales", href: "/sales" },
-    // { icon: <FaTruck />, name: "Suppliers", href: "/suppliers" },
-    // { icon: <FaUserMd />, name: "Customers", href: "/customers" },
-    // {
-    //   icon: <RxClipboard />,
-    //   name: "Reports",
-    //   href: "/reports",
-    //   subLinks: [
-    //     { name: "Sales Report", href: "/reports/sales" },
-    //     { name: "Stock Report", href: "/reports/stock" },
-    //   ],
-    // },
-    
+   
     {
       icon: <FaUsers />,
       name: "Staff",
@@ -64,70 +42,49 @@ export default function Sidebar() {
       icon: <Tag />,
       name: "Hsn",
       href: "/Hsn",
-      // subLinks: [
-      //   { name: "Add Hsn", href: "/hsn/add" },
-      //   { name: "Hsn List", href: "/hsn/stock" },
-      // ],
+      
     },
     {
       icon: <GiMedicinePills />,
       name: "DrugSchedule",
       href: "/drug",
-      // subLinks: [
-      //   { name: "Add drug", href: "/drug/add" },
-      //   { name: "drug List", href: "/drug/stock" },
-      // ],
+     
     },
-     {
-      icon: <FaClipboardList />,
-    name: "Items",
-      href: "/items",
+    //  {
+    //   icon: <FaClipboardList />,
+    // name: "Items",
+    //   href: "/items",
 
-      // subLinks: [
-      //   { name: "Add drug", href: "/drug/add" },
-      //   { name: "drug List", href: "/drug/stock" },
-      // ],
-    },
-    {
-      icon: <FaTruck />,
-    name: "Supplier",
-      href: "/supplier",
+     
+    // },
+    // {
+    //   icon: <FaTruck />,
+    // name: "Supplier",
+    //   href: "/supplier",
 
-      // subLinks: [
-      //   { name: "Add drug", href: "/drug/add" },
-      //   { name: "drug List", href: "/drug/stock" },
-      // ],
-    },
-    {
-      icon: <FaUser />,
-    name: "Customers",
-      href: "/customers",
+      
+    // },
+    // {
+    //   icon: <FaUser />,
+    // name: "Customers",
+    //   href: "/customers",
 
-      // subLinks: [
-      //   { name: "Add drug", href: "/drug/add" },
-      //   { name: "drug List", href: "/drug/stock" },
-      // ],
-    },
-    {
-      icon: <Inventory2Icon  />,
-    name: "stockstore",
-      href: "/stock",
+     
+    // },
+    // {
+    //   icon: <Inventory2Icon  />,
+    // name: "stockstore",
+    //   href: "/stock",
 
-      // subLinks: [
-      //   { name: "Add drug", href: "/drug/add" },
-      //   { name: "drug List", href: "/drug/stock" },
-      // ],
-    },
-    {
-      icon: <Inventory2Icon  />,
-    name: "purchaceinvoice",
-      href: "/purchaceinvoice",
+     
+    // },
+    // {
+    //   icon: <Inventory2Icon  />,
+    // name: "purchaceinvoice",
+    //   href: "/purchaceinvoice",
 
-      // subLinks: [
-      //   { name: "Add drug", href: "/drug/add" },
-      //   { name: "drug List", href: "/drug/stock" },
-      // ],
-    },
+      
+    // },
   ];
 
   const sidebarWidth = isExpanded ? "w-64" : "w-16";
