@@ -23,7 +23,7 @@ export default function Login() {
         try {
             setLoading(true);
             const loggedUser = await authService.login(user.username, user.password);
-            alert(`Welcome, ${loggedUser.full_name || loggedUser.username}`);
+            // alert(`Welcome, ${loggedUser.full_name || loggedUser.username}`);
             window.location.href = "/dashboard";
         } catch (err) {
             alert(err.response?.data?.message || "Login failed");
@@ -44,13 +44,13 @@ export default function Login() {
                border-2 border-[var(--color-border-default)] 
                shadow-[1px_1px_4px_var(--color-border-default)]"
             >
-                <div className="p-[40px] sm:p-8 flex flex-col items-center">
+                <div className="p-[40px] flex flex-col items-center">
                     {/* Logo */}
                     <img
-            src="https://cdn-icons-png.flaticon.com/512/2966/2966486.png"
-            alt="PharmaPro"
-            className="h-[40px] w-[40px] rounded-md"
-          />
+                        src="https://cdn-icons-png.flaticon.com/512/2966/2966486.png"
+                        alt="PharmaPro"
+                        className="h-[40px] w-[40px] rounded-md"
+                    />
 
                     {/* Title */}
                     <div className="text-2xl font-normal text-gray-800 my-5 text-center">
