@@ -50,13 +50,11 @@ export default function Sidebar() {
       href: "/drug",
      
     },
-    //  {
-    //   icon: <FaClipboardList />,
-    // name: "Items",
-    //   href: "/items",
-
-     
-    // },
+     {
+      icon: <FaClipboardList />,
+    name: "Items",
+      href: "/items",
+    },
     // {
     //   icon: <FaTruck />,
     // name: "Supplier",

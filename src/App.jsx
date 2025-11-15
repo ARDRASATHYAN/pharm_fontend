@@ -11,6 +11,9 @@ import SupplierMockApiHeader from "./pages/supplier";
 import CustomerMockApiHeader from "./pages/customer";
 import StoreStockMockApiHeader from "./pages/store_stock";
 import PurchaseInvoiceMockApiHeader from "./pages/purchase_invoices";
+import AddPurchase from "./components/commen/AddItemsPage";
+import PreviewPurchase from "./components/commen/PreviewItemsPage ";
+
 
 
 
@@ -20,7 +23,10 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Login />} />
+         
         <Route element={<Layout />}>
+         {/* <Route path="/" element={<AddPurchase />} />
+          <Route path="/preview" element={<PreviewPurchase />} /> */}
 
           <Route path="/dashboard" element={<Dashboard />} />
 

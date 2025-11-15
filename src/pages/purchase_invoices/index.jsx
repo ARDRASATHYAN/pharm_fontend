@@ -5,6 +5,7 @@ import BasicTable from "@/components/commen/BasicTable";
 import { useAddpurchaseinvoice, useDeletepurchaseinvoice, usepurchaseinvoice, useUpdatepurchaseinvoice } from "@/hooks/usePurchaseInvoice";
 import { getPurchaseInvoiceColumns } from "./components/PurchaseInvoicesHeader";
 import PurchaseInvoiceForm from "./components/PurchaseInvoicesForm";
+import PurchaseForm from "../purchase/PurchaseForm";
 
 export default function PurchaseInvoiceMockApiHeader() {
   const { data: purchaseinvoice = [], isLoading, isFetching } = usepurchaseinvoice();
@@ -106,7 +107,7 @@ export default function PurchaseInvoiceMockApiHeader() {
       <BasicTable columns={columns} data={purchaseinvoice} loading={isLoading || isFetching} />
 
 
-      <PurchaseInvoiceForm
+      <PurchaseForm
         open={open}
         onClose={() => {
           setOpen(false);
