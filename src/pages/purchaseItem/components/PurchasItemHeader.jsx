@@ -52,6 +52,10 @@ export const getPurchaseItemColumns = (onEdit, onDelete) => [
         header: "purchase_id",
         accessorKey: "purchase_id"
     },
+    //  {
+    //     header: "invoice_no",
+    //     accessorKey: "invoice.invoice_no"
+    // },
      {
         header: "item_id",
         accessorKey: "item_id"

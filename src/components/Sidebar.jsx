@@ -66,8 +66,9 @@ export default function Sidebar() {
       name: "purchase",
       href: "/purchase/purchaceinvoice",
       subLinks: [
+        { name: "Add Purchase", href: "/purchase/addpurchase" },
         { name: "View Invoice", href: "/purchase/purchaceinvoice" },
-        { name: "View PurchaseItem", href: "/purchase/purchaceitem" },
+        { name: "View PurchaseItem", href: "/purchase/purchaceitem" },  
       ],
     },
     {
