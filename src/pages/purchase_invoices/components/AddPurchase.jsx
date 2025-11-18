@@ -37,7 +37,7 @@ const emptyItemRow = {
   mrp: "",
   gst_percent: "",
   discount_percent: "",
-  pack_qty: "",     // user input
+  pack_qty:1,     // user input
   pack_size: "",    // from item master
   expiry_date: "",
   amount: "",
@@ -319,7 +319,7 @@ export default function AddPurchaseForm({ onClose }) {
                   <TableCell sx={{ minWidth: 90 }}>MRP</TableCell>
                   <TableCell sx={{ minWidth: 80 }}>GST%</TableCell>
                   <TableCell sx={{ minWidth: 90 }}>Disc%</TableCell>
-                  <TableCell sx={{ minWidth: 90 }}>Pack</TableCell>
+                  <TableCell sx={{ minWidth: 90 }}>Pack Qty</TableCell>
                    <TableCell sx={{ minWidth: 70 }}>Qty</TableCell>
                   <TableCell sx={{ minWidth: 110 }}>Expiry</TableCell>
                   <TableCell sx={{ minWidth: 90 }}>Amount</TableCell>
