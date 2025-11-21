@@ -1,5 +1,5 @@
 // src/hooks/useSalesReturn.js
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import apiClient from "@/services/apiClient";
 
 // ✅ Create sales return
@@ -21,3 +21,25 @@ export const useAddSalesReturn = () => {
     },
   });
 };
+
+
+export function useSalesReturnList() {
+  return useQuery({
+    queryKey: ["salesreturnlist"],
+    queryFn: async () => {
+      const res = await apiClient.get("/sales-returns");
+      return res.data;
+    }
+  });
+}
+
+export function usesalesreturnitems() {
+  return useQuery({
+    queryKey: ["salesreturnitem"],
+   queryFn: async () => {
+      const res = await apiClient.get("/sales-returns/items");
+      return res.data;
+    }
+  });
+}
+

@@ -1,11 +1,28 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { RxDashboard, RxClipboard } from "react-icons/rx";
-import { LogOut, ChevronDown, ChevronRight, Tag } from "lucide-react";
-import { FaUserMd, FaUsers, FaPills, FaTruck, FaStore, FaClipboardList, FaUser } from "react-icons/fa";
-import { MdPointOfSale } from "react-icons/md";
-import { GiMedicinePills } from "react-icons/gi";
-import Inventory2Icon from "@mui/icons-material/Inventory2";
+import {
+  LayoutDashboard,
+  Users,
+  Store,
+  BadgePercent,
+  Pill,
+  ClipboardList,
+  Truck,
+  ShoppingCart,
+  RotateCcw,
+  ArrowRightLeft,
+  Package,
+  PackageX,
+  Boxes,
+  User,
+  LogOut,
+  ChevronDown,
+  ChevronRight,
+  Menu,
+  X,
+} from "lucide-react";
+
+
 
 function cn(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -13,97 +30,109 @@ function cn(...classes) {
 
 export default function Sidebar() {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [openSubmenu, setOpenSubmenu] = useState(null); // Track which submenu is open
+  const [openSubmenu, setOpenSubmenu] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
 
-  const navigationItems = [
-    { icon: <RxDashboard />, name: "Dashboard", href: "/dashboard" },
-   
-    {
-      icon: <FaUsers />,
-      name: "Staff",
-      href: "/staff",
-      // subLinks: [
-      //   { name: "Add Staff", href: "/staff/add" },
-      //   { name: "Attendance", href: "/staff/attendance" },
-      // ],
-    },
-    {
-      icon: <FaStore />,
-      name: "Store",
-      href: "/store",
-      // subLinks: [
-      //   { name: "Add store", href: "/store/add" },
-      //   { name: "store List", href: "/store/stock" },
-      // ],
-    },
-     {
-      icon: <Tag />,
-      name: "Hsn",
-      href: "/Hsn",
-      
-    },
-    {
-      icon: <GiMedicinePills />,
-      name: "DrugSchedule",
-      href: "/drug",
-     
-    },
-     {
-      icon: <FaClipboardList />,
-    name: "Items",
-      href: "/items",
-    },
-    {
-      icon: <FaTruck />,
-    name: "Supplier",
-      href: "/supplier",
-    },
+ const navigationItems = [
+  // Dashboard
+  { icon: <LayoutDashboard size={18} />, name: "Dashboard", href: "/dashboard" },
 
-    {
-      icon: <FaUsers />,
-      name: "purchase",
-      href: "/purchase/purchaceinvoice",
-      subLinks: [
-        { name: "Add Purchase", href: "/purchase/addpurchase" },
-        { name: "View Invoice", href: "/purchase/purchaceinvoice" },
-        { name: "View PurchaseItem", href: "/purchase/purchaceitem" },  
-      ],
-    },
-    {
-      icon: <FaUsers />,
-      name: "purchase return",
-      href: "/return/purchacereturn",
-      subLinks: [
-        { name: "Add Return", href: "/return/addpurchasereturn" },
-        { name: "View Return", href: "/purchase/purchacereturn" },
-        { name: "View Return Item", href: "/return/returnitem" },  
-      ],
-    },
-    {
-      icon: <FaUser />,
+  // Master data
+  { icon: <Users size={18} />, name: "Staff", href: "/staff" },
+  { icon: <Store size={18} />, name: "Store", href: "/store" },
+  { icon: <BadgePercent size={18} />, name: "HSN", href: "/Hsn" },
+  { icon: <Pill size={18} />, name: "Drug Schedule", href: "/drug" },
+  { icon: <ClipboardList size={18} />, name: "Items", href: "/items" },
+  { icon: <Truck size={18} />, name: "Supplier", href: "/supplier" },
+
+  // Purchase
+  {
+    icon: <ShoppingCart size={18} />,
+    name: "Purchase",
+    href: "/purchase/purchaceinvoice",
+    subLinks: [
+      { name: "Add Purchase", href: "/purchase/addpurchase" },
+      { name: "View Invoice", href: "/purchase/purchaceinvoice" },
+      { name: "View Purchase Item", href: "/purchase/purchaceitem" },
+    ],
+  },
+
+  // Purchase Return
+  {
+    icon: <RotateCcw size={18} />,
+    name: "Purchase Return",
+    href: "/return/purchacereturn",
+    subLinks: [
+      { name: "Add Return", href: "/return/addpurchasereturn" },
+      { name: "View Return", href: "/purchase/purchacereturn" },
+      { name: "View Return Item", href: "/return/returnitem" },
+    ],
+  },
+
+  // Sales
+  {
+    icon: <ArrowRightLeft size={18} />,
+    name: "Sales",
+    href: "/sales/add",
+    subLinks: [
+      { name: "Add Sales", href: "/sales/add" },
+      { name: "View Sales", href: "/sales/list" },
+      { name: "View Sales Item", href: "/sales/items" },
+    ],
+  },
+
+  // Sales Return
+  {
+    icon: <RotateCcw size={18} />,
+    name: "Sales Return",
+    href: "/salesreturn/add",
+    subLinks: [
+      { name: "Add Sales Return", href: "/salesreturn/add" },
+      { name: "View Sales Return", href: "/salesreturn/list" },
+      { name: "View Sales Return Item", href: "/salesreturn/items" },
+    ],
+  },
+
+  // Damaged stock
+  {
+    icon: <PackageX size={18} />,
+    name: "Damaged Stock",
+    href: "/damaged/add",
+    subLinks: [
+      { name: "Add Damaged Stock", href: "/damaged/add" },
+      { name: "View Damaged Stock", href: "/damaged/list" },
+    ],
+  },
+
+  // Excess stock
+  {
+    icon: <Boxes size={18} />,
+    name: "Excess Stock",
+    href: "/excess/add",
+    subLinks: [
+      { name: "Add Excess Stock", href: "/excess/add" },
+      { name: "View Excess Stock", href: "/excess/list" },
+    ],
+  },
+
+  // Stock
+  {
+    icon: <Package size={18} />,
     name: "Stock",
-      href: "/stock",
+    href: "/stock",
+  },
 
-     
-    },
-    // {
-    //   icon: <Inventory2Icon  />,
-    // name: "stockstore",
-    //   href: "/stock",
+  // Customers
+  {
+    icon: <User size={18} />,
+    name: "Customer",
+    href: "/customers",
+  },
+];
 
-     
-    // },
-    // {
-    //   icon: <Inventory2Icon  />,
-    // name: "purchaceinvoice",
-    //   href: "/purchaceinvoice",
 
-      
-    // },
-  ];
-
+  // Wider on desktop, but still usable collapsed
   const sidebarWidth = isExpanded ? "w-64" : "w-16";
 
   const handleLogout = () => {
@@ -117,9 +146,10 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* === Desktop Sidebar === */}
+      {/* === Desktop / Tablet Sidebar === */}
       <nav
         className={cn(
+          // show from md and above, fixed full height
           "hidden md:flex fixed left-0 top-0 h-screen z-30 flex-col bg-white border-r border-gray-200 transition-all duration-300 ease-in-out",
           sidebarWidth
         )}
@@ -127,14 +157,14 @@ export default function Sidebar() {
         onMouseLeave={() => setIsExpanded(false)}
       >
         {/* Logo Section */}
-        <div className="flex items-center border-b border-gray-200 p-4">
+        <div className="flex items-center border-b border-gray-200 px-3 py-4">
           <img
             src="https://cdn-icons-png.flaticon.com/512/2966/2966486.png"
             alt="PharmaPro"
-            className="h-[40px] w-[40px] rounded-md"
+            className="h-10 w-10 rounded-md"
           />
           {isExpanded && (
-            <span className="ml-2">
+            <span className="ml-2 overflow-hidden">
               <p className="text-[18px] text-blue-700 font-bold whitespace-nowrap">
                 PharmaPro
               </p>
@@ -146,7 +176,7 @@ export default function Sidebar() {
         </div>
 
         {/* Menu */}
-        <ul className="flex-1 p-3 space-y-1 overflow-y-auto">
+        <ul className="flex-1 px-2 py-3 space-y-1 overflow-y-auto">
           {navigationItems.map((item) => {
             const isActive =
               location.pathname === item.href ||
@@ -161,16 +191,16 @@ export default function Sidebar() {
                       item.subLinks ? toggleSubmenu(item.name) : navigate(item.href)
                     }
                     className={cn(
-                      "flex items-center justify-between p-2 rounded-md w-full text-left transition-all",
+                      "flex items-center justify-between px-2 py-2 rounded-md w-full text-left text-sm transition-all",
                       isActive
                         ? "bg-blue-50 text-blue-600 border-l-4 border-blue-600"
                         : "text-gray-700 hover:bg-gray-100"
                     )}
                   >
                     <div className="flex items-center gap-3">
-                      <span className="text-2xl">{item.icon}</span>
+                      <span className="text-xl flex-shrink-0">{item.icon}</span>
                       {isExpanded && (
-                        <span className="text-sm font-medium whitespace-nowrap">
+                        <span className="text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis">
                           {item.name}
                         </span>
                       )}
@@ -189,7 +219,7 @@ export default function Sidebar() {
 
                   {/* Submenu */}
                   {item.subLinks && isOpen && isExpanded && (
-                    <ul className="pl-10 mt-1 space-y-1 transition-all duration-200">
+                    <ul className="pl-9 mt-1 space-y-1 transition-all duration-200">
                       {item.subLinks.map((sub) => {
                         const subActive = location.pathname === sub.href;
                         return (
@@ -197,7 +227,7 @@ export default function Sidebar() {
                             <button
                               onClick={() => navigate(sub.href)}
                               className={cn(
-                                "block w-full text-left text-sm p-2 rounded-md",
+                                "block w-full text-left text-xs px-2 py-1.5 rounded-md",
                                 subActive
                                   ? "text-blue-600 bg-blue-50"
                                   : "text-gray-700 hover:bg-gray-100"
@@ -217,9 +247,9 @@ export default function Sidebar() {
         </ul>
 
         {/* Logout */}
-        <div className="p-3 border-t border-gray-200">
+        <div className="px-3 py-3 border-t border-gray-200">
           <button
-            className="flex items-center gap-2 w-full p-2 bg-red-500 hover:bg-red-600 rounded-md text-sm text-white font-medium justify-center"
+            className="flex items-center gap-2 w-full px-3 py-2 bg-red-500 hover:bg-red-600 rounded-md text-sm text-white font-medium justify-center"
             onClick={handleLogout}
           >
             <LogOut size={16} />
@@ -228,12 +258,13 @@ export default function Sidebar() {
         </div>
       </nav>
 
-      {/* === Mobile Navbar === */}
-      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 bg-white border border-gray-200 shadow-lg rounded-full px-5 py-2 flex justify-around items-center w-[90%] max-w-[380px] md:hidden">
+      {/* === Mobile Bottom Navbar === */}
+      <div className="fixed bottom-3 left-1/2 -translate-x-1/2 z-40 bg-white border border-gray-200 shadow-lg rounded-full px-4 py-2 flex justify-around items-center w-[94%] max-w-[380px] md:hidden">
         {navigationItems.map((item) => {
           const isActive =
             location.pathname === item.href ||
             item.subLinks?.some((s) => s.href === location.pathname);
+
           return (
             <button
               key={item.name}
@@ -242,7 +273,7 @@ export default function Sidebar() {
             >
               <span
                 className={cn(
-                  "text-2xl mb-1 transition-colors duration-200",
+                  "text-xl mb-0.5 transition-colors duration-200",
                   isActive ? "text-blue-600" : "text-gray-600"
                 )}
               >
@@ -250,11 +281,13 @@ export default function Sidebar() {
               </span>
               <span
                 className={cn(
-                  "text-[10px]",
+                  "text-[9px] leading-tight",
                   isActive ? "text-blue-600 font-medium" : "text-gray-700"
                 )}
               >
-                {item.name}
+                {item.name.length > 10
+                  ? item.name.slice(0, 9) + "…"
+                  : item.name}
               </span>
             </button>
           );
@@ -264,8 +297,8 @@ export default function Sidebar() {
           onClick={handleLogout}
           className="flex flex-col items-center justify-center text-center text-gray-600 hover:text-red-500"
         >
-          <LogOut size={22} />
-          <span className="text-[10px]">Logout</span>
+          <LogOut size={20} />
+          <span className="text-[9px] leading-tight">Logout</span>
         </button>
       </div>
     </>

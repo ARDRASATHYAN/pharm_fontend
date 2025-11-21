@@ -1,0 +1,138 @@
+// src/config/navigation.js
+import {
+  LayoutDashboard,
+  Users,
+  Store,
+  BadgePercent,
+  Pill,
+  ClipboardList,
+  Truck,
+  ShoppingCart,
+  RotateCcw,
+  ArrowRightLeft,
+  Package,
+  PackageX,
+  Boxes,
+  User,
+} from "lucide-react";
+
+export const navigationItems = [
+  {
+    key: "dashboard",
+    label: "Dashboard",
+    href: "/dashboard",
+    icon: LayoutDashboard,
+  },
+  {
+    key: "staff",
+    label: "Staff",
+    href: "/staff",
+    icon: Users,
+  },
+  {
+    key: "store",
+    label: "Store",
+    href: "/store",
+    icon: Store,
+  },
+  {
+    key: "hsn",
+    label: "HSN",
+    href: "/Hsn",
+    icon: BadgePercent,
+  },
+  {
+    key: "drugSchedule",
+    label: "Drug Schedule",
+    href: "/drug",
+    icon: Pill,
+  },
+  {
+    key: "items",
+    label: "Items",
+    href: "/items",
+    icon: ClipboardList,
+  },
+  {
+    key: "supplier",
+    label: "Supplier",
+    href: "/supplier",
+    icon: Truck,
+  },
+  {
+    key: "purchase",
+    label: "Purchase",
+    href: "/purchase/purchaceinvoice",
+    icon: ShoppingCart,
+    children: [
+      { key: "purchase-add", label: "Add Purchase", href: "/purchase/addpurchase" },
+      { key: "purchase-invoice", label: "View Invoice", href: "/purchase/purchaceinvoice" },
+      { key: "purchase-items", label: "View Purchase Item", href: "/purchase/purchaceitem" },
+    ],
+  },
+  {
+    key: "purchase-return",
+    label: "Purchase Return",
+    href: "/return/purchacereturn",
+    icon: RotateCcw,
+    children: [
+      { key: "preturn-add", label: "Add Return", href: "/return/addpurchasereturn" },
+      { key: "preturn-view", label: "View Return", href: "/purchase/purchacereturn" },
+      { key: "preturn-items", label: "View Return Item", href: "/return/returnitem" },
+    ],
+  },
+  {
+    key: "sales",
+    label: "Sales",
+    href: "/sales/add",
+    icon: ArrowRightLeft,
+    children: [
+      { key: "sales-add", label: "Add Sales", href: "/sales/add" },
+      { key: "sales-view", label: "View Sales", href: "/sales/list" },
+      { key: "sales-items", label: "View Sales Item", href: "/sales/items" },
+    ],
+  },
+  {
+    key: "sales-return",
+    label: "Sales Return",
+    href: "/salesreturn/add",
+    icon: RotateCcw,
+    children: [
+      { key: "sreturn-add", label: "Add Sales Return", href: "/salesreturn/add" },
+      { key: "sreturn-view", label: "View Sales Return", href: "/salesreturn/list" },
+      { key: "sreturn-items", label: "View Sales Return Item", href: "/salesreturn/items" },
+    ],
+  },
+  {
+    key: "damaged",
+    label: "Damaged Stock",
+    href: "/damaged/add",
+    icon: PackageX,
+    children: [
+      { key: "damaged-add", label: "Add Damaged Stock", href: "/damaged/add" },
+      { key: "damaged-view", label: "View Damaged Stock", href: "/damaged/list" },
+    ],
+  },
+  {
+    key: "excess",
+    label: "Excess Stock",
+    href: "/excess/add",
+    icon: Boxes,
+    children: [
+      { key: "excess-add", label: "Add Excess Stock", href: "/excess/add" },
+      { key: "excess-view", label: "View Excess Stock", href: "/excess/list" },
+    ],
+  },
+  {
+    key: "stock",
+    label: "Stock",
+    href: "/stock",
+    icon: Package,
+  },
+  {
+    key: "customers",
+    label: "Customer",
+    href: "/customers",
+    icon: User,
+  },
+];

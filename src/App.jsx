@@ -18,6 +18,14 @@ import PurchaseReturnForm from "./pages/purchase_return/components/PurchaseRetur
 import PurchaseREturnItemMockApiHeader from "./pages/purchasereturnitems";
 import SalesForm from "./pages/sales_invioces/component/SalesForm";
 import AddSalesReturnForm from "./pages/sales_return/components/AddSalesReturnForm";
+import SalesInvoiceMockApiHeader from "./pages/sales_invioces";
+import SalesItemMockApiHeader from "./pages/salesitems";
+import SalesReturnMockApiHeader from "./pages/sales_return";
+import SalesReturnItemMockApiHeader from "./pages/salesreturnitem";
+import AddDamagedStockForm from "./pages/damanagedstock/components/AddDamagedStock";
+import DamagedStockMockApiHeader from "./pages/damanagedstock";
+import AddExcessStockForm from "./pages/exceedstock/component/AddExcessFrom";
+import ExcessStockMockApiHeader from "./pages/exceedstock";
 
 
 
@@ -39,18 +47,38 @@ function App() {
           <Route path="/drug" element={< DrugScheduleMockApiHeader />} />
           <Route path="/items" element={< ItemMockApiHeader />} />
           <Route path="/supplier" element={< SupplierMockApiHeader />} />
+
+
           <Route path="/customers" element={< CustomerMockApiHeader />} />
-          {/* <Route path="/stock" element={<StoreStockMockApiHeader />} /> */}
+
+
           <Route path="/purchase/purchaceinvoice" element={<PurchaseInvoiceMockApiHeader />} />
           <Route path="/purchase/purchaceitem" element={<PurchaseItemMockApiHeader />} />
-          <Route path="/stock" element={<StockMockApiHeader />} />
-          <Route path="/return" element={<PurchaseReturnMockApiHeader />} />
           <Route path="/purchase/addpurchase" element={<AddPurchaseForm />} />
+
+          <Route path="/stock" element={<StockMockApiHeader />} />
+
+          <Route path="/return" element={<PurchaseReturnMockApiHeader />} />
           <Route path="/return/addpurchasereturn" element={<PurchaseReturnForm />} />
           <Route path="/purchase/purchacereturn" element={<PurchaseReturnMockApiHeader />} />
           <Route path="/return/returnitem" element={<PurchaseREturnItemMockApiHeader />} />
-           <Route path="/sales" element={<SalesForm />} />
-            <Route path="/salesreturn" element={<AddSalesReturnForm />} />
+
+          <Route path="/sales/add" element={<SalesForm />} />
+          <Route path="/sales/list" element={<SalesInvoiceMockApiHeader />} />
+          <Route path="/sales/items" element={<SalesItemMockApiHeader />} />
+
+
+          <Route path="/salesreturn/add" element={<AddSalesReturnForm />} />
+          <Route path="/salesreturn/list" element={< SalesReturnMockApiHeader />} />
+          <Route path="/salesreturn/items" element={< SalesReturnItemMockApiHeader />} />
+
+
+          <Route path="/damaged/add" element={< AddDamagedStockForm />} />
+          <Route path="/damaged/list" element={< DamagedStockMockApiHeader />} />
+
+
+          <Route path="/excess/add" element={< AddExcessStockForm />} />
+          <Route path="/excess/list" element={< ExcessStockMockApiHeader />} />
 
 
         </Route>

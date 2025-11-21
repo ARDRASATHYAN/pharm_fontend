@@ -36,6 +36,17 @@ export function useSalesInvoiceList() {
 }
 
 
+export function useSalesItemsList() {
+  return useQuery({
+    queryKey: ["salesitems"],
+    queryFn: async () => {
+      const res = await apiClient.get("/sales/items");
+      return res.data;
+    }
+  });
+}
+
+
 export const useSaleItems = (saleId) => {
   return useQuery(
     {

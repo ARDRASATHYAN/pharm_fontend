@@ -2,12 +2,12 @@
 import React, { useState } from "react";
 import { Button } from "@mui/material";
 import BasicTable from "@/components/commen/BasicTable";
-import { getSalesInvoiceColumns } from "./component/SalesInvoiceHeader";
-import { useSalesInvoiceList } from "@/hooks/useSalesInvoice";
+import { getExcessStockColumns } from "./component/ExcessStockHeader";
+import { useExcessStock } from "@/hooks/useExcessStock";
 
 
-export default function SalesInvoiceMockApiHeader() {
-  const { data: salesinvoice = [], isLoading, isFetching } =useSalesInvoiceList()
+export default function ExcessStockMockApiHeader() {
+  const { data: excessstock = [], isLoading, isFetching } =useExcessStock()
     
   
  
@@ -68,14 +68,14 @@ export default function SalesInvoiceMockApiHeader() {
         }}
       >
         <h2 className="text-xl font-bold text-blue-700 tracking-wide">
-          Sales Invoice List
+         excess stock List
         </h2>
        
       </div>
 
       <BasicTable
-        columns={getSalesInvoiceColumns(handleEdit, handleDelete)}
-        data={salesinvoice}
+        columns={getExcessStockColumns(handleEdit, handleDelete)}
+        data={excessstock}
         loading={isLoading || isFetching}
       />
 
