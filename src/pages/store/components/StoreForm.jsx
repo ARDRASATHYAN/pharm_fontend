@@ -9,8 +9,8 @@ import { storeSchema } from "../validation/storeSchema";
 export default function StoreForm({
   open,
   onClose,
-  onSubmit,   
-  defaultValues, 
+  onSubmit,
+  defaultValues,
   editMode,
 }) {
   const {
@@ -28,11 +28,10 @@ export default function StoreForm({
       state: "",
       gst_no: "",
       phone: "",
-      ...defaultValues,     // if editing, override with store data
+      ...defaultValues,
     },
   });
 
-  // Reset when dialog opens or `defaultValues` change
   useEffect(() => {
     if (open) {
       reset({
@@ -59,7 +58,18 @@ export default function StoreForm({
       phone: values.phone?.trim() || null,
     };
 
-    onSubmit(payload);
+    // pass reset so parent can clear form on success for "add"
+    onSubmit(payload, () => {
+      reset({
+        store_name: "",
+        address: "",
+        email: "",
+        city: "",
+        state: "",
+        gst_no: "",
+        phone: "",
+      });
+    });
   };
 
   return (

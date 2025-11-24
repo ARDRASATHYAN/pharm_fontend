@@ -27,35 +27,41 @@ export default function StoreMockApiHeader() {
   const [selectedStoreId, setSelectedStoreId] = useState(null);
 
   // Add or Update 
-  const handleSubmit = (values) => {
-    if (editMode && editingStore?.store_id) {
-      updateStore.mutate(
-        { id: editingStore.store_id, data: values },
-        {
-          onSuccess: () => {
-            showSuccessToast("Store updated successfully");
-            setOpen(false);
-            setEditMode(false);
-            setEditingStore(null);
-          },
-          onError: (error) => {
-            console.error(error);
-            showErrorToast("Failed to update Store");
-          },
-        }
-      );
-    } else {
-      addStore.mutate(values, {
+
+const handleSubmit = (values, resetForm) => {
+  if (editMode && editingStore?.store_id) {
+    updateStore.mutate(
+      { id: editingStore.store_id, data: values },
+      {
         onSuccess: () => {
-          showSuccessToast("Store created successfully");
+          showSuccessToast("Store updated successfully");
+          setOpen(false);
+          setEditMode(false);
+          setEditingStore(null);
         },
         onError: (error) => {
           console.error(error);
-          showErrorToast("Failed to create user");
+          showErrorToast("Failed to update Store");
         },
-      });
-    }
-  };
+      }
+    );
+  } else {
+    // ADD MODE: keep dialog open but clear the fields
+    addStore.mutate(values, {
+      onSuccess: () => {
+        showSuccessToast("Store created successfully");
+        if (typeof resetForm === "function") {
+          resetForm(); // this clears form fields
+        }
+      },
+      onError: (error) => {
+        console.error(error);
+        showErrorToast("Failed to create Store");
+      },
+    });
+  }
+};
+
 
   //Edit Handler
   const handleEdit = (row) => {
