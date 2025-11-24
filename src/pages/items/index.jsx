@@ -4,6 +4,8 @@ import BasicTable from "@/components/commen/BasicTable";
 import { useAdditem, useDeleteitem, useitem, useUpdateitem } from "@/hooks/useItem";
 import ItemForm from "./components/ItemForm";
 import { getItemsColumns } from "./components/ItemHeader";
+import { showErrorToast, showSuccessToast } from "@/lib/toastService";
+import ConfirmDialog from "@/components/commen/ConfirmDialog";
 
 export default function ItemMockApiHeader() {
   const { data: item = [], isLoading ,isFetching} = useitem();
@@ -11,66 +13,87 @@ export default function ItemMockApiHeader() {
   const updateitem = useUpdateitem();
   const deleteitem = useDeleteitem();
 
-  const [open, setOpen] = useState(false);
+const [open, setOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [formData, setFormData] = useState({
-    sku: "",
-      barcode: "",
-      name: "",
-      brand: "",
-      generic_name: "",
-      manufacturer: "",
-      hsn_id: "",
-      schedule_id: "",
-      description: "",
-      item_type: "",
-      pack_size: "",
-      is_active: true,
-  });
+  const [editingStore, setEditingStore] = useState(null);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [SelectedItemId, setSelectedItemId] = useState(null);
 
-  // 🟢 Add or Update
-  const handleSubmit = () => {
-    if (editMode) {
+
+   // Add or Update 
+  
+  const handleSubmit = (values, resetForm) => {
+    if (editMode && editingStore?.item_id) {
       updateitem.mutate(
-        { id: formData.item_id, data: formData },
+        { id: editingStore.item_id, data: values },
         {
-
-          onSuccess: () => setOpen(false),
+          onSuccess: () => {
+            showSuccessToast("Store updated successfully");
+            setOpen(false);
+            setEditMode(false);
+            setEditingStore(null);
+          },
+          onError: (error) => {
+            console.error(error);
+            showErrorToast("Failed to update Store");
+          },
         }
       );
     } else {
-      additem.mutate(formData, {
-        onSuccess: () => setOpen(false),
+      // ADD MODE: keep dialog open but clear the fields
+      additem.mutate(values, {
+        onSuccess: () => {
+          showSuccessToast("Store created successfully");
+          if (typeof resetForm === "function") {
+            resetForm(); // this clears form fields
+          }
+        },
+        onError: (error) => {
+          console.error(error);
+          showErrorToast("Failed to create Store");
+        },
       });
     }
   };
-
-
-
-  // ✏️ Edit Handler
-
-  const handleEdit = (row) => {
-
-    console.log("row", row);
-
-    setFormData(row);
-    setEditMode(true);
-    setOpen(true);
-  };
-
-  // ❌ Delete Handler
-  const handleDelete = (id) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
-      deleteitem.mutate(id);
-    }
-  };
-
-
+  
+  
+    //Edit Handler
+    const handleEdit = (row) => {
+      console.log("row", row);
+      setEditingStore(row);
+      setEditMode(true);
+      setOpen(true);
+    };
+  
+  
+    // Delete Handler – open confirm dialog
+    const handleDelete = (id) => {
+      setSelectedItemId(id);
+      setDeleteDialogOpen(true);
+    };
+  
+    //Confirm delete
+    const confirmDelete = () => {
+      if (!SelectedItemId) return;
+      console.log(SelectedItemId,"SelectedItemId");
+      
+  
+      deleteitem.mutate(SelectedItemId, {
+        onSuccess: () => {
+          showSuccessToast("item deleted successfully");
+          setDeleteDialogOpen(false);
+          setSelectedItemId(null);
+        },
+        onError: (error) => {
+          console.error(error);
+          showErrorToast("Failed to delete item");
+          setDeleteDialogOpen(false);
+        },
+      });
+    };
+  
+ 
   
 
 
@@ -84,30 +107,16 @@ export default function ItemMockApiHeader() {
           Items List
         </h2>
         <Button variant="contained" color="primary" onClick={() => {
-    // 🧹 Clear previous data before opening
-    setFormData({
-      sku: "",
-      barcode: "",
-      name: "",
-      brand: "",
-      generic_name: "",
-      manufacturer: "",
-      hsn_id: "",
-      schedule_id: "",
-      description: "",
-      item_type: "",
-      pack_size: "",
-      is_active: true,
-    });
-    setEditMode(false);
-    setOpen(true);
-  }}>
+            setOpen(true);
+            setEditMode(false);
+            setEditingStore(null);
+          }}>
           Add Item
         </Button>
       </div>
 
 
-      <BasicTable columns={columns} data={item} loading={isLoading || isFetching}/>
+      <BasicTable columns={columns} data={item} loading={isLoading}/>
 
 
       <ItemForm
@@ -115,11 +124,27 @@ export default function ItemMockApiHeader() {
         onClose={() => {
           setOpen(false);
           setEditMode(false);
+          setEditingStore(null);
         }}
         onSubmit={handleSubmit}
-        formData={formData}
-        onChange={handleChange}
+        defaultValues={editingStore}
         editMode={editMode}
+      />
+
+
+       {/* Delete confirmation dialog */}
+      <ConfirmDialog
+        open={deleteDialogOpen}
+        title="Delete item"
+        description="Are you sure you want to delete this item? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        confirmColor="error"
+        onConfirm={confirmDelete}
+        onCancel={() => {
+          setDeleteDialogOpen(false);
+          setSelectedItemId(null);
+        }}
       />
     </>
   );

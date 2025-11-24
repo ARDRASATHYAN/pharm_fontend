@@ -76,7 +76,7 @@ export const getItemsColumns = (onEdit, onDelete) => [
       <IconButton
         color="error"
         size="small"
-        onClick={() => onDelete(row.original.schedule_id)}
+        onClick={() => onDelete(row.original.item_id)}
         sx={{ padding: "4px" }}
       >
         <Delete size={16} />
