@@ -3,7 +3,6 @@ import {
   TextField,
   MenuItem,
   Box,
-  Grid,
   Typography,
   Divider,
   IconButton,
@@ -28,12 +27,20 @@ import { useitem } from "@/hooks/useItem";
 import { useCurrentUser } from "@/hooks/useAuth";
 import { useAddDamagedStock } from "@/hooks/useDamagedStock";
 import { usestock } from "@/hooks/useStock";
+import { showSuccessToast } from "@/lib/toastService";
+
+const emptyRow = { item_id: "", batch_no: "", qty: "", reason: "", max_qty: null };
+
+const initialFormState = {
+  store_id: "",
+  bill_date: dayjs().toISOString(),
+};
 
 export default function AddDamagedStockForm({ onClose }) {
   const { data: store = [], isLoading: loadingStore } = useStores();
   const { data: itemsMaster = [], isLoading: loadingItems } = useitem();
   const { data: currentUserResponse } = useCurrentUser();
-  const { data: stock = [] } = usestock?.() || { data: [] }; // adjust hook name if different
+  const { data: stock = [] } = usestock?.() || { data: [] };
 
   const addDamagedStock = useAddDamagedStock();
 
@@ -41,18 +48,8 @@ export default function AddDamagedStockForm({ onClose }) {
     ? currentUserResponse[0]
     : currentUserResponse || null;
 
-  const [formData, setFormData] = useState({
-    store_id: "",
-    bill_date: dayjs().toISOString(),
-    total_amount: 0,
-    total_gst: 0,
-    total_discount: 0,
-    net_amount: 0,
-  });
-
-  const [rows, setRows] = useState([
-    { item_id: "", batch_no: "", qty: "", reason: "", max_qty: null },
-  ]);
+  const [formData, setFormData] = useState(initialFormState);
+  const [rows, setRows] = useState([emptyRow]);
 
   // Filter stock based on selected store
   const storeStock = useMemo(() => {
@@ -86,15 +83,12 @@ export default function AddDamagedStockForm({ onClose }) {
 
     // If store changed, reset rows because stock list changes
     if (name === "store_id") {
-      setRows([{ item_id: "", batch_no: "", qty: "", reason: "", max_qty: null }]);
+      setRows([emptyRow]);
     }
   };
 
   const handleAddRow = () => {
-    setRows((prev) => [
-      ...prev,
-      { item_id: "", batch_no: "", qty: "", reason: "", max_qty: null },
-    ]);
+    setRows((prev) => [...prev, emptyRow]);
   };
 
   const handleRemoveRow = (index) => {
@@ -110,6 +104,16 @@ export default function AddDamagedStockForm({ onClose }) {
       };
       return newRows;
     });
+  };
+
+  // 🔹 Reset form after success
+  const resetForm = () => {
+    setFormData((prev) => ({
+      ...initialFormState,
+      // if you want to keep same store after save, uncomment:
+      // store_id: prev.store_id,
+    }));
+    setRows([emptyRow]);
   };
 
   const handleSubmit = async () => {
@@ -145,8 +149,9 @@ export default function AddDamagedStockForm({ onClose }) {
         items,
       });
 
-      alert("Damaged stock saved");
-      onClose && onClose();
+     showSuccessToast("successfully created")
+      resetForm();          // 🔸 clear form and rows
+      onClose && onClose(); // 🔸 close dialog if provided
     } catch (err) {
       console.error(err);
       const msg =
@@ -423,10 +428,8 @@ export default function AddDamagedStockForm({ onClose }) {
         </Paper>
       </Box>
 
-      {/* Amount Summary – you can hide or keep, here kept read-only */}
+      {/* Footer */}
       <Box mt={2}>
-       
-
         <Box mt={2} display="flex" justifyContent="flex-end" gap={1}>
           {onClose && (
             <Button variant="outlined" onClick={onClose}>
