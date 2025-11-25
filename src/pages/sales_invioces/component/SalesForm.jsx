@@ -206,7 +206,7 @@ export default function AddSalesForm({ onClose }) {
   const resetForm = () => {
     setFormData((prev) => ({
       ...initialFormData,
-      // keep store & created_by so user doesn’t have to reselect every time
+     
       store_id: prev.store_id,
       created_by: prev.created_by,
     }));

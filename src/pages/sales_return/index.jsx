@@ -67,7 +67,7 @@ const { data:salesreturnlist= [], isLoading } = useSalesReturnList();
         }}
       >
         <h2 className="text-xl font-bold text-blue-700 tracking-wide">
-          Purchase return List
+       Sales return List
         </h2>
        
       </div>
