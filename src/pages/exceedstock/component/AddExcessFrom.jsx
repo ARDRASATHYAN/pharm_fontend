@@ -4,7 +4,6 @@ import {
   TextField,
   MenuItem,
   Box,
-  Grid,
   Typography,
   Divider,
   IconButton,
@@ -29,6 +28,14 @@ import { useitem } from "@/hooks/useItem";
 import { useCurrentUser } from "@/hooks/useAuth";
 import { usestock } from "@/hooks/useStock";
 import { useAddExcessStock } from "@/hooks/useExcessStock";
+import { showSuccessToast } from "@/lib/toastService";
+
+const emptyRow = { item_id: "", batch_no: "", qty: "", reason: "" };
+
+const initialFormState = {
+  store_id: "",
+  bill_date: dayjs().toISOString(),
+};
 
 export default function AddExcessStockForm({ onClose }) {
   const { data: store = [], isLoading: loadingStore } = useStores();
@@ -42,14 +49,8 @@ export default function AddExcessStockForm({ onClose }) {
     ? currentUserResponse[0]
     : currentUserResponse || null;
 
-  const [formData, setFormData] = useState({
-    store_id: "",
-    bill_date: dayjs().toISOString(),
-  });
-
-  const [rows, setRows] = useState([
-    { item_id: "", batch_no: "", qty: "", reason: "" },
-  ]);
+  const [formData, setFormData] = useState(initialFormState);
+  const [rows, setRows] = useState([emptyRow]);
 
   // Filter stock based on selected store
   const storeStock = useMemo(() => {
@@ -83,15 +84,12 @@ export default function AddExcessStockForm({ onClose }) {
 
     // If store changed, reset rows because stock list changes
     if (name === "store_id") {
-      setRows([{ item_id: "", batch_no: "", qty: "", reason: "" }]);
+      setRows([emptyRow]);
     }
   };
 
   const handleAddRow = () => {
-    setRows((prev) => [
-      ...prev,
-      { item_id: "", batch_no: "", qty: "", reason: "" },
-    ]);
+    setRows((prev) => [...prev, emptyRow]);
   };
 
   const handleRemoveRow = (index) => {
@@ -107,6 +105,16 @@ export default function AddExcessStockForm({ onClose }) {
       };
       return newRows;
     });
+  };
+
+  // 🔹 Reset form after successful insert
+  const resetForm = () => {
+    setFormData({
+      ...initialFormState,
+      // if you want to keep last selected store, uncomment:
+      // store_id: formData.store_id,
+    });
+    setRows([emptyRow]);
   };
 
   const handleSubmit = async () => {
@@ -142,8 +150,9 @@ export default function AddExcessStockForm({ onClose }) {
         items,
       });
 
-      alert("Excess stock saved");
-      onClose && onClose();
+     showSuccessToast("successfully created")
+      resetForm();         
+      onClose && onClose(); 
     } catch (err) {
       console.error(err);
       const msg =
@@ -275,7 +284,7 @@ export default function AddExcessStockForm({ onClose }) {
                                 item_id: value,
                                 batch_no: "",
                                 qty: "",
-                                reason: "",
+                                reason: newRows[index].reason || "",
                               };
                               return newRows;
                             });
@@ -313,9 +322,10 @@ export default function AddExcessStockForm({ onClose }) {
                             const batchValue = e.target.value;
                             setRows((prev) => {
                               const newRows = [...prev];
-                              const newRow = { ...newRows[index] };
-                              newRow.batch_no = batchValue;
-                              newRows[index] = newRow;
+                              newRows[index] = {
+                                ...newRows[index],
+                                batch_no: batchValue,
+                              };
                               return newRows;
                             });
                           }}
@@ -337,7 +347,6 @@ export default function AddExcessStockForm({ onClose }) {
 
                           {rowBatches.map((b) => (
                             <MenuItem key={b.stock_id} value={b.batch_no}>
-                              {/* you can still show existing qty for info */}
                               {b.batch_no} – Current Qty: {b.qty_in_stock}
                             </MenuItem>
                           ))}
@@ -349,14 +358,9 @@ export default function AddExcessStockForm({ onClose }) {
                         <TextField
                           name="qty"
                           value={row.qty}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            setRows((prev) => {
-                              const newRows = [...prev];
-                              newRows[index] = { ...newRows[index], qty: val };
-                              return newRows;
-                            });
-                          }}
+                          onChange={(e) =>
+                            handleRowChange(index, "qty", e.target.value)
+                          }
                           fullWidth
                           size="small"
                           type="number"
