@@ -190,7 +190,7 @@ export default function AddPurchaseForm({ onClose }) {
         resetForm();
         onClose?.();
       },
-      onError:(error)=>{
+      onError: (error) => {
         showErrorToast("purchase not created")
       }
     });
@@ -615,14 +615,14 @@ export default function AddPurchaseForm({ onClose }) {
                           render={({ field: expField }) => (
                             <TextField
                               {...expField}
-                              type="date"
                               fullWidth
                               size="small"
-                              // label="Expiry"
+                              placeholder="MM/YYYY"
                               InputLabelProps={{ shrink: true }}
                               error={!!rowErrors?.expiry_date}
                               helperText={rowErrors?.expiry_date?.message}
                             />
+
                           )}
                         />
                       </TableCell>

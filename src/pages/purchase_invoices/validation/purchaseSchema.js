@@ -56,7 +56,7 @@ export const purchaseItemSchema = yup.object().shape({
     .max(100, "Discount% cannot be more than 100")
     .nullable(),
 
-  expiry_date: yup.string().nullable(),
+  expiry_date: yup.string().required("expiry date needed"),
   amount: yup.number().nullable(),
   pack_size: yup.number().nullable(),
 });
