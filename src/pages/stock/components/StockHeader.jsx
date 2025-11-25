@@ -1,3 +1,4 @@
+import { formatToKeralaDateTime } from "@/lib/dateTime";
 import { IconButton } from "@mui/material";
 import { Delete, Edit } from "lucide-react";
 
@@ -14,7 +15,8 @@ export const getStockColumns = (onEdit, onDelete) => [
     },
       {
         header: "expiry_date",
-        accessorKey: "expiry_date"
+        accessorKey: "expiry_date",
+         cell: ({ row }) => formatToKeralaDateTime(row.original.expiry_date),
     },
 
     {

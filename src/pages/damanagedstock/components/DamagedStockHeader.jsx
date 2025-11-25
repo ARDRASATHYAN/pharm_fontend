@@ -1,3 +1,4 @@
+import { formatToKeralaDateTime } from "@/lib/dateTime";
 import { IconButton } from "@mui/material";
 import { Delete, Edit } from "lucide-react";
 
@@ -30,7 +31,8 @@ export const getDamagedStockColumns = (onEdit, onDelete) => [
     },
       {
         header: "entry_date",
-        accessorKey: "entry_date"
+        accessorKey: "entry_date",
+         cell: ({ row }) => formatToKeralaDateTime(row.original.entry_date),
     },
 
     {
@@ -39,7 +41,8 @@ export const getDamagedStockColumns = (onEdit, onDelete) => [
     },
     {
         header: "created_at",
-        accessorKey: "created_at"
+        accessorKey: "created_at",
+         cell: ({ row }) => formatToKeralaDateTime(row.original.created_at),
     },
 
    {
