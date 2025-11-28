@@ -32,8 +32,10 @@ const emptyRow = {
   batch_no: "",
   qty: 0,
   rate: 0,
+  discount_percent: 0,
+  gst_percent: 0,
   amount: 0,
-  max_qty: null, // optional if you want to enforce max return qty
+  max_qty: null,
 };
 
 const initialData = {
@@ -50,7 +52,6 @@ export default function AddSalesReturnForm({ onClose }) {
   const { data: salesInvoices = [] } = useSalesInvoiceList();
   const addSalesReturn = useAddSalesReturn();
 
-  // IMPORTANT: should be object, not array
   const [formData, setFormData] = useState(initialData);
   const [rows, setRows] = useState([emptyRow]);
 
@@ -59,7 +60,7 @@ export default function AddSalesReturnForm({ onClose }) {
     formData.sale_id
   );
 
-  // Keep created_by if needed in payload (optional)
+  // set created_by once
   useEffect(() => {
     if (currentUser?.user_id) {
       setFormData((prev) => ({
@@ -69,7 +70,25 @@ export default function AddSalesReturnForm({ onClose }) {
     }
   }, [currentUser?.user_id]);
 
-  // When sale is selected
+  // helper: calculate line amount = (qty * rate) - discount
+ const computeRowAmount = (row) => {
+  const qtyNum = Number(row.qty || 0);
+  const rateNum = Number(row.rate || 0);
+  const discPercent = Number(row.discount_percent || 0);
+  const gstPercent = Number(row.gst_percent || 0);
+
+  const gross = qtyNum * rateNum;                       // qty * rate
+  const discountAmount = (gross * discPercent) / 100;   // discount
+  const taxable = gross - discountAmount;               // after discount
+  const gstAmount = (taxable * gstPercent) / 100;       // GST on taxable
+  const amount = taxable + gstAmount;                   // final line value
+
+  if (!Number.isFinite(amount)) return "0.00";
+  return amount.toFixed(2);
+};
+
+
+  // when sale is selected
   const handleSaleChange = (saleId) => {
     const selectedSale = salesInvoices.find((s) => s.sale_id === saleId);
 
@@ -79,8 +98,7 @@ export default function AddSalesReturnForm({ onClose }) {
       store_id: selectedSale?.store_id || "",
     }));
 
-    // reset items when sale changes
-    setRows([emptyRow]);
+    setRows([emptyRow]); // reset rows
   };
 
   const handleRowChange = (index, field, value) => {
@@ -88,28 +106,34 @@ export default function AddSalesReturnForm({ onClose }) {
       const newRows = [...prev];
       let row = { ...newRows[index], [field]: value };
 
+      // when item is selected: auto-fill from sale item
       if (field === "item_id") {
         const selectedItem = saleItems.find(
           (i) => String(i.item_id) === String(value)
         );
+
         if (selectedItem) {
           row.rate = selectedItem.rate;
-          row.qty = selectedItem.qty; // default to invoice qty
+          row.qty = selectedItem.qty; // default full qty
           row.batch_no = selectedItem.batch_no;
-          row.max_qty = selectedItem.qty; // if you want to enforce max
+          row.max_qty = selectedItem.qty;
+
+          // 🔹 from backend (make sure field names match)
+          row.discount_percent = selectedItem.discount_percent || 0;
+          row.gst_percent = selectedItem.gst_percent || 0;
+
+          row.amount = computeRowAmount(row);
         }
       }
 
+      // when qty changes
       if (field === "qty" && row.max_qty != null) {
         const qtyNum = Number(value || 0);
         if (qtyNum > row.max_qty) {
           row.qty = row.max_qty;
         }
+        row.amount = computeRowAmount(row);
       }
-
-      row.amount = (
-        parseFloat(row.qty || 0) * parseFloat(row.rate || 0)
-      ).toFixed(2);
 
       newRows[index] = row;
       return newRows;
@@ -121,7 +145,7 @@ export default function AddSalesReturnForm({ onClose }) {
   const handleRemoveRow = (index) =>
     setRows((prev) => prev.filter((_, i) => i !== index));
 
-  // Calculate total amount
+  // total amount of return
   useEffect(() => {
     const total = rows.reduce(
       (sum, r) => sum + Number(r.amount || 0),
@@ -133,21 +157,28 @@ export default function AddSalesReturnForm({ onClose }) {
     }));
   }, [rows]);
 
-  // RESET FORM
   const resetForm = () => {
     setFormData((prev) => ({
       ...initialData,
-      store_id:prev.store_id,
+      store_id: prev.store_id,
       created_by: prev.created_by,
     }));
     setRows([emptyRow]);
   };
 
   const handleSubmit = () => {
-    if (!formData.sale_id) return alert("Select sale");
-    if (!formData.store_id) return alert("Store not found for selected sale");
-    if (!rows.length || !rows.some((r) => r.item_id))
-      return alert("Add at least one item");
+    if (!formData.sale_id) {
+      showErrorToast("Select sale");
+      return;
+    }
+    if (!formData.store_id) {
+      showErrorToast("Store not found for selected sale");
+      return;
+    }
+    if (!rows.length || !rows.some((r) => r.item_id)) {
+      showErrorToast("Add at least one item");
+      return;
+    }
 
     const payload = {
       store_id: formData.store_id,
@@ -163,15 +194,20 @@ export default function AddSalesReturnForm({ onClose }) {
           batch_no: r.batch_no,
           qty: Number(r.qty || 0),
           rate: Number(r.rate || 0),
+          discount_percent: Number(r.discount_percent || 0),
+          gst_percent: Number(r.gst_percent || 0),
           amount: Number(r.amount || 0),
         })),
     };
 
     addSalesReturn.mutate(payload, {
       onSuccess: () => {
-        showSuccessToast("successfull")
-        resetForm();       // 🔹 clear data
-        onClose?.();       // 🔹 close dialog if given
+        showSuccessToast("Sales return saved");
+        resetForm();
+        onClose?.();
+      },
+      onError: (err) => {
+        showErrorToast(err?.message || "Failed to save sales return");
       },
     });
   };
@@ -180,14 +216,14 @@ export default function AddSalesReturnForm({ onClose }) {
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
       {/* Header */}
       <Typography
-                variant="subtitle1"
-                fontWeight={600}
-                display="flex"
-                className="text-blue-700"
-              >
-                Sales Return Details
-              </Typography>
-              <Divider />
+        variant="subtitle1"
+        fontWeight={600}
+        display="flex"
+        className="text-blue-700"
+      >
+        Sales Return Details
+      </Typography>
+      <Divider />
 
       {/* Top fields */}
       <Box display="flex" gap={2}>
@@ -217,9 +253,7 @@ export default function AddSalesReturnForm({ onClose }) {
           size="small"
           disabled
         >
-          {loadingStores && (
-            <MenuItem disabled>Loading stores...</MenuItem>
-          )}
+          {loadingStores && <MenuItem disabled>Loading stores...</MenuItem>}
           {stores.map((s) => (
             <MenuItem key={s.store_id} value={s.store_id}>
               {s.store_name}
@@ -231,16 +265,12 @@ export default function AddSalesReturnForm({ onClose }) {
           <DatePicker
             label="Return Date"
             value={
-              formData.return_date
-                ? dayjs(formData.return_date)
-                : null
+              formData.return_date ? dayjs(formData.return_date) : null
             }
             onChange={(newValue) =>
               setFormData((prev) => ({
                 ...prev,
-                return_date: newValue
-                  ? newValue.toISOString()
-                  : null,
+                return_date: newValue ? newValue.toISOString() : null,
               }))
             }
             slotProps={{
@@ -265,8 +295,10 @@ export default function AddSalesReturnForm({ onClose }) {
         multiline
         minRows={1}
       />
-       <Box mt={2} sx={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
- <Box display="flex" justifyContent="space-between" alignItems="center">
+
+      {/* Items */}
+      <Box mt={2} sx={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography
             variant="subtitle1"
             fontWeight={600}
@@ -282,126 +314,141 @@ export default function AddSalesReturnForm({ onClose }) {
           </Tooltip>
         </Box>
         <Divider />
-      {/* Items Table */}
-      <Paper variant="outlined" sx={{ mt: 1 }}>
-       
 
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell>Item</TableCell>
-              <TableCell>Batch</TableCell>
-              <TableCell>Qty</TableCell>
-              <TableCell>Rate</TableCell>
-              <TableCell>Amount</TableCell>
-              <TableCell align="center">Del</TableCell>
-            </TableRow>
-          </TableHead>
-
-          <TableBody>
-            {rows.map((row, index) => (
-              <TableRow key={index}>
-                {/* Item */}
-                <TableCell>
-                  <TextField
-                    select
-                    value={row.item_id}
-                    onChange={(e) =>
-                      handleRowChange(
-                        index,
-                        "item_id",
-                        Number(e.target.value)
-                      )
-                    }
-                    fullWidth
-                    size="small"
-                    disabled={!formData.sale_id || loadingSaleItems}
-                  >
-                    {(!formData.sale_id || loadingSaleItems) && (
-                      <MenuItem disabled>
-                        {loadingSaleItems
-                          ? "Loading items..."
-                          : "Select sale first"}
-                      </MenuItem>
-                    )}
-                    {saleItems.map((it) => (
-                      <MenuItem
-                        key={it.item_id}
-                        value={it.item_id}
-                      >
-                        {it.item_name} (Sold: {it.qty})
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                </TableCell>
-
-                {/* Batch */}
-                <TableCell>
-                  <TextField
-                    value={row.batch_no}
-                    fullWidth
-                    size="small"
-                    InputProps={{ readOnly: true }}
-                  />
-                </TableCell>
-
-                {/* Qty */}
-                <TableCell>
-                  <TextField
-                    type="number"
-                    value={row.qty}
-                    onChange={(e) =>
-                      handleRowChange(
-                        index,
-                        "qty",
-                        Number(e.target.value)
-                      )
-                    }
-                    fullWidth
-                    size="small"
-                    inputProps={{ min: 0 }}
-                    helperText={
-                      row.max_qty != null
-                        ? `Max: ${row.max_qty}`
-                        : ""
-                    }
-                  />
-                </TableCell>
-
-                {/* Rate */}
-                <TableCell>
-                  <TextField
-                    value={row.rate}
-                    fullWidth
-                    size="small"
-                    InputProps={{ readOnly: true }}
-                  />
-                </TableCell>
-
-                {/* Amount */}
-                <TableCell>
-                  <TextField
-                    value={row.amount}
-                    fullWidth
-                    size="small"
-                    InputProps={{ readOnly: true }}
-                  />
-                </TableCell>
-
-                {/* Delete */}
-                <TableCell align="center">
-                  <IconButton
-                    size="small"
-                    onClick={() => handleRemoveRow(index)}
-                  >
-                    <DeleteOutline />
-                  </IconButton>
-                </TableCell>
+        <Paper variant="outlined" sx={{ mt: 1 }}>
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell>Item</TableCell>
+                <TableCell>Batch</TableCell>
+                <TableCell>Qty</TableCell>
+                <TableCell>Rate</TableCell>
+                <TableCell>Disc %</TableCell>
+                <TableCell>GST %</TableCell>
+                <TableCell>Amount</TableCell>
+                <TableCell align="center">Del</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </Paper>
+            </TableHead>
+
+            <TableBody>
+              {rows.map((row, index) => (
+                <TableRow key={index}>
+                  {/* Item */}
+                  <TableCell>
+                    <TextField
+                      select
+                      value={row.item_id}
+                      onChange={(e) =>
+                        handleRowChange(
+                          index,
+                          "item_id",
+                          Number(e.target.value)
+                        )
+                      }
+                      fullWidth
+                      size="small"
+                      disabled={!formData.sale_id || loadingSaleItems}
+                    >
+                      {(!formData.sale_id || loadingSaleItems) && (
+                        <MenuItem disabled>
+                          {loadingSaleItems
+                            ? "Loading items..."
+                            : "Select sale first"}
+                        </MenuItem>
+                      )}
+                      {saleItems.map((it) => (
+                        <MenuItem key={it.item_id} value={it.item_id}>
+                          {it.item_name} (Sold: {it.qty})
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  </TableCell>
+
+                  {/* Batch */}
+                  <TableCell>
+                    <TextField
+                      value={row.batch_no}
+                      fullWidth
+                      size="small"
+                      InputProps={{ readOnly: true }}
+                    />
+                  </TableCell>
+
+                  {/* Qty */}
+                  <TableCell>
+                    <TextField
+                      type="number"
+                      value={row.qty}
+                      onChange={(e) =>
+                        handleRowChange(
+                          index,
+                          "qty",
+                          Number(e.target.value)
+                        )
+                      }
+                      fullWidth
+                      size="small"
+                      inputProps={{ min: 0 }}
+                      helperText={
+                        row.max_qty != null ? `Max: ${row.max_qty}` : ""
+                      }
+                    />
+                  </TableCell>
+
+                  {/* Rate */}
+                  <TableCell>
+                    <TextField
+                      value={row.rate}
+                      fullWidth
+                      size="small"
+                      InputProps={{ readOnly: true }}
+                    />
+                  </TableCell>
+
+                  {/* Discount % */}
+                  <TableCell>
+                    <TextField
+                      value={row.discount_percent}
+                      fullWidth
+                      size="small"
+                      InputProps={{ readOnly: true }}
+                    />
+                  </TableCell>
+
+                  {/* GST % */}
+                  <TableCell>
+                    <TextField
+                      value={row.gst_percent}
+                      fullWidth
+                      size="small"
+                      InputProps={{ readOnly: true }}
+                    />
+                  </TableCell>
+
+                  {/* Amount */}
+                  <TableCell>
+                    <TextField
+                      value={row.amount}
+                      fullWidth
+                      size="small"
+                      InputProps={{ readOnly: true }}
+                    />
+                  </TableCell>
+
+                  {/* Delete */}
+                  <TableCell align="center">
+                    <IconButton
+                      size="small"
+                      onClick={() => handleRemoveRow(index)}
+                    >
+                      <DeleteOutline />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Paper>
       </Box>
 
       {/* Footer */}
