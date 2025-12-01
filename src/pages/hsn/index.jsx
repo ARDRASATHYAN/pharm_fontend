@@ -10,7 +10,8 @@ import ConfirmDialog from "@/components/commen/ConfirmDialog";
 
 
 export default function HsnMockApiHeader() {
-  const { data: hsns = [], isLoading} = useHsn();
+const { data: hsnsData = {}, isLoading } = useHsn();
+const hsns = hsnsData.data || [];
   const addHsn = useAddHsn();
   const updateHsn = useUpdateHsn();
   const deleteHsn = useDeleteHsn();

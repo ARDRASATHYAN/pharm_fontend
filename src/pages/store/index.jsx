@@ -14,7 +14,7 @@ import { showSuccessToast } from "@/lib/toastService";
 import ConfirmDialog from "@/components/commen/ConfirmDialog";
 
 export default function StoreMockApiHeader() {
-  const { data: stores = [], isLoading } = useStores();
+  const { data, isLoading } = useStores();
   const addStore = useAddStore();
   const updateStore = useUpdateStore();
   const deleteStore = useDeleteStore();
@@ -125,11 +125,21 @@ const handleSubmit = (values, resetForm) => {
       </div>
 
       {/* table */}
-      <BasicTable
-        columns={columns}
-        data={stores}
-        loading={isLoading}
-      />
+     <BasicTable
+  columns={columns}
+  data={data?.stores || []}  // ✅ pass the correct array
+  loading={isLoading}
+  pagination={{
+    page: data?.page,
+    perPage: data?.perPage,
+    total: data?.total,
+    totalPages: data?.totalPages,
+  }}
+  onPageChange={(newPage) =>
+    setFilters((prev) => ({ ...prev, page: newPage }))
+  }
+/>
+
 
       {/* Add / Edit Store dialog */}
       <StoreForm

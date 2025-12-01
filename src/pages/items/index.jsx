@@ -8,7 +8,8 @@ import { showErrorToast, showSuccessToast } from "@/lib/toastService";
 import ConfirmDialog from "@/components/commen/ConfirmDialog";
 
 export default function ItemMockApiHeader() {
-  const { data: item = [], isLoading ,isFetching} = useitem();
+  const { data: items = {}, isLoading ,isFetching} = useitem();
+  const  item=items.data ||[];
   const additem = useAdditem();
   const updateitem = useUpdateitem();
   const deleteitem = useDeleteitem();

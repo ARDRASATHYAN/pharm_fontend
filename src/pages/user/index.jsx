@@ -145,12 +145,14 @@ export default function User() {
 
       {/* Table */}
       <BasicTable
-        columns={columns}
-        data={data?.data || []}
-        loading={isLoading}
-        pagination={data?.pagination}
-        onPageChange={handlePageChange}
-      />
+  columns={columns}
+ data={data?.users || []} // ✅ correct
+
+  loading={isLoading}
+  pagination={data?.pagination} // { page, perPage, totalPages, total }
+  onPageChange={(page) => setFilters((prev) => ({ ...prev, page }))}
+/>
+
 
       {/* Add / Edit User Dialog */}
       <UserForm

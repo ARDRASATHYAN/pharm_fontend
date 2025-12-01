@@ -9,11 +9,11 @@ export const purchaseItemSchema = yup.object().shape({
 
   batch_no: yup.string().nullable(),
 
-  pack_qty: yup
-    .number()
-    .typeError("Pack Qty is required")
-    .positive("Pack Qty must be greater than 0")
-    .required("Pack Qty is required"),
+  // pack_qty: yup
+  //   .number()
+  //   .typeError("Pack Qty is required")
+  //   .positive("Pack Qty must be greater than 0")
+  //   .required("Pack Qty is required"),
 
   qty: yup
     .number()

@@ -7,7 +7,6 @@ import {
   Box,
 } from "@mui/material";
 import DraggableDialog from "@/components/commen/DraggableDialog";
-import { useRoles } from "@/hooks/useRoles";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { userSchema } from "../validation/userSchema";
@@ -20,7 +19,6 @@ export default function UserForm({
   defaultValues,
   editMode,
 }) {
-  const { data: roles = [], isLoading } = useRoles();
 
   const {
     register,
@@ -42,6 +40,8 @@ export default function UserForm({
       ...defaultValues,
     },
   });
+  const roles = ['Admin','Manager','Pharmacist','Billing','StoreKeeper'];
+
 
   // When dialog opens or editing user changes reset form values
   useEffect(() => {
@@ -128,36 +128,37 @@ export default function UserForm({
           }
         />
 
-        <Controller
-          name="role"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              select
-              label="Role"
-              fullWidth
-              size="small"
-              required
-              {...field}
-              value={field.value || ""}
-              error={!!errors.role}
-              helperText={errors.role?.message}
-            >
-              {isLoading && <MenuItem disabled>Loading roles...</MenuItem>}
+     <Controller
+  name="role"
+  control={control}
+  render={({ field }) => (
+    <TextField
+      select
+      label="Role"
+      fullWidth
+      size="small"
+      required
+      {...field}
+      value={field.value || ""}
+      error={!!errors.role}
+      helperText={errors.role?.message}
+    >
+      {isLoading && <MenuItem disabled>Loading roles...</MenuItem>}
 
-              {!isLoading && roles.length === 0 && (
-                <MenuItem disabled>No roles found</MenuItem>
-              )}
+      {!isLoading && roles.length === 0 && (
+        <MenuItem disabled>No roles found</MenuItem>
+      )}
 
-              {!isLoading &&
-                roles.map((role) => (
-                  <MenuItem key={role} value={role}>
-                    {role}
-                  </MenuItem>
-                ))}
-            </TextField>
-          )}
-        />
+      {!isLoading &&
+        roles.map((role) => (
+          <MenuItem key={role} value={role}>
+            {role}
+          </MenuItem>
+        ))}
+    </TextField>
+  )}
+/>
+
 
 
         <FormControlLabel

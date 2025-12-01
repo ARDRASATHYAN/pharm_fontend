@@ -8,7 +8,8 @@ import { showErrorToast, showSuccessToast } from "@/lib/toastService";
 import ConfirmDialog from "@/components/commen/ConfirmDialog";
 
 export default function SupplierMockApiHeader() {
-  const { data: supplier = [], isLoading, isFetching } = useSupplier();
+  const { data: suppliers = {}, isLoading, isFetching } = useSupplier();
+    const  supplier=suppliers.data ||[];
   const addSupplier = useAddSupplier();
   const updateSupplier = useUpdateSupplier();
   const deleteSupplier = useDeleteSupplier();

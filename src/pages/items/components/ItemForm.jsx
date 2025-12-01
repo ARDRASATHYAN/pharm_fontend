@@ -19,9 +19,10 @@ export default function ItemForm({
   editMode,
   defaultValues,
 }) {
-  const { data: hsns = [], isLoading: loadingHsn } = useHsn();
-  const { data: drugschedule = [], isLoading: loadingSchedule } = useDrugSchedule();
-
+const { data: hsnsData = {}, isLoading: loadingHsn } = useHsn();
+const hsns = hsnsData.data || [];
+  const { data: drugschedules = [], isLoading: loadingSchedule } = useDrugSchedule();
+const drugschedule = drugschedules.data || [];
   const {
     register,
     handleSubmit,
@@ -242,15 +243,16 @@ export default function ItemForm({
                 <MenuItem value="">
                   <em>Select HSN</em>
                 </MenuItem>
-                {loadingHsn ? (
-                  <MenuItem disabled>Loading...</MenuItem>
-                ) : (
-                  hsns.map((hsn) => (
-                    <MenuItem key={hsn.hsn_id} value={hsn.hsn_id}>
-                      {hsn.hsn_code} — {hsn.description}
-                    </MenuItem>
-                  ))
-                )}
+               {loadingHsn ? (
+  <MenuItem disabled>Loading...</MenuItem>
+) : (
+  hsns.map((hsn) => (
+    <MenuItem key={hsn.hsn_id} value={hsn.hsn_id}>
+      {hsn.hsn_code} — {hsn.description}
+    </MenuItem>
+  ))
+)}
+
               </TextField>
             )}
           />

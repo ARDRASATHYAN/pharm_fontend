@@ -8,7 +8,8 @@ import { showErrorToast, showSuccessToast } from "@/lib/toastService";
 import ConfirmDialog from "@/components/commen/ConfirmDialog";
 
 export default function DrugScheduleMockApiHeader() {
-  const { data: drugschedule = [], isLoading, isFetching } = useDrugSchedule();
+  const { data: drugschedules = {}, isLoading, isFetching } = useDrugSchedule();
+  const drugschedule = drugschedules.data || [];
   const addDrugSchedule = useAddDrugSchedule();
   const updateDrugSchedule = useUpdateDrugSchedule();
   const deleteDrugSchedule = useDeleteDrugSchedule();
