@@ -24,11 +24,11 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 
 import { useStores } from "@/hooks/useStore";
-import { useitem } from "@/hooks/useItem";
 import { useCurrentUser } from "@/hooks/useAuth";
 import { usestock } from "@/hooks/useStock";
 import { useAddExcessStock } from "@/hooks/useExcessStock";
 import { showSuccessToast } from "@/lib/toastService";
+import { useItem } from "@/hooks/useItem";
 
 const emptyRow = { item_id: "", batch_no: "", qty: "", reason: "" };
 
@@ -39,7 +39,7 @@ const initialFormState = {
 
 export default function AddExcessStockForm({ onClose }) {
   const { data: store = [], isLoading: loadingStore } = useStores();
-  const { data: itemsMaster = [], isLoading: loadingItems } = useitem();
+  const { data: itemsMaster = [], isLoading: loadingItems } = useItem();
   const { data: currentUserResponse } = useCurrentUser();
   const { data: stock = [] } = usestock?.() || { data: [] };
 

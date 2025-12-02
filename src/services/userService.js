@@ -10,10 +10,13 @@ const userService = {
 
   // Get all users (with search, filter, pagination, sorting)
 getUsers: async (filters = {}) => {
-  const { search, role, is_active } = filters;
-  const { data } = await apiClient.get("/user", { params: {search, role, is_active } });
+  const { search = "", role = "", is_active = "", page = 1, perPage = 10 } = filters;
+  const { data } = await apiClient.get("/user", {
+    params: { search, role, is_active, page, perPage },
+  });
   return data;
 },
+
 
 
   // Get single user by ID

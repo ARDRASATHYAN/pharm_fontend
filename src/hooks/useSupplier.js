@@ -2,11 +2,11 @@ import storeService from "@/services/storeService";
 import supplierService from "@/services/supplierService";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-export function useSupplier() {
+export function useSupplier({ page = 1, perPage = 10, search = "" } = {}) {
   return useQuery({
-    queryKey: ["supplier"],
-    queryFn: supplierService.getSupplier,
-    staleTime: 1000 * 60 * 5, // 5 min cache
+    queryKey: ["supplier", page, perPage, search],
+    queryFn: () => supplierService.getSupplier({ page, perPage, search }),
+    staleTime: 1000 * 60 * 5, // 5 minutes cache
   });
 }
 

@@ -25,12 +25,12 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 
 import { useStores } from "@/hooks/useStore";
-import { useitem } from "@/hooks/useItem";
 import { useCurrentUser } from "@/hooks/useAuth";
 import { useCustomer } from "@/hooks/useCustomer";
 import { useAddSalesInvoice } from "@/hooks/useSalesInvoice";
 import apiClient from "@/services/apiClient";
 import { showSuccessToast } from "@/lib/toastService";
+import { useItem } from "@/hooks/useItem";
 
 const emptySaleItemRow = {
   item_id: "",
@@ -79,7 +79,7 @@ function recalcRow(row) {
 
 export default function AddSalesForm({ onClose }) {
   const { data: store = [], isLoading: loadingStore } = useStores();
-  const { data: itemsMaster = [] } = useitem();
+  const { data: itemsMaster = [] } = useItem();
   const { data: currentUserResponse } = useCurrentUser();
   const { data: customers = [], isLoading: loadingCustomers } = useCustomer();
 

@@ -10,10 +10,14 @@ supplierCreate: async (data) => {
 
 
 
-  getSupplier: async () => {
-    const { data } = await apiClient.get("/supplier");
-    return data;
-  },
+ getSupplier: async (filters = {}) => {
+  const { page = 1, perPage = 10, search = "" } = filters;
+  const { data } = await apiClient.get("/supplier", {
+    params: { page, limit: perPage, search },
+  });
+  return data;
+},
+
 
 
   getSingleSupplier: async (id) => {

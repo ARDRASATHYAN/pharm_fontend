@@ -1,142 +1,187 @@
 import React, { useEffect, useState } from "react";
-import { Button } from "@mui/material";
+import { Button, TextField } from "@mui/material";
 import BasicTable from "@/components/commen/BasicTable";
-import { useAdditem, useDeleteitem, useitem, useUpdateitem } from "@/hooks/useItem";
 import ItemForm from "./components/ItemForm";
 import { getItemsColumns } from "./components/ItemHeader";
-import { showErrorToast, showSuccessToast } from "@/lib/toastService";
 import ConfirmDialog from "@/components/commen/ConfirmDialog";
+import { showSuccessToast, showErrorToast } from "@/lib/toastService";
+import { useItem, useAdditem, useUpdateitem, useDeleteitem } from "@/hooks/useItem";
 
-export default function ItemMockApiHeader() {
-  const { data: items = {}, isLoading ,isFetching} = useitem();
-  const  item=items.data ||[];
+
+export default function ItemPage() {
+  // ----------------------------
+  // Filters / Pagination / Search
+  // ----------------------------
+  const [filters, setFilters] = useState({ page: 1, perPage: 10, search: "" });
+
+  const { data: itemsData = {}, isLoading } = useItem(filters);
+  const items = Array.isArray(itemsData?.data) ? itemsData.data : [];
+  const totalPages = Math.ceil((itemsData?.total || 0) / filters.perPage);
+
   const additem = useAdditem();
   const updateitem = useUpdateitem();
   const deleteitem = useDeleteitem();
 
-const [open, setOpen] = useState(false);
+  // ----------------------------
+  // Modal states
+  // ----------------------------
+  const [open, setOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [editingStore, setEditingStore] = useState(null);
+  const [editingItem, setEditingItem] = useState(null);
 
+  // ----------------------------
+  // Delete dialog
+  // ----------------------------
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [SelectedItemId, setSelectedItemId] = useState(null);
+  const [selectedItemId, setSelectedItemId] = useState(null);
 
+  // ----------------------------
+  // Adjust table rows by screen height
+  // ----------------------------
+  const adjustRowsByHeight = () => {
+    const screenHeight = window.innerHeight;
+    const headerHeight = 180;
+    const rowHeight = 34;
+    const rows = Math.floor((screenHeight - headerHeight) / rowHeight);
+    setFilters((prev) => ({ ...prev, perPage: Math.max(5, rows) }));
+  };
 
-   // Add or Update 
-  
+  useEffect(() => {
+    adjustRowsByHeight();
+    window.addEventListener("resize", adjustRowsByHeight);
+    return () => window.removeEventListener("resize", adjustRowsByHeight);
+  }, []);
+
+  // ----------------------------
+  // Pagination / Filters
+  // ----------------------------
+  const handlePageChange = (page) => setFilters((prev) => ({ ...prev, page }));
+  const handlePerPageChange = (perPage) => setFilters((prev) => ({ ...prev, perPage, page: 1 }));
+  const handleSearchChange = (e) => setFilters((prev) => ({ ...prev, search: e.target.value, page: 1 }));
+
+  // ----------------------------
+  // Add / Update Item
+  // ----------------------------
   const handleSubmit = (values, resetForm) => {
-    if (editMode && editingStore?.item_id) {
+    if (editMode && editingItem?.item_id) {
       updateitem.mutate(
-        { id: editingStore.item_id, data: values },
+        { id: editingItem.item_id, data: values },
         {
           onSuccess: () => {
-            showSuccessToast("Store updated successfully");
+            showSuccessToast("Item updated successfully");
             setOpen(false);
             setEditMode(false);
-            setEditingStore(null);
+            setEditingItem(null);
           },
-          onError: (error) => {
-            console.error(error);
-            showErrorToast("Failed to update Store");
-          },
+          onError: () => showErrorToast("Update failed"),
         }
       );
     } else {
-      // ADD MODE: keep dialog open but clear the fields
       additem.mutate(values, {
         onSuccess: () => {
-          showSuccessToast("Store created successfully");
-          if (typeof resetForm === "function") {
-            resetForm(); // this clears form fields
-          }
+          showSuccessToast("Item created successfully");
+          resetForm?.();
         },
-        onError: (error) => {
-          console.error(error);
-          showErrorToast("Failed to create Store");
-        },
+        onError: () => showErrorToast("Create failed"),
       });
     }
   };
-  
-  
-    //Edit Handler
-    const handleEdit = (row) => {
-      console.log("row", row);
-      setEditingStore(row);
-      setEditMode(true);
-      setOpen(true);
-    };
-  
-  
-    // Delete Handler – open confirm dialog
-    const handleDelete = (id) => {
-      setSelectedItemId(id);
-      setDeleteDialogOpen(true);
-    };
-  
-    //Confirm delete
-    const confirmDelete = () => {
-      if (!SelectedItemId) return;
-      console.log(SelectedItemId,"SelectedItemId");
-      
-  
-      deleteitem.mutate(SelectedItemId, {
-        onSuccess: () => {
-          showSuccessToast("item deleted successfully");
-          setDeleteDialogOpen(false);
-          setSelectedItemId(null);
-        },
-        onError: (error) => {
-          console.error(error);
-          showErrorToast("Failed to delete item");
-          setDeleteDialogOpen(false);
-        },
-      });
-    };
-  
- 
-  
 
+  // ----------------------------
+  // Edit
+  // ----------------------------
+  const handleEdit = (row) => {
+    setEditingItem(row);
+    setEditMode(true);
+    setOpen(true);
+  };
 
-  // ✅ pass handlers to columns (so edit/delete buttons work)
+  // ----------------------------
+  // Delete
+  // ----------------------------
+  const handleDelete = (id) => {
+    setSelectedItemId(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (!selectedItemId) return;
+    deleteitem.mutate(selectedItemId, {
+      onSuccess: () => {
+        showSuccessToast("Item deleted successfully");
+        setDeleteDialogOpen(false);
+        setSelectedItemId(null);
+      },
+      onError: () => {
+        showErrorToast("Delete failed");
+        setDeleteDialogOpen(false);
+      },
+    });
+  };
+
+  // ----------------------------
+  // Table columns
+  // ----------------------------
   const columns = getItemsColumns(handleEdit, handleDelete);
 
   return (
     <>
+      {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
-        <h2 className="text-xl font-bold text-blue-700 tracking-wide">
-          Items List
-        </h2>
-        <Button variant="contained" color="primary" onClick={() => {
-            setOpen(true);
-            setEditMode(false);
-            setEditingStore(null);
-          }}>
-          Add Item
-        </Button>
+        <h2 className="text-xl font-bold text-blue-700 tracking-wide">Items List</h2>
+        <div style={{ display: "flex", gap: 10 }}>
+          <TextField
+            size="small"
+            placeholder="Search by name or SKU"
+            value={filters.search}
+            onChange={handleSearchChange}
+          />
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              setOpen(true);
+              setEditMode(false);
+              setEditingItem(null);
+            }}
+          >
+            Add Item
+          </Button>
+        </div>
       </div>
 
+      {/* Table */}
+      <BasicTable
+        columns={columns}
+        data={items}
+        loading={isLoading}
+        pagination={{
+          page: itemsData?.page || 1,
+          perPage: filters.perPage,
+          totalPages,
+          total: itemsData?.total || 0,
+        }}
+        onPageChange={handlePageChange}
+        onPerPageChange={handlePerPageChange}
+      />
 
-      <BasicTable columns={columns} data={item} loading={isLoading}/>
-
-
+      {/* Add/Edit Form */}
       <ItemForm
         open={open}
         onClose={() => {
           setOpen(false);
           setEditMode(false);
-          setEditingStore(null);
+          setEditingItem(null);
         }}
         onSubmit={handleSubmit}
-        defaultValues={editingStore}
+        defaultValues={editingItem}
         editMode={editMode}
       />
 
-
-       {/* Delete confirmation dialog */}
+      {/* Delete Dialog */}
       <ConfirmDialog
         open={deleteDialogOpen}
-        title="Delete item"
+        title="Delete Item"
         description="Are you sure you want to delete this item? This action cannot be undone."
         confirmText="Delete"
         cancelText="Cancel"

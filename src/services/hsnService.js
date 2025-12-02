@@ -9,11 +9,14 @@ const hsnService = {
 
 
 
-  getHsns: async () => {
-    const { data } = await apiClient.get("/hsn");
+  getHsns: async (filters = {}) => {
+     const { search = "", page = 1, perPage = 10 } = filters;
+    const { data } = await apiClient.get("/hsn", {
+    params: { search,page, perPage },
+  });
     return data;
   },
-
+ 
 
   getSinglehsn: async (id) => {
     const { data } = await apiClient.get(`/hsn/${id}`);

@@ -9,6 +9,7 @@ export function usePurchaseReport(filters = {}) {
   });
 }
 
+
 export function useSaleReport(filters = {}) {
   return useQuery({
     queryKey: ["sale-report", filters], // refetch when filters change

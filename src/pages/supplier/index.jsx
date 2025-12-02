@@ -8,123 +8,83 @@ import { showErrorToast, showSuccessToast } from "@/lib/toastService";
 import ConfirmDialog from "@/components/commen/ConfirmDialog";
 
 export default function SupplierMockApiHeader() {
-  const { data: suppliers = {}, isLoading, isFetching } = useSupplier();
-    const  supplier=suppliers.data ||[];
+  const [filters, setFilters] = useState({ page: 1, perPage: 10, search: "" });
+
+  const { data: suppliersData = {}, isLoading } = useSupplier(filters);
+  const suppliers = suppliersData?.data || [];
+  const totalPages = Math.ceil((suppliersData?.total || 0) / filters.perPage);
+
   const addSupplier = useAddSupplier();
   const updateSupplier = useUpdateSupplier();
   const deleteSupplier = useDeleteSupplier();
 
   const [open, setOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [editingStore, setEditingStore] = useState(null);
+  const [editingSupplier, setEditingSupplier] = useState(null);
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [SelectedSupplierId, setSelectedSupplierId] = useState(null);
+  const [selectedSupplierId, setSelectedSupplierId] = useState(null);
 
   const handleSubmit = (values, resetForm) => {
-    if (editMode && editingStore?.supplier_id) {
-      updateSupplier.mutate(
-        { id: editingStore.supplier_id, data: values },
-        {
-          onSuccess: () => {
-            showSuccessToast("Store updated successfully");
-            setOpen(false);
-            setEditMode(false);
-            setEditingStore(null);
-          },
-          onError: (error) => {
-            console.error(error);
-            showErrorToast("Failed to update Store");
-          },
-        }
-      );
+    if (editMode && editingSupplier?.supplier_id) {
+      updateSupplier.mutate({ id: editingSupplier.supplier_id, data: values }, {
+        onSuccess: () => { setOpen(false); setEditMode(false); setEditingSupplier(null); },
+        onError: () => showErrorToast("Update failed"),
+      });
     } else {
-      // ADD MODE: keep dialog open but clear the fields
       addSupplier.mutate(values, {
-        onSuccess: () => {
-          showSuccessToast("Store created successfully");
-          if (typeof resetForm === "function") {
-            resetForm(); // this clears form fields
-          }
-        },
-        onError: (error) => {
-          console.error(error);
-          showErrorToast("Failed to create Store");
-        },
+        onSuccess: () => resetForm?.(),
+        onError: () => showErrorToast("Create failed"),
       });
     }
   };
 
-
-  //Edit Handler
-  const handleEdit = (row) => {
-    console.log("row", row);
-    setEditingStore(row);
-    setEditMode(true);
-    setOpen(true);
-  };
-
-
-  // Delete Handler – open confirm dialog
-  const handleDelete = (id) => {
-    setSelectedSupplierId(id);
-    setDeleteDialogOpen(true);
-  };
-
-  //Confirm delete
+  const handleEdit = (row) => { setEditingSupplier(row); setEditMode(true); setOpen(true); };
+  const handleDelete = (id) => { setSelectedSupplierId(id); setDeleteDialogOpen(true); };
   const confirmDelete = () => {
-    if (!SelectedSupplierId) return;
-
-    deleteSupplier.mutate(SelectedSupplierId, {
-      onSuccess: () => {
-        showSuccessToast("Store deleted successfully");
-        setDeleteDialogOpen(false);
-        setSelectedSupplierId(null);
-      },
-      onError: (error) => {
-        console.error(error);
-        showErrorToast("Failed to delete Store");
-        setDeleteDialogOpen(false);
-      },
+    if (!selectedSupplierId) return;
+    deleteSupplier.mutate(selectedSupplierId, {
+      onSuccess: () => { setDeleteDialogOpen(false); setSelectedSupplierId(null); },
+      onError: () => { showErrorToast("Delete failed"); setDeleteDialogOpen(false); },
     });
   };
 
-  // ✅ pass handlers to columns (so edit/delete buttons work)
+  const handlePageChange = (page) => setFilters(prev => ({ ...prev, page }));
+  const handlePerPageChange = (perPage) => setFilters(prev => ({ ...prev, perPage, page: 1 }));
+
   const columns = getSupplierColumns(handleEdit, handleDelete);
 
   return (
     <>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
-        <h2 className="text-xl font-bold text-blue-700 tracking-wide">
-          Supplier List
-        </h2>
-        <Button variant="contained" color="primary" onClick={() => {
-          setOpen(true);
-          setEditMode(false);
-          setEditingStore(null);
-        }}>
-          Add supplier
+        <h2 className="text-xl font-bold text-blue-700 tracking-wide">Supplier List</h2>
+        <Button variant="contained" color="primary" onClick={() => { setOpen(true); setEditMode(false); setEditingSupplier(null); }}>
+          Add Supplier
         </Button>
       </div>
 
-
-      <BasicTable columns={columns} data={supplier} loading={isLoading} />
-
+      <BasicTable
+        columns={columns}
+        data={suppliers}
+        loading={isLoading}
+        pagination={{
+          page: suppliersData?.page || 1,
+          perPage: filters.perPage,
+          totalPages,
+          total: suppliersData?.total || 0,
+        }}
+        onPageChange={handlePageChange}
+        onPerPageChange={handlePerPageChange}
+      />
 
       <SupplierForm
         open={open}
-        onClose={() => {
-          setOpen(false);
-          setEditMode(false);
-          setEditingStore(null);
-        }}
+        onClose={() => { setOpen(false); setEditMode(false); setEditingSupplier(null); }}
         onSubmit={handleSubmit}
-        defaultValues={editingStore}
+        defaultValues={editingSupplier}
         editMode={editMode}
       />
 
-
-      {/* Delete confirmation dialog */}
       <ConfirmDialog
         open={deleteDialogOpen}
         title="Delete Supplier"
@@ -133,11 +93,9 @@ export default function SupplierMockApiHeader() {
         cancelText="Cancel"
         confirmColor="error"
         onConfirm={confirmDelete}
-        onCancel={() => {
-          setDeleteDialogOpen(false);
-          setSelectedSupplierId(null);
-        }}
+        onCancel={() => { setDeleteDialogOpen(false); setSelectedSupplierId(null); }}
       />
     </>
   );
 }
+

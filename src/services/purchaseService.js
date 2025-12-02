@@ -7,7 +7,7 @@ const purchaseService = {
     return data;
   },
    getpurchaseInvoise: async () => {
-      const { data } = await apiClient.get("/purchase");
+      const { data } = await apiClient.get("/purchase/invoice");
       return data;
     },
     getpurchasItem: async () => {

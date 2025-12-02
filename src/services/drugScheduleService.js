@@ -11,10 +11,16 @@ drugScheduleCreate: async (data) => {
 
 
 
-  drugScheduleget: async () => {
-    const { data } = await apiClient.get("/drug_Schedule");
-    return data;
-  },
+ drugScheduleget: async (filters = {}) => {
+  const { search = "", page = 1, perPage = 10 } = filters;
+
+  const { data } = await apiClient.get("/drug_Schedule", {
+    params: { search, page, perPage },
+  });
+
+  return data;
+},
+
 
 
   getSingledrugSchedule: async (id) => {

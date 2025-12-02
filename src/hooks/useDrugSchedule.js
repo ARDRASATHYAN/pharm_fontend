@@ -3,13 +3,16 @@ import hsnService from "@/services/hsnService";
 import storeService from "@/services/storeService";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-export function useDrugSchedule() {
+export function useDrugSchedule(filters = {}) {
+  const { search = "", page = 1, perPage = 10 } = filters;
+
   return useQuery({
-    queryKey: ["drugschedule"],
-    queryFn: drugScheduleService.drugScheduleget,
-    staleTime: 1000 * 60 * 5, // 5 min cache
+    queryKey: ["drugschedule", search, page, perPage],
+    queryFn: () => drugScheduleService.drugScheduleget({ search, page, perPage }),
+    staleTime: 1000 * 60 * 5,
   });
 }
+
 
 export function useAddDrugSchedule() {
   const queryClient = useQueryClient();

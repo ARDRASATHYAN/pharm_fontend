@@ -9,10 +9,13 @@ const itemService = {
 
 
 
-  getitems: async () => {
-    const { data } = await apiClient.get("/items");
-    return data;
-  },
+getitems: async ({ search = "", page = 1, perPage = 10 } = {}) => {
+  const { data } = await apiClient.get("/items", {
+    params: { search, page, limit: perPage },
+  });
+  return data;
+},
+
 
 
   getSingleitem: async (id) => {

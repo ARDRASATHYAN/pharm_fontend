@@ -49,12 +49,12 @@ export const purchaseItemSchema = yup.object().shape({
     .max(28, "GST% cannot be more than 28")
     .nullable(),
 
-  discount_percent: yup
-    .number()
-    .typeError("Discount% must be a number")
-    .min(0, "Discount% cannot be negative")
-    .max(100, "Discount% cannot be more than 100")
-    .nullable(),
+  // discount_percent: yup
+  //   .number()
+  //   .typeError("Discount% must be a number")
+  //   .min(0, "Discount% cannot be negative")
+  //   .max(100, "Discount% cannot be more than 100")
+  //   .nullable(),
 
   expiry_date: yup.string().required("expiry date needed"),
   amount: yup.number().nullable(),

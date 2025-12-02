@@ -28,7 +28,6 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 
 import { useStores } from "@/hooks/useStore";
-import { useitem } from "@/hooks/useItem";
 import { useSupplier } from "@/hooks/useSupplier";
 import { useCurrentUser } from "@/hooks/useAuth";
 import { useAddpurchaseinvoice } from "@/hooks/usePurchaseInvoice";
@@ -37,6 +36,7 @@ import { showErrorToast, showSuccessToast } from "@/lib/toastService";
 import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { purchaseSchema } from "../validation/purchaseSchema";
+import { useItem } from "@/hooks/useItem";
 
 const emptyItemRow = {
   item_id: "",
@@ -67,7 +67,7 @@ export default function AddPurchaseForm({ onClose }) {
   // ===== API HOOKS =====
   const { data: storesRes = {}, isLoading: loadingStore } = useStores();
   const { data: suppliersRes = {}, isLoading: loadingSupplier } = useSupplier();
-  const { data: itemsMastersRes = [], isLoading: loadingItems } = useitem();
+  const { data: itemsMastersRes = [], isLoading: loadingItems } = useItem();
   const { data: currentUserResponse } = useCurrentUser();
   const addpurchaseinvoice = useAddpurchaseinvoice();
 

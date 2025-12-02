@@ -1,13 +1,17 @@
 import hsnService from "@/services/hsnService";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-export function useHsn() {
+export function useHsn({ search = "", page = 1, perPage = 10 } = {}) {
   return useQuery({
-    queryKey: ["hsns"],
-    queryFn: hsnService.getHsns,
-    staleTime: 1000 * 60 * 5, // 5 min cache
+    queryKey: ["hsns", search, page, perPage],
+    queryFn: () => hsnService.getHsns({ search, page, perPage }),
+    keepPreviousData: true,
+    staleTime: 1000 * 60 * 5,
   });
 }
+
+
+
 
 export function useAddHsn() {
   const queryClient = useQueryClient();

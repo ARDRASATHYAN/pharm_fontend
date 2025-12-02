@@ -1,132 +1,162 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@mui/material";
-import DataTable from "../../components/commen/Datatable";
+import BasicTable from "@/components/commen/BasicTable";
+import { useHsn, useAddHsn, useUpdateHsn, useDeleteHsn } from "@/hooks/useHsn";
 import { getHsnColumns } from "./components/HsnHeader";
 import HsnForm from "./components/HsnForm";
-import BasicTable from "@/components/commen/BasicTable";
-import { useAddHsn, useDeleteHsn, useHsn, useUpdateHsn } from "@/hooks/useHsn";
-import { showErrorToast, showSuccessToast } from "@/lib/toastService";
 import ConfirmDialog from "@/components/commen/ConfirmDialog";
+import { showSuccessToast, showErrorToast } from "@/lib/toastService";
 
+export default function HsnPage() {
+  // pagination + dynamic row size
+  const [filters, setFilters] = useState({ page: 1, perPage: 10 });
 
-export default function HsnMockApiHeader() {
-const { data: hsnsData = {}, isLoading } = useHsn();
-const hsns = hsnsData.data || [];
-  const addHsn = useAddHsn();
-  const updateHsn = useUpdateHsn();
-  const deleteHsn = useDeleteHsn();
-
+  // modal states
   const [open, setOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [editingStore, setEditingStore] = useState(null);
 
-
+  // delete dialog states
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedHsnId, setSelectedHsnId] = useState(null);
 
+  // API
+  const { data: hsnsData = {}, isLoading } = useHsn(filters);
+  const addHsn = useAddHsn();
+  const updateHsn = useUpdateHsn();
+  const deleteHsn = useDeleteHsn();
 
+  const hsns = hsnsData?.data || []; // MUST match backend "data"
 
+  // Adjust table rows based on screen size
+  const adjustRowsByHeight = () => {
+    const screenHeight = window.innerHeight;
+    const headerHeight = 180;
+    const rowHeight = 34;
+
+    const rows = Math.floor((screenHeight - headerHeight) / rowHeight);
+
+    setFilters((prev) => ({
+      ...prev,
+      perPage: Math.max(5, rows),
+    }));
+  };
+
+  useEffect(() => {
+    adjustRowsByHeight();
+    window.addEventListener("resize", adjustRowsByHeight);
+    return () => window.removeEventListener("resize", adjustRowsByHeight);
+  }, []);
+
+  // ----------------------
+  // Pagination Click
+  // ----------------------
+  const handlePageChange = (page) =>
+    setFilters((prev) => ({ ...prev, page }));
+
+  // ----------------------
+  // Add / Update HSN
+  // ----------------------
   const handleSubmit = (values, resetForm) => {
+    // EDIT
     if (editMode && editingStore?.hsn_id) {
       updateHsn.mutate(
         { id: editingStore.hsn_id, data: values },
         {
           onSuccess: () => {
-            showSuccessToast("hsn updated successfully");
+            showSuccessToast("HSN updated successfully");
             setOpen(false);
             setEditMode(false);
             setEditingStore(null);
           },
-          onError: (error) => {
-            console.error(error);
-            showErrorToast("Failed to update hsn");
-          },
+          onError: () => showErrorToast("Update failed"),
         }
       );
-    } else {
-      // ADD MODE: keep dialog open but clear the fields
+    }
+    // ADD
+    else {
       addHsn.mutate(values, {
         onSuccess: () => {
-          showSuccessToast("Store created successfully");
-          if (typeof resetForm === "function") {
-            resetForm(); // this clears form fields
-          }
+          showSuccessToast("HSN created");
+          resetForm?.();
         },
-        onError: (error) => {
-          console.error(error);
-          showErrorToast("Failed to create Store");
-        },
+        onError: () => showErrorToast("Create failed"),
       });
     }
   };
 
-  // 🟢 Add or Update
-
-
-
-  // ✏️ Edit Handler
+  // ----------------------
+  // Edit
+  // ----------------------
   const handleEdit = (row) => {
-    console.log("row", row);
     setEditingStore(row);
     setEditMode(true);
     setOpen(true);
   };
 
-
-  // Delete Handler – open confirm dialog
+  // ----------------------
+  // Delete Flow
+  // ----------------------
   const handleDelete = (id) => {
     setSelectedHsnId(id);
     setDeleteDialogOpen(true);
   };
 
-  //Confirm delete
   const confirmDelete = () => {
     if (!selectedHsnId) return;
 
     deleteHsn.mutate(selectedHsnId, {
       onSuccess: () => {
-        showSuccessToast("hsn deleted successfully");
+        showSuccessToast("HSN deleted");
         setDeleteDialogOpen(false);
         setSelectedHsnId(null);
       },
-      onError: (error) => {
-        console.error(error);
-        showErrorToast("Failed to delete hsn");
+      onError: () => {
+        showErrorToast("Delete failed");
         setDeleteDialogOpen(false);
       },
     });
   };
 
-
-
-
-
-
-
-  // ✅ pass handlers to columns (so edit/delete buttons work)
+  // Table Columns
   const columns = getHsnColumns(handleEdit, handleDelete);
+  console.log("HSN LIST:", hsns);
+  console.log("HSN RESPONSE:", hsnsData);
 
   return (
     <>
+      {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
-        <h2 className="text-xl font-bold text-blue-700 tracking-wide">
-          HSN List
-        </h2>
-        <Button variant="contained" color="primary" onClick={() => {
-          // 🧹 Clear previous data before opening
+        <h2 className="text-xl font-bold text-blue-700 tracking-wide">HSN List</h2>
 
-          setOpen(true);
-          setEditMode(false);
-          setEditingStore(null);
-        }}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => {
+            setOpen(true);
+            setEditMode(false);
+            setEditingStore(null);
+          }}
+        >
           Add HSN
         </Button>
       </div>
 
+      {/* Table */}
+      <BasicTable
+        columns={columns}
+        data={hsns}
+        loading={isLoading}
+        pagination={{
+          page: hsnsData?.page || 1,
+          perPage: filters.perPage,
+          totalPages: hsnsData?.totalPages || 1,
+          total: hsnsData?.total || 0,
+        }}
+        onPageChange={handlePageChange}
+      />
 
-      <BasicTable columns={columns} data={hsns} loading={isLoading} />
-
-
+      {/* Add/Edit Form */}
       <HsnForm
         open={open}
         onClose={() => {
@@ -139,12 +169,11 @@ const hsns = hsnsData.data || [];
         editMode={editMode}
       />
 
-
-      {/* Delete confirmation dialog */}
+      {/* Delete Dialog */}
       <ConfirmDialog
         open={deleteDialogOpen}
-        title="Delete Hsn"
-        description="Are you sure you want to delete this hsn? This action cannot be undone."
+        title="Delete HSN"
+        description="Are you sure you want to delete this HSN?"
         confirmText="Delete"
         cancelText="Cancel"
         confirmColor="error"
