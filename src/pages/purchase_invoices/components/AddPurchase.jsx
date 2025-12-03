@@ -15,10 +15,6 @@ import {
   TableRow,
   Paper,
   Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
 } from "@mui/material";
 import { AddCircleOutline, DeleteOutline } from "@mui/icons-material";
 
@@ -58,20 +54,17 @@ const emptyItemRow = {
   sgst: "",
   igst: "",
   total_amount: "",
-  // --- HSN FIELDS ---
   hsn_id: "",
   hsn_code: "",
 };
 
 export default function AddPurchaseForm({ onClose }) {
-  // ===== API HOOKS =====
   const { data: storesRes = {}, isLoading: loadingStore } = useStores();
   const { data: suppliersRes = {}, isLoading: loadingSupplier } = useSupplier();
   const { data: itemsMastersRes = [], isLoading: loadingItems } = useItem();
   const { data: currentUserResponse } = useCurrentUser();
   const addpurchaseinvoice = useAddpurchaseinvoice();
 
-  // normalized data
   const stores = Array.isArray(storesRes?.stores)
     ? storesRes.stores
     : Array.isArray(storesRes?.data)
@@ -129,7 +122,7 @@ export default function AddPurchaseForm({ onClose }) {
   });
 
   const [createdBy, setCreatedBy] = useState("");
-  const [advancedRowIndex, setAdvancedRowIndex] = useState(null);
+  const [expandedRows, setExpandedRows] = useState({});
 
   useEffect(() => {
     if (currentUser?.user_id) {
@@ -137,9 +130,9 @@ export default function AddPurchaseForm({ onClose }) {
     }
   }, [currentUser]);
 
-  // ===== TOTAL SUMMARY CALC (from each row) =====
+  // ===== TOTAL SUMMARY CALC =====
   useEffect(() => {
-    let total_amount = 0; // taxable total
+    let total_amount = 0;
     let total_gst = 0;
     let total_discount = 0;
 
@@ -191,7 +184,6 @@ export default function AddPurchaseForm({ onClose }) {
   const recalcRow = (row) => {
     const qty = Number(row.qty || 0);
     const rate = Number(row.purchase_rate || 0);
-    const free_qty = Number(row.free_qty || 0); // currently for stock only, not in amount
     const discPercent = Number(row.discount_percent || 0);
     const schemeDiscPercent = Number(row.scheme_discount_percent || 0);
     const gstPercent = Number(row.gst_percent || 0);
@@ -204,14 +196,12 @@ export default function AddPurchaseForm({ onClose }) {
     const gstAmount = (taxable * gstPercent) / 100;
     const cgst = gstAmount / 2;
     const sgst = gstAmount / 2;
-    const igst = 0; // adjust for interstate if needed
+    const igst = 0;
     const total = taxable + gstAmount;
 
     return {
       ...row,
-      discount_amount: isNaN(discountAmount)
-        ? ""
-        : discountAmount.toFixed(2),
+      discount_amount: isNaN(discountAmount) ? "" : discountAmount.toFixed(2),
       scheme_discount_amount: isNaN(schemeDiscountAmount)
         ? ""
         : schemeDiscountAmount.toFixed(2),
@@ -224,32 +214,28 @@ export default function AddPurchaseForm({ onClose }) {
   };
 
   const handleItemChange = (index, field, value) => {
-    const current = [...(watch("items") || [])];
-    let row = { ...current[index], [field]: value };
-    row = recalcRow(row);
-    current[index] = row;
-    setValue("items", current, { shouldValidate: true });
+    const updatedRow = recalcRow({ ...watchedItems[index], [field]: value });
+
+    Object.keys(updatedRow).forEach((key) => {
+      setValue(`items.${index}.${key}`, updatedRow[key], {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    });
   };
 
   const handleAddRow = () => append(emptyItemRow);
-
   const handleRemoveRow = (index) => {
     if (fields.length === 1) return;
     remove(index);
   };
 
-  const openAdvanced = (index) => {
-    setAdvancedRowIndex(index);
-  };
-
-  const closeAdvanced = () => {
-    setAdvancedRowIndex(null);
+  const toggleAdvanced = (index) => {
+    setExpandedRows((prev) => ({ ...prev, [index]: !prev[index] }));
   };
 
   // ===== SUBMIT =====
   const onSubmit = (data) => {
-    console.log(data,"data");
-    
     if (!currentUser?.user_id) return;
 
     const validItems = (data.items || []).filter((r) => r.item_id);
@@ -283,7 +269,6 @@ export default function AddPurchaseForm({ onClose }) {
         sgst: Number(r.sgst || 0),
         igst: Number(r.igst || 0),
         total_amount: Number(r.total_amount || 0),
-        // ===== HSN FIELDS IN PAYLOAD =====
         hsn_id: r.hsn_id ? Number(r.hsn_id) : null,
         hsn_code: r.hsn_code || null,
       })),
@@ -293,211 +278,176 @@ export default function AddPurchaseForm({ onClose }) {
       net_amount: Number(totals.net_amount || 0),
     };
 
-    console.log("CREATE PAYLOAD:", payload);
-
     addpurchaseinvoice.mutate(payload, {
-  
-      
       onSuccess: () => {
         showSuccessToast("Purchased items updated successfully");
         resetForm();
         onClose?.();
       },
-      onError: () => {
-        showErrorToast("Purchase not created");
-      },
+      onError: () => showErrorToast("Purchase not created"),
     });
   };
 
-  const advancedRow =
-    advancedRowIndex != null ? watchedItems[advancedRowIndex] : null;
-
   // ===== UI =====
   return (
-    <>
-      <Box
-        gap={3}
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          height: "calc(100vh - 64px)",
-        }}
-      >
-        {/* HEADER */}
-        <Box>
-          <Typography
-            variant="subtitle1"
-            fontWeight={600}
-            display="flex"
-            className="text-blue-700"
-          >
-            Purchase Invoice
-          </Typography>
-          <Divider />
-
-          <Grid container spacing={2} mt={1}>
-            <Grid item xs={12} md={3}>
-              <Controller
-                name="invoice_no"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    label="Invoice No"
-                    fullWidth
-                    size="small"
-                    error={!!errors.invoice_no}
-                    helperText={errors.invoice_no?.message}
-                  />
-                )}
-              />
-            </Grid>
-
-            <Grid item xs={12} md={3}>
-              <Controller
-                name="invoice_date"
-                control={control}
-                render={({ field }) => (
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker
-                      label="Invoice Date"
-                      value={field.value ? dayjs(field.value) : null}
-                      onChange={(newValue) =>
-                        field.onChange(
-                          newValue ? newValue.format("YYYY-MM-DD") : null
-                        )
-                      }
-                      slotProps={{
-                        textField: {
-                          fullWidth: true,
-                          size: "small",
-                          required: true,
-                          error: !!errors.invoice_date,
-                          helperText: errors.invoice_date?.message,
-                        },
-                      }}
-                    />
-                  </LocalizationProvider>
-                )}
-              />
-            </Grid>
-
-            <Grid item xs={12} md={3}>
-              <Controller
-                name="supplier_id"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    select
-                    label="Supplier"
-                    fullWidth
-                    size="small"
-                    error={!!errors.supplier_id}
-                    helperText={errors.supplier_id?.message}
-                  >
-                    {loadingSupplier ? (
-                      <MenuItem disabled>Loading...</MenuItem>
-                    ) : (
-                      suppliers.map((s) => (
-                        <MenuItem key={s.supplier_id} value={s.supplier_id}>
-                          {s.supplier_name || s.supplier_id}
-                        </MenuItem>
-                      ))
-                    )}
-                  </TextField>
-                )}
-              />
-            </Grid>
-
-            <Grid item xs={12} md={3}>
-              <Controller
-                name="store_id"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    select
-                    label="Store"
-                    fullWidth
-                    size="small"
-                    error={!!errors.store_id}
-                    helperText={errors.store_id?.message}
-                  >
-                    {loadingStore ? (
-                      <MenuItem disabled>Loading...</MenuItem>
-                    ) : (
-                      stores.map((s) => (
-                        <MenuItem key={s.store_id} value={s.store_id}>
-                          {s.store_name || s.store_id}
-                        </MenuItem>
-                      ))
-                    )}
-                  </TextField>
-                )}
-              />
-            </Grid>
-
-            <Grid item xs={12} md={3}>
-              <TextField
-                label="Created By"
-                value={currentUser?.username || createdBy || ""}
-                fullWidth
-                size="small"
-                InputProps={{ readOnly: true }}
-              />
-            </Grid>
+    <Box gap={2} sx={{ display: "flex", flexDirection: "column", height: "calc(100vh - 64px)" }}>
+      {/* HEADER */}
+      <Box>
+        <Typography variant="subtitle1" fontWeight={600} display="flex" className="text-blue-700">
+          Purchase Invoice
+        </Typography>
+        <Divider />
+        <Grid container spacing={2} mt={1}>
+          <Grid item xs={12} md={3}>
+            <Controller
+              name="invoice_no"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Invoice No"
+                  fullWidth
+                  size="small"
+                  error={!!errors.invoice_no}
+                  helperText={errors.invoice_no?.message}
+                />
+              )}
+            />
           </Grid>
+          <Grid item xs={12} md={3}>
+            <Controller
+              name="invoice_date"
+              control={control}
+              render={({ field }) => (
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DatePicker
+                    label="Invoice Date"
+                    value={field.value ? dayjs(field.value) : null}
+                    onChange={(newValue) =>
+                      field.onChange(newValue ? newValue.format("YYYY-MM-DD") : null)
+                    }
+                    slotProps={{
+                      textField: {
+                        fullWidth: true,
+                        size: "small",
+                        required: true,
+                        error: !!errors.invoice_date,
+                        helperText: errors.invoice_date?.message,
+                      },
+                    }}
+                  />
+                </LocalizationProvider>
+              )}
+            />
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <Controller
+              name="supplier_id"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  select
+                  label="Supplier"
+                  fullWidth
+                  size="small"
+                  error={!!errors.supplier_id}
+                  helperText={errors.supplier_id?.message}
+                >
+                  {loadingSupplier ? (
+                    <MenuItem disabled>Loading...</MenuItem>
+                  ) : (
+                    suppliers.map((s) => (
+                      <MenuItem key={s.supplier_id} value={s.supplier_id}>
+                        {s.supplier_name || s.supplier_id}
+                      </MenuItem>
+                    ))
+                  )}
+                </TextField>
+              )}
+            />
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <Controller
+              name="store_id"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  select
+                  label="Store"
+                  fullWidth
+                  size="small"
+                  error={!!errors.store_id}
+                  helperText={errors.store_id?.message}
+                >
+                  {loadingStore ? (
+                    <MenuItem disabled>Loading...</MenuItem>
+                  ) : (
+                    stores.map((s) => (
+                      <MenuItem key={s.store_id} value={s.store_id}>
+                        {s.store_name || s.store_id}
+                      </MenuItem>
+                    ))
+                  )}
+                </TextField>
+              )}
+            />
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <TextField
+              label="Created By"
+              value={currentUser?.username || createdBy || ""}
+              fullWidth
+              size="small"
+              InputProps={{ readOnly: true }}
+            />
+          </Grid>
+        </Grid>
+      </Box>
+
+      {/* ITEMS TABLE */}
+      <Box mt={2} sx={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Typography variant="subtitle1" fontWeight={600} gutterBottom className="text-blue-700">
+            Purchase Items
+          </Typography>
+          <Tooltip title="Add Item">
+            <IconButton onClick={handleAddRow} size="small">
+              <AddCircleOutline />
+            </IconButton>
+          </Tooltip>
         </Box>
+        <Divider />
+        <Paper variant="outlined" sx={{ mt: 1 }}>
+          <Box sx={{ overflowX: "auto" }}>
+            <Table size="small" stickyHeader>
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ minWidth: 160 }}>Item</TableCell>
+                  <TableCell sx={{ minWidth: 110 }}>HSN</TableCell>
+                  <TableCell sx={{ minWidth: 110 }}>Batch</TableCell>
+                  <TableCell sx={{ minWidth: 90 }}>Expiry</TableCell>
+                  <TableCell sx={{ minWidth: 70 }}>Pack Sz</TableCell>
+                  <TableCell sx={{ minWidth: 70 }}>Qty</TableCell>
+                  <TableCell sx={{ minWidth: 70 }}>Free</TableCell>
+                  <TableCell sx={{ minWidth: 90 }}>Purchase</TableCell>
+                  <TableCell sx={{ minWidth: 90 }}>MRP</TableCell>
+                  <TableCell sx={{ minWidth: 90 }}>Sale</TableCell>
+                  <TableCell sx={{ minWidth: 70 }}>GST%</TableCell>
+                  <TableCell sx={{ minWidth: 100 }}>Total</TableCell>
+                  <TableCell sx={{ minWidth: 120 }} align="center">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {fields.map((field, index) => {
+                  const rowErrors = errors.items?.[index] || {};
+                  const rowValue = watchedItems[index] || {};
+                  const isExpanded = expandedRows[index];
 
-        {/* ITEMS TABLE */}
-        <Box mt={2} sx={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
-          <Box display="flex" justifyContent="space-between" alignItems="center">
-            <Typography
-              variant="subtitle1"
-              fontWeight={600}
-              gutterBottom
-              className="text-blue-700"
-            >
-              Purchase Items
-            </Typography>
-            <Tooltip title="Add Item">
-              <IconButton onClick={handleAddRow} size="small">
-                <AddCircleOutline />
-              </IconButton>
-            </Tooltip>
-          </Box>
-          <Divider />
-          <Paper variant="outlined" sx={{ mt: 1 }}>
-            <Box sx={{ overflowX: "auto" }}>
-              <Table size="small" stickyHeader>
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ minWidth: 160 }}>Item</TableCell>
-                    <TableCell sx={{ minWidth: 110 }}>HSN</TableCell>
-                    <TableCell sx={{ minWidth: 110 }}>Batch</TableCell>
-                    <TableCell sx={{ minWidth: 90 }}>Expiry</TableCell>
-                    <TableCell sx={{ minWidth: 70 }}>Pack Sz</TableCell>
-                    <TableCell sx={{ minWidth: 70 }}>Qty</TableCell>
-                    <TableCell sx={{ minWidth: 70 }}>Free</TableCell>
-                    <TableCell sx={{ minWidth: 90 }}>Purchase</TableCell>
-                    <TableCell sx={{ minWidth: 90 }}>MRP</TableCell>
-                    <TableCell sx={{ minWidth: 90 }}>Sale</TableCell>
-                    <TableCell sx={{ minWidth: 70 }}>GST%</TableCell>
-                    <TableCell sx={{ minWidth: 100 }}>Total</TableCell>
-                    <TableCell sx={{ minWidth: 120 }} align="center">
-                      Actions
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-
-                <TableBody>
-                  {fields.map((field, index) => {
-                    const rowErrors = errors.items?.[index] || {};
-                    const rowValue = watchedItems[index] || {};
-
-                    return (
-                      <TableRow key={field.id}>
+                  return (
+                    <React.Fragment key={field.id}>
+                      <TableRow>
                         {/* Item */}
                         <TableCell padding="none" sx={{ p: 0.25 }}>
                           <Controller
@@ -516,62 +466,35 @@ export default function AddPurchaseForm({ onClose }) {
                                   itemField.onChange(value);
 
                                   const selectedItem = items.find(
-                                    (it) =>
-                                      String(it.item_id) === String(value)
+                                    (it) => String(it.item_id) === String(value)
                                   );
+                                  if (!selectedItem) return;
 
-                                  if (selectedItem) {
-                                    const current = [
-                                      ...(watch("items") || []),
-                                    ];
-                                    let row = { ...current[index] };
+                                  const updatedRow = recalcRow({
+                                    ...watchedItems[index],
+                                    item_id: value,
+                                    pack_size: selectedItem.pack_size ?? watchedItems[index].pack_size,
+                                    mrp: selectedItem.mrp ?? watchedItems[index].mrp,
+                                    sale_rate: selectedItem.sale_rate ?? watchedItems[index].sale_rate,
+                                    hsn_id: selectedItem.hsn?.hsn_id ?? watchedItems[index].hsn_id,
+                                    hsn_code: selectedItem.hsn?.hsn_code ?? watchedItems[index].hsn_code,
+                                    gst_percent: selectedItem.hsn?.gst_percent ?? watchedItems[index].gst_percent,
+                                  });
 
-                                    if (selectedItem.pack_size != null) {
-                                      row.pack_size = selectedItem.pack_size;
-                                    }
-                                    if (selectedItem.mrp != null) {
-                                      row.mrp = selectedItem.mrp;
-                                    }
-                                    if (selectedItem.sale_rate != null) {
-                                      row.sale_rate = selectedItem.sale_rate;
-                                    }
-
-                                    // ===== HSN + GST FROM MASTER =====
-                                    if (selectedItem.hsn) {
-                                      if (
-                                        selectedItem.hsn.gst_percent != null
-                                      ) {
-                                        row.gst_percent =
-                                          selectedItem.hsn.gst_percent;
-                                      }
-                                      if (selectedItem.hsn.hsn_id != null) {
-                                        row.hsn_id = selectedItem.hsn.hsn_id;
-                                      }
-                                      if (selectedItem.hsn.hsn_code != null) {
-                                        row.hsn_code =
-                                          selectedItem.hsn.hsn_code;
-                                      }
-                                    }
-
-                                    row = recalcRow(row);
-                                    current[index] = row;
-                                    setValue("items", current, {
+                                  Object.keys(updatedRow).forEach((key) => {
+                                    setValue(`items.${index}.${key}`, updatedRow[key], {
                                       shouldValidate: true,
+                                      shouldDirty: true,
                                     });
-                                  }
+                                  });
                                 }}
                               >
                                 {loadingItems ? (
                                   <MenuItem disabled>Loading items...</MenuItem>
                                 ) : (
                                   items.map((it) => (
-                                    <MenuItem
-                                      key={it.item_id}
-                                      value={it.item_id}
-                                    >
-                                      {it.item_name ||
-                                        it.name ||
-                                        `Item #${it.item_id}`}
+                                    <MenuItem key={it.item_id} value={it.item_id}>
+                                      {it.item_name || it.name || `Item #${it.item_id}`}
                                     </MenuItem>
                                   ))
                                 )}
@@ -580,527 +503,160 @@ export default function AddPurchaseForm({ onClose }) {
                           />
                         </TableCell>
 
-                        {/* HSN (read-only) */}
+                        {/* HSN */}
                         <TableCell padding="none" sx={{ p: 0.25 }}>
-                          <Controller
-                            name={`items.${index}.hsn_code`}
-                            control={control}
-                            render={({ field: hsnField }) => (
-                              <TextField
-                                {...hsnField}
-                                fullWidth
-                                size="small"
-                                InputProps={{ readOnly: true }}
-                                placeholder="HSN"
-                              />
-                            )}
-                          />
+                          <TextField value={rowValue.hsn_code} size="small" fullWidth InputProps={{ readOnly: true }} />
                         </TableCell>
 
                         {/* Batch */}
                         <TableCell padding="none" sx={{ p: 0.25 }}>
-                          <Controller
-                            name={`items.${index}.batch_no`}
-                            control={control}
-                            render={({ field: batchField }) => (
-                              <TextField
-                                {...batchField}
-                                fullWidth
-                                size="small"
-                                error={!!rowErrors?.batch_no}
-                                helperText={rowErrors?.batch_no?.message}
-                              />
-                            )}
-                          />
+                          <TextField fullWidth size="small" value={rowValue.batch_no || ""} onChange={(e) => handleItemChange(index, "batch_no", e.target.value)} />
                         </TableCell>
 
                         {/* Expiry */}
                         <TableCell padding="none" sx={{ p: 0.25 }}>
-                          <Controller
-                            name={`items.${index}.expiry_date`}
-                            control={control}
-                            render={({ field: expField }) => (
-                              <TextField
-                                {...expField}
-                                fullWidth
-                                size="small"
-                                placeholder="YYYY-MM-DD"
-                                InputLabelProps={{ shrink: true }}
-                                error={!!rowErrors?.expiry_date}
-                                helperText={rowErrors?.expiry_date?.message}
-                              />
-                            )}
-                          />
+                          <TextField fullWidth size="small" value={rowValue.expiry_date || ""} placeholder="YYYY-MM-DD" onChange={(e) => handleItemChange(index, "expiry_date", e.target.value)} />
                         </TableCell>
 
                         {/* Pack Size */}
                         <TableCell padding="none" sx={{ p: 0.25 }}>
-                          <Controller
-                            name={`items.${index}.pack_size`}
-                            control={control}
-                            render={({ field: psField }) => (
-                              <TextField
-                                {...psField}
-                                fullWidth
-                                size="small"
-                                inputProps={{ min: 0, step: "1" }}
-                                onChange={(e) =>
-                                  handleItemChange(
-                                    index,
-                                    "pack_size",
-                                    e.target.value
-                                  )
-                                }
-                              />
-                            )}
-                          />
+                          <TextField fullWidth size="small" value={rowValue.pack_size || ""} onChange={(e) => handleItemChange(index, "pack_size", e.target.value)} />
                         </TableCell>
 
                         {/* Qty */}
                         <TableCell padding="none" sx={{ p: 0.25 }}>
-                          <Controller
-                            name={`items.${index}.qty`}
-                            control={control}
-                            render={({ field: qtyField }) => (
-                              <TextField
-                                {...qtyField}
-                                fullWidth
-                                size="small"
-                                inputProps={{ min: 0, step: "1" }}
-                                error={!!rowErrors?.qty}
-                                helperText={rowErrors?.qty?.message}
-                                value={rowValue.qty || ""}
-                                onChange={(e) =>
-                                  handleItemChange(
-                                    index,
-                                    "qty",
-                                    e.target.value
-                                  )
-                                }
-                              />
-                            )}
-                          />
+                          <TextField fullWidth size="small" value={rowValue.qty || ""} onChange={(e) => handleItemChange(index, "qty", e.target.value)} />
                         </TableCell>
 
-                        {/* Free Qty */}
+                        {/* Free */}
                         <TableCell padding="none" sx={{ p: 0.25 }}>
-                          <Controller
-                            name={`items.${index}.free_qty`}
-                            control={control}
-                            render={({ field: fqField }) => (
-                              <TextField
-                                {...fqField}
-                                fullWidth
-                                size="small"
-                                inputProps={{ min: 0, step: "1" }}
-                                onChange={(e) =>
-                                  handleItemChange(
-                                    index,
-                                    "free_qty",
-                                    e.target.value
-                                  )
-                                }
-                              />
-                            )}
-                          />
+                          <TextField fullWidth size="small" value={rowValue.free_qty || ""} onChange={(e) => handleItemChange(index, "free_qty", e.target.value)} />
                         </TableCell>
 
-                        {/* Purchase Rate */}
+                        {/* Purchase */}
                         <TableCell padding="none" sx={{ p: 0.25 }}>
-                          <Controller
-                            name={`items.${index}.purchase_rate`}
-                            control={control}
-                            render={({ field: rateField }) => (
-                              <TextField
-                                {...rateField}
-                                fullWidth
-                                size="small"
-                                inputProps={{ min: 0, step: "0.01" }}
-                                error={!!rowErrors?.purchase_rate}
-                                helperText={rowErrors?.purchase_rate?.message}
-                                onChange={(e) =>
-                                  handleItemChange(
-                                    index,
-                                    "purchase_rate",
-                                    e.target.value
-                                  )
-                                }
-                              />
-                            )}
-                          />
+                          <TextField fullWidth size="small" value={rowValue.purchase_rate || ""} onChange={(e) => handleItemChange(index, "purchase_rate", e.target.value)} />
                         </TableCell>
 
                         {/* MRP */}
                         <TableCell padding="none" sx={{ p: 0.25 }}>
-                          <Controller
-                            name={`items.${index}.mrp`}
-                            control={control}
-                            render={({ field: mrpField }) => (
-                              <TextField
-                                {...mrpField}
-                                fullWidth
-                                size="small"
-                                inputProps={{ min: 0, step: "0.01" }}
-                                error={!!rowErrors?.mrp}
-                                helperText={rowErrors?.mrp?.message}
-                                onChange={(e) =>
-                                  handleItemChange(
-                                    index,
-                                    "mrp",
-                                    e.target.value
-                                  )
-                                }
-                              />
-                            )}
-                          />
+                          <TextField fullWidth size="small" value={rowValue.mrp || ""} onChange={(e) => handleItemChange(index, "mrp", e.target.value)} />
                         </TableCell>
 
-                        {/* Sale Rate */}
+                        {/* Sale */}
                         <TableCell padding="none" sx={{ p: 0.25 }}>
-                          <Controller
-                            name={`items.${index}.sale_rate`}
-                            control={control}
-                            render={({ field: saleField }) => (
-                              <TextField
-                                {...saleField}
-                                fullWidth
-                                size="small"
-                                inputProps={{ min: 0, step: "0.01" }}
-                                onChange={(e) =>
-                                  handleItemChange(
-                                    index,
-                                    "sale_rate",
-                                    e.target.value
-                                  )
-                                }
-                              />
-                            )}
-                          />
+                          <TextField fullWidth size="small" value={rowValue.sale_rate || ""} onChange={(e) => handleItemChange(index, "sale_rate", e.target.value)} />
                         </TableCell>
 
-                        {/* GST % */}
+                        {/* GST */}
                         <TableCell padding="none" sx={{ p: 0.25 }}>
-                          <Controller
-                            name={`items.${index}.gst_percent`}
-                            control={control}
-                            render={({ field: gstField }) => (
-                              <TextField
-                                {...gstField}
-                                fullWidth
-                                size="small"
-                                inputProps={{ min: 0, step: "0.01" }}
-                                error={!!rowErrors?.gst_percent}
-                                helperText={rowErrors?.gst_percent?.message}
-                                onChange={(e) =>
-                                  handleItemChange(
-                                    index,
-                                    "gst_percent",
-                                    e.target.value
-                                  )
-                                }
-                              />
-                            )}
-                          />
+                          <TextField fullWidth size="small" value={rowValue.gst_percent || ""} onChange={(e) => handleItemChange(index, "gst_percent", e.target.value)} />
                         </TableCell>
 
-                        {/* Total Amount */}
+                        {/* Total */}
                         <TableCell padding="none" sx={{ p: 0.25 }}>
-                          <Controller
-                            name={`items.${index}.total_amount`}
-                            control={control}
-                            render={({ field: taField }) => (
-                              <TextField
-                                {...taField}
-                                fullWidth
-                                size="small"
-                                InputProps={{ readOnly: true }}
-                                value={rowValue.total_amount || ""}
-                              />
-                            )}
-                          />
+                          <TextField fullWidth size="small" InputProps={{ readOnly: true }} value={rowValue.total_amount || ""} />
                         </TableCell>
 
                         {/* Actions */}
-                        <TableCell
-                          align="center"
-                          padding="none"
-                          sx={{ p: 0.25, whiteSpace: "nowrap" }}
-                        >
-                          <Button
-                            variant="outlined"
-                            size="small"
-                            sx={{ mr: 1 }}
-                            onClick={() => openAdvanced(index)}
-                          >
-                            More
+                        <TableCell align="center" padding="none" sx={{ p: 0.25, whiteSpace: "nowrap" }}>
+                          <Button variant="outlined" size="small" sx={{ mr: 1 }} onClick={() => toggleAdvanced(index)}>
+                            {isExpanded ? "Less" : "More"}
                           </Button>
-                          <IconButton
-                            size="small"
-                            onClick={() => handleRemoveRow(index)}
-                            disabled={fields.length === 1}
-                          >
+                          <IconButton size="small" onClick={() => handleRemoveRow(index)} disabled={fields.length === 1}>
                             <DeleteOutline fontSize="small" />
                           </IconButton>
                         </TableCell>
                       </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </Box>
-          </Paper>
-          {errors.items && typeof errors.items.message === "string" && (
-            <Typography color="error" variant="caption" sx={{ ml: 1 }}>
-              {errors.items.message}
-            </Typography>
-          )}
-        </Box>
 
-        {/* SUMMARY */}
-        <Box mt={2}>
-          <Typography
-            variant="subtitle1"
-            fontWeight={600}
-            gutterBottom
-            className="text-blue-700"
-          >
-            Amount Summary
-          </Typography>
-          <Divider />
-          <Grid container spacing={2} mt={1} justifyContent="flex-end">
-            <Grid item xs={12} sm={3}>
-              <TextField
-                label="Total Taxable"
-                name="total_amount"
-                value={totals.total_amount.toFixed(2)}
-                type="number"
-                fullWidth
-                size="small"
-                InputProps={{ readOnly: true }}
-              />
-            </Grid>
-            <Grid item xs={12} sm={3}>
-              <TextField
-                label="Total GST"
-                name="total_gst"
-                value={totals.total_gst.toFixed(2)}
-                type="number"
-                fullWidth
-                size="small"
-                InputProps={{ readOnly: true }}
-              />
-            </Grid>
-            <Grid item xs={12} sm={3}>
-              <TextField
-                label="Total Discount"
-                name="total_discount"
-                value={totals.total_discount.toFixed(2)}
-                type="number"
-                fullWidth
-                size="small"
-                InputProps={{ readOnly: true }}
-              />
-            </Grid>
-            <Grid item xs={12} sm={3}>
-              <TextField
-                label="Net Amount"
-                name="net_amount"
-                value={totals.net_amount.toFixed(2)}
-                type="number"
-                fullWidth
-                size="small"
-                InputProps={{ readOnly: true }}
-              />
-            </Grid>
-          </Grid>
-
-          <Box mt={2} display="flex" justifyContent="flex-end" gap={1}>
-            {onClose && (
-              <Button variant="outlined" onClick={onClose}>
-                Cancel
-              </Button>
-            )}
-           <Button
-  variant="contained"
-  onClick={handleSubmit(
-    (data) => {
-      console.log("✅ onSubmit CALLED with data:", data);
-      onSubmit(data);
-    },
-    (formErrors) => {
-      console.log("❌ VALIDATION ERRORS:", formErrors);
-    }
-  )}
-  disabled={addpurchaseinvoice.isLoading}
->
-  {addpurchaseinvoice.isLoading ? "Saving..." : "Save Purchase"}
-</Button>
-
+                      {/* Advanced Row Inline */}
+                      {isExpanded && (
+                        <TableRow>
+                          <TableCell colSpan={13} sx={{ p: 1, backgroundColor: "#f9f9f9" }}>
+                            <Box container spacing={1} display="flex">
+                               <TextField
+                                label="taxable %"
+    fullWidth
+    size="small"
+    value={rowValue.taxable_amount || ""}
+    InputProps={{ readOnly: true }}
+  />
+                            
+                                <TextField sx={{ p: 0.25, whiteSpace: "nowrap" }}
+                                  label="Discount %"
+                                  fullWidth
+                                  size="small"
+                                  value={rowValue.discount_percent || ""}
+                                  onChange={(e) => handleItemChange(index, "discount_percent", e.target.value)}
+                                />
+                           
+                                <TextField sx={{ p: 0.25, whiteSpace: "nowrap" }}
+                                  label="Discount Amount"
+                                  fullWidth
+                                  size="small"
+                                  value={rowValue.discount_amount || ""}
+                                  InputProps={{ readOnly: true }}
+                                />
+                             
+                                <TextField sx={{ p: 0.25, whiteSpace: "nowrap" }}
+                                  label="Scheme %"
+                                  fullWidth
+                                  size="small"
+                                  value={rowValue.scheme_discount_percent || ""}
+                                  onChange={(e) => handleItemChange(index, "scheme_discount_percent", e.target.value)}
+                                />
+                              
+                                <TextField sx={{ p: 0.25, whiteSpace: "nowrap" }}
+                                  label="Scheme Amount"
+                                  fullWidth
+                                  size="small"
+                                  value={rowValue.scheme_discount_amount || ""}
+                                  InputProps={{ readOnly: true }}
+                                />
+                              
+                                <TextField  sx={{ p: 0.25, whiteSpace: "nowrap" }} label="CGST" fullWidth size="small" value={rowValue.cgst || ""} InputProps={{ readOnly: true }} />
+                             
+                                <TextField  sx={{ p: 0.25, whiteSpace: "nowrap" }} label="SGST" fullWidth size="small" value={rowValue.sgst || ""} InputProps={{ readOnly: true }} />
+                            
+                                <TextField sx={{ p: 0.25, whiteSpace: "nowrap" }} label="IGST" fullWidth size="small" value={rowValue.igst || ""} InputProps={{ readOnly: true }} />
+                             
+                            </Box>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
+              </TableBody>
+            </Table>
           </Box>
-        </Box>
+        </Paper>
       </Box>
 
-      {/* ADVANCED ROW DIALOG */}
-      <Dialog
-        open={advancedRowIndex !== null}
-        onClose={closeAdvanced}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>Advanced Item Details</DialogTitle>
-        <DialogContent dividers>
-          {advancedRow && (
-            <Grid container spacing={2} mt={0.5}>
-              <Grid item xs={6}>
-                <Controller
-                  name={`items.${advancedRowIndex}.discount_percent`}
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      label="Discount %"
-                      fullWidth
-                      size="small"
-                      inputProps={{ min: 0, step: "0.01" }}
-                      onChange={(e) =>
-                        handleItemChange(
-                          advancedRowIndex,
-                          "discount_percent",
-                          e.target.value
-                        )
-                      }
-                    />
-                  )}
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <Controller
-                  name={`items.${advancedRowIndex}.discount_amount`}
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      label="Discount Amount"
-                      fullWidth
-                      size="small"
-                      InputProps={{ readOnly: true }}
-                      value={advancedRow.discount_amount || ""}
-                    />
-                  )}
-                />
-              </Grid>
+      {/* SUMMARY */}
+      <Box mt={2}>
+        <Typography variant="subtitle1" fontWeight={600} gutterBottom className="text-blue-700">
+          Amount Summary
+        </Typography>
+        <Divider />
+        <Grid container spacing={2} mt={1} justifyContent="flex-end">
+          <Grid item xs={12} sm={3}><TextField label="Total Taxable" value={totals.total_amount.toFixed(2)} fullWidth size="small" InputProps={{ readOnly: true }} /></Grid>
+          <Grid item xs={12} sm={3}><TextField label="Total GST" value={totals.total_gst.toFixed(2)} fullWidth size="small" InputProps={{ readOnly: true }} /></Grid>
+          <Grid item xs={12} sm={3}><TextField label="Total Discount" value={totals.total_discount.toFixed(2)} fullWidth size="small" InputProps={{ readOnly: true }} /></Grid>
+          <Grid item xs={12} sm={3}><TextField label="Net Amount" value={totals.net_amount.toFixed(2)} fullWidth size="small" InputProps={{ readOnly: true }} /></Grid>
+        </Grid>
 
-              <Grid item xs={6}>
-                <Controller
-                  name={`items.${advancedRowIndex}.scheme_discount_percent`}
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      label="Scheme %"
-                      fullWidth
-                      size="small"
-                      inputProps={{ min: 0, step: "0.01" }}
-                      onChange={(e) =>
-                        handleItemChange(
-                          advancedRowIndex,
-                          "scheme_discount_percent",
-                          e.target.value
-                        )
-                      }
-                    />
-                  )}
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <Controller
-                  name={`items.${advancedRowIndex}.scheme_discount_amount`}
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      label="Scheme Amount"
-                      fullWidth
-                      size="small"
-                      InputProps={{ readOnly: true }}
-                      value={advancedRow.scheme_discount_amount || ""}
-                    />
-                  )}
-                />
-              </Grid>
-
-              <Grid item xs={12}>
-                <Controller
-                  name={`items.${advancedRowIndex}.taxable_amount`}
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      label="Taxable Amount"
-                      fullWidth
-                      size="small"
-                      InputProps={{ readOnly: true }}
-                      value={advancedRow.taxable_amount || ""}
-                    />
-                  )}
-                />
-              </Grid>
-
-              <Grid item xs={4}>
-                <Controller
-                  name={`items.${advancedRowIndex}.cgst`}
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      label="CGST"
-                      fullWidth
-                      size="small"
-                      InputProps={{ readOnly: true }}
-                      value={advancedRow.cgst || ""}
-                    />
-                  )}
-                />
-              </Grid>
-              <Grid item xs={4}>
-                <Controller
-                  name={`items.${advancedRowIndex}.sgst`}
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      label="SGST"
-                      fullWidth
-                      size="small"
-                      InputProps={{ readOnly: true }}
-                      value={advancedRow.sgst || ""}
-                    />
-                  )}
-                />
-              </Grid>
-              <Grid item xs={4}>
-                <Controller
-                  name={`items.${advancedRowIndex}.igst`}
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      label="IGST"
-                      fullWidth
-                      size="small"
-                      InputProps={{ readOnly: true }}
-                      value={advancedRow.igst || ""}
-                    />
-                  )}
-                />
-              </Grid>
-            </Grid>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={closeAdvanced}>Close</Button>
-        </DialogActions>
-      </Dialog>
-    </>
+        <Box mt={2} display="flex" justifyContent="flex-end" gap={1}>
+          {onClose && <Button variant="outlined" onClick={onClose}>Cancel</Button>}
+          <Button
+            variant="contained"
+            onClick={handleSubmit(onSubmit)}
+            disabled={addpurchaseinvoice.isLoading}
+          >
+            {addpurchaseinvoice.isLoading ? "Saving..." : "Save Purchase"}
+          </Button>
+        </Box>
+      </Box>
+    </Box>
   );
 }
