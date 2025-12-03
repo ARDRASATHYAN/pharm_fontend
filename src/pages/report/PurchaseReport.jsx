@@ -16,7 +16,7 @@ export default function PurchaseReport() {
   });
 
   // ----------------------------
-  // Pagination (1-indexed for backend)
+  // Pagination (backend expects 1-index)
   // ----------------------------
   const [pagination, setPagination] = useState({
     page: 1,
@@ -28,11 +28,17 @@ export default function PurchaseReport() {
   // ----------------------------
   const adjustRowsByHeight = () => {
     const screenHeight = window.innerHeight;
-    const headerHeight = 180; // title + search + filters
+    const headerHeight = 180;
     const rowHeight = 34;
+
     const rows = Math.floor((screenHeight - headerHeight) / rowHeight);
     const safeRows = Math.max(5, rows);
-    setPagination((prev) => ({ ...prev, perPage: safeRows, page: 1 }));
+
+    setPagination((prev) => ({
+      ...prev,
+      perPage: safeRows,
+      page: 1,
+    }));
   };
 
   useLayoutEffect(() => {
@@ -49,37 +55,38 @@ export default function PurchaseReport() {
   // ----------------------------
   const { data: report, isLoading } = usePurchaseReport({
     ...filters,
-    page: pagination.page, // backend page (1-indexed)
+    page: pagination.page,       // backend 1-indexed
     perPage: pagination.perPage,
   });
 
   const rows = Array.isArray(report?.data) ? report.data : [];
   const totalPages = report?.totalPages || 1;
+  const totalRecords = report?.total || 0;
 
   // ----------------------------
-  // Filters and search
+  // Filters & Search
   // ----------------------------
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilters((prev) => ({ ...prev, [name]: value }));
-    setPagination((prev) => ({ ...prev, page: 1 })); // reset page
+    setPagination((prev) => ({ ...prev, page: 1 })); // reset page on filter change
   };
 
   const handleSearchChange = (e) => {
     setFilters((prev) => ({ ...prev, search: e.target.value }));
-    setPagination((prev) => ({ ...prev, page: 1 })); // reset page
+    setPagination((prev) => ({ ...prev, page: 1 }));
   };
 
   // ----------------------------
   // Pagination handlers
   // ----------------------------
   const handlePageChange = (pageIndex) => {
-    // table sends 0-indexed page → backend needs 1-indexed
+    // Table gives 0-based → Convert to backend 1-based
     setPagination((prev) => ({ ...prev, page: pageIndex }));
   };
 
   const handlePerPageChange = (perPage) => {
-    setPagination({ page: 1, perPage }); // reset to first page
+    setPagination({ page: 1, perPage });
   };
 
   const columns = getPurchaseReportColumns();
@@ -112,11 +119,12 @@ export default function PurchaseReport() {
         data={rows}
         loading={isLoading}
         pagination={{
-          page: pagination.page-1, // 0-indexed for table
+          page: pagination.page ,   // convert 1-index → 0-index for table
           perPage: pagination.perPage,
           totalPages,
-          total: report?.total || 0,
+          total: totalRecords,
         }}
+         rowPadding="py-2" 
         onPageChange={handlePageChange}
         onPerPageChange={handlePerPageChange}
       />

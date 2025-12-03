@@ -2,7 +2,7 @@ import React from "react";
 import { useReactTable, flexRender, getCoreRowModel } from "@tanstack/react-table";
 import { Skeleton } from "@mui/material";
 
-const BasicTable = ({ columns, data = [], loading = false, pagination, onPageChange }) => {
+const BasicTable = ({ columns, data = [], loading = false, pagination, onPageChange ,rowPadding}) => {
   const { page = 1, perPage = 10, totalPages = 1, total = 0 } = pagination;
 
   const table = useReactTable({
@@ -36,7 +36,7 @@ const BasicTable = ({ columns, data = [], loading = false, pagination, onPageCha
             ? skeletonRows.map((_, i) => (
                 <tr key={i}>
                   {columns.map((col, j) => (
-                    <td key={j} className="py-2 px-2 border-b">
+                    <td key={j} className={`${rowPadding} py-2 px-2 border-b`}>
                       <div className="h-3 bg-gray-200 rounded w-[80%]"></div>
                     </td>
                   ))}
@@ -45,7 +45,7 @@ const BasicTable = ({ columns, data = [], loading = false, pagination, onPageCha
             : table.getRowModel().rows.map(row => (
                 <tr key={row.id} className="even:bg-gray-100 hover:bg-gray-200 cursor-pointer">
                   {row.getVisibleCells().map(cell => (
-                    <td key={cell.id} className="py-1 px-2 text-xs text-gray-800">
+                    <td key={cell.id} className={`${rowPadding} py-1 px-2 text-xs text-gray-800`}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}
