@@ -128,7 +128,7 @@ export default function UserForm({
           }
         />
 
-     <Controller
+   <Controller
   name="role"
   control={control}
   render={({ field }) => (
@@ -143,21 +143,15 @@ export default function UserForm({
       error={!!errors.role}
       helperText={errors.role?.message}
     >
-      {isLoading && <MenuItem disabled>Loading roles...</MenuItem>}
-
-      {!isLoading && roles.length === 0 && (
-        <MenuItem disabled>No roles found</MenuItem>
-      )}
-
-      {!isLoading &&
-        roles.map((role) => (
-          <MenuItem key={role} value={role}>
-            {role}
-          </MenuItem>
-        ))}
+      {roles.map((role) => (
+        <MenuItem key={role} value={role}>
+          {role}
+        </MenuItem>
+      ))}
     </TextField>
   )}
 />
+
 
 
 

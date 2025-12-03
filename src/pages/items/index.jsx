@@ -6,6 +6,10 @@ import { getItemsColumns } from "./components/ItemHeader";
 import ConfirmDialog from "@/components/commen/ConfirmDialog";
 import { showSuccessToast, showErrorToast } from "@/lib/toastService";
 import { useItem, useAdditem, useUpdateitem, useDeleteitem } from "@/hooks/useItem";
+import HsnForm from "../hsn/components/HsnForm";
+import { useAddHsn } from "@/hooks/useHsn";
+import DrugScheduleForm from "../drug_schedule/components/DrugScheduleForm";
+import { useAddDrugSchedule } from "@/hooks/useDrugSchedule";
 
 
 export default function ItemPage() {
@@ -34,6 +38,17 @@ export default function ItemPage() {
   // ----------------------------
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState(null);
+
+  // hsn
+  const [openHsnForm, setOpenHsnForm] = useState(false);
+const handleOpenHsnForm = () => setOpenHsnForm(true);
+const handleCloseHsnForm = () => setOpenHsnForm(false);
+
+// drugschedule
+ const [openDrugScheduleForm, setOpenDrugScheduleForm] = useState(false);
+const handleOpenDrugScheduleForm = () => setOpenDrugScheduleForm(true);
+const handleCloseDrugScheduleForm = () => setOpenDrugScheduleForm(false);
+
 
   // ----------------------------
   // Adjust table rows by screen height
@@ -118,6 +133,25 @@ export default function ItemPage() {
       },
     });
   };
+  const addHsn = useAddHsn();
+  const handleSaveHsn = async (values) => {
+ addHsn.mutate(values, {
+    onSuccess: () => {
+      showSuccessToast("HSN created");    
+    },
+  });
+};
+
+
+
+ const addDrugSchedule = useAddDrugSchedule();
+  const handleSaveDrugSchedule = async (values) => {
+ addDrugSchedule.mutate(values, {
+    onSuccess: () => {
+      showSuccessToast("drug schedule created");    
+    },
+  });
+};
 
   // ----------------------------
   // Table columns
@@ -176,7 +210,23 @@ export default function ItemPage() {
         onSubmit={handleSubmit}
         defaultValues={editingItem}
         editMode={editMode}
+         onOpenHsnForm={handleOpenHsnForm}
+         onOpenDrugScheduleForm={handleOpenDrugScheduleForm} 
       />
+      <HsnForm
+  open={openHsnForm}         
+  onClose={handleCloseHsnForm}
+   onSubmit={handleSaveHsn}
+  editMode={false}          
+/>
+
+ <DrugScheduleForm
+  open={openDrugScheduleForm}         
+  onClose={handleCloseDrugScheduleForm}
+  onSubmit={handleSaveDrugSchedule}
+  editMode={false}          
+/>
+
 
       {/* Delete Dialog */}
       <ConfirmDialog

@@ -11,6 +11,9 @@ import { useDrugSchedule } from "@/hooks/useDrugSchedule";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { itemSchema } from "../validation/itemSchema";
+import HsnSelect from "./HSnSelecter";
+import DrugSheduleSelect from "./DrugScheduleSelecter";
+import DrugScheduleSelect from "./DrugScheduleSelecter";
 
 export default function ItemForm({
   open,
@@ -18,6 +21,8 @@ export default function ItemForm({
   onSubmit,
   editMode,
   defaultValues,
+   onOpenHsnForm,
+    onOpenDrugScheduleForm
 }) {
 const { data: hsnsData = {}, isLoading: loadingHsn } = useHsn();
 const hsns = hsnsData.data || [];
@@ -221,44 +226,24 @@ const drugschedule = drugschedules.data || [];
           />
 
 
-          <Controller
-            name="hsn_id"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                select
-                label="HSN Code"
-                fullWidth
-                size="small"
-                autoComplete="off"
-                disabled={editMode}
-                value={field.value ?? ""}      // important: allow "" for reset
-                onChange={(e) => {
-                  const val = e.target.value === "" ? "" : Number(e.target.value);
-                  field.onChange(val);
-                }}
-                error={!!errors.hsn_id}
-                helperText={errors.hsn_id?.message}
-              >
-                <MenuItem value="">
-                  <em>Select HSN</em>
-                </MenuItem>
-               {loadingHsn ? (
-  <MenuItem disabled>Loading...</MenuItem>
-) : (
-  hsns.map((hsn) => (
-    <MenuItem key={hsn.hsn_id} value={hsn.hsn_id}>
-      {hsn.hsn_code} — {hsn.description}
-    </MenuItem>
-  ))
-)}
-
-              </TextField>
-            )}
-          />
+<HsnSelect
+  control={control}
+  errors={errors}
+  editMode={editMode}
+  onOpenHsnForm={onOpenHsnForm}
+/>
+<DrugScheduleSelect
+  control={control}
+  errors={errors}
+  editMode={editMode}
+  onOpenDrugScheduleForm={onOpenDrugScheduleForm}  // <-- correct prop name
+/>
 
 
-          <Controller
+
+
+
+          {/* <Controller
             name="schedule_id"
             control={control}
             render={({ field }) => (
@@ -291,7 +276,7 @@ const drugschedule = drugschedules.data || [];
                 )}
               </TextField>
             )}
-          />
+          /> */}
 
         </Box>
 

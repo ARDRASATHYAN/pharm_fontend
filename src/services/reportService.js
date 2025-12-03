@@ -28,13 +28,24 @@ getpurchasereport: async (filters = {}) => {
     }))
   );
 
+  // 🔥 Important: compute frontend pagination on flattened rows
+  const totalFlat = flat.length;
+  const perPage = Number(filters.perPage) || 10;
+  const page = Number(filters.page) || 1;
+
+  // Slice manually for pagination
+  const start = (page - 1) * perPage;
+  const end = start + perPage;
+  const paginatedRows = flat.slice(start, end);
+
   return {
-    data: flat,             // frontend expects 'data' array
-    total: data.total || 0, // total rows for pagination
-    page: data.page || 1,   // current page
-    totalPages: data.pages || 1, // total pages
+    data: paginatedRows,
+    total: totalFlat,
+    page,
+    totalPages: Math.ceil(totalFlat / perPage),
   };
 },
+
 
 
 

@@ -4,14 +4,13 @@ import axios from "axios";
 const apiUrl = import.meta.env.VITE_API_URL;
 if (!apiUrl) console.error("❌ Missing VITE_API_URL in your .env");
 
-// Constants
-const ACCESS_TOKEN_KEY = "accessToken"; // localStorage key
-const REFRESH_INTERVAL = 50 * 1000; // 50s, adjust < access token expiry
+// ---------------- Constants ----------------
+const ACCESS_TOKEN_KEY = "accessToken"; 
 
-// Create Axios instance
+// ---------------- Axios Instance ----------------
 const apiClient = axios.create({
   baseURL: apiUrl,
-  withCredentials: true, // send cookies (refresh token)
+  withCredentials: true, // needed for refresh token cookie
 });
 
 // ---------------- Queue Mechanism ----------------
@@ -39,9 +38,11 @@ apiClient.interceptors.request.use(
 // ---------------- Response Interceptor ----------------
 apiClient.interceptors.response.use(
   (response) => response,
+
   async (error) => {
     const originalRequest = error.config;
 
+    // Check for 401 and avoid infinite loop
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
@@ -49,6 +50,7 @@ apiClient.interceptors.response.use(
     ) {
       originalRequest._retry = true;
 
+      // Already refreshing → add request to queue
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -63,19 +65,28 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
+        // Call refresh API
         const res = await apiClient.post("/auth/refresh");
         const newAccessToken = res.data.accessToken;
 
-        if (!newAccessToken) throw new Error("No new access token received");
+        if (!newAccessToken) throw new Error("No new access token");
 
+        // Save new access token
         localStorage.setItem(ACCESS_TOKEN_KEY, newAccessToken);
         apiClient.defaults.headers.Authorization = `Bearer ${newAccessToken}`;
 
+        // Process waiting requests
         processQueue(null, newAccessToken);
+
+        // Retry original request
         return apiClient(originalRequest);
       } catch (err) {
         processQueue(err, null);
+
+        // Clear user session
         localStorage.removeItem(ACCESS_TOKEN_KEY);
+
+        // Redirect to login
         window.location.href = "/";
         return Promise.reject(err);
       } finally {
@@ -86,30 +97,5 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
-// ---------------- Silent Background Refresh ----------------
-setInterval(async () => {
-  const token = localStorage.getItem(ACCESS_TOKEN_KEY);
-  if (!token || isRefreshing) return;
-
-  isRefreshing = true;
-  try {
-    const res = await apiClient.post("/auth/refresh");
-    const newAccessToken = res.data.accessToken;
-
-    if (newAccessToken) {
-      localStorage.setItem(ACCESS_TOKEN_KEY, newAccessToken);
-      apiClient.defaults.headers.Authorization = `Bearer ${newAccessToken}`;
-      processQueue(null, newAccessToken);
-      console.log("🔁 Access token auto-refreshed in background");
-    }
-  } catch (err) {
-    processQueue(err, null);
-    localStorage.removeItem(ACCESS_TOKEN_KEY);
-    window.location.href = "/";
-  } finally {
-    isRefreshing = false;
-  }
-}, REFRESH_INTERVAL);
 
 export default apiClient;
