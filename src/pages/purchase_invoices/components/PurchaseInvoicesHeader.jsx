@@ -32,6 +32,7 @@ export const getPurchaseInvoiceColumns = (onEdit, onDelete) => [
   //   id: "purchase_rate",
   // },
   { header: "Total Amount", accessorKey: "total_amount" },
+  { header: "Net Amount", accessorKey: "net_amount" },
   { header: "Total GST", accessorKey: "total_gst" },
   { header: "Total Discount", accessorKey: "total_discount" },
   {
