@@ -4,13 +4,15 @@ import purchaseInvoiceService from "@/services/purchaseInvoiceService";
 import purchaseService from "@/services/purchaseService";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-export function usepurchaseinvoice() {
+export function usepurchaseinvoice(filters) {
   return useQuery({
-    queryKey: ["purchaseinvoice"],
-    queryFn: purchaseService.getpurchaseInvoise,
-    staleTime: 1000 * 60 * 5, // 5 min cache
+    queryKey: ["purchaseinvoice", filters],
+    queryFn: () => purchaseService.getpurchaseInvoise(filters),
+    keepPreviousData: true,
+    staleTime: 1000 * 60 * 5,
   });
 }
+
 
 
 export function usepurchaseitems() {
