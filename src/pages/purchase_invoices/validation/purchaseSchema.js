@@ -18,29 +18,29 @@ export const purchaseItemSchema = yup.object().shape({
   qty: yup
     .number()
     .typeError("Qty is required")
-    .positive("Qty must be greater than 0")
-    .required("Qty is required"),
+    .positive("Qty must be greater than 0"),
+    // .required("Qty is required"),
 
   purchase_rate: yup
     .number()
     .typeError("Rate is required")
-    .positive("Rate must be greater than 0")
-    .required("Rate is required"),
+    .positive("Rate must be greater than 0"),
+    // .required("Rate is required"),
 
   mrp: yup
     .number()
     .typeError("MRP is required")
-    .positive("MRP must be greater than 0")
-    .required("MRP is required")
-    .test(
-      "mrp-gte-rate",
-      "MRP must be greater than or equal to Rate",
-      function (value) {
-        const { purchase_rate } = this.parent;
-        if (!value || !purchase_rate) return true;
-        return value >= purchase_rate;
-      }
-    ),
+    .positive("MRP must be greater than 0"),
+    // .required("MRP is required"),
+    // .test(
+    //   "mrp-gte-rate",
+    //   "MRP must be greater than or equal to Rate",
+    //   function (value) {
+    //     const { purchase_rate } = this.parent;
+    //     if (!value || !purchase_rate) return true;
+    //     return value >= purchase_rate;
+    //   }
+    // ),
 
   gst_percent: yup
     .number()
@@ -56,7 +56,7 @@ export const purchaseItemSchema = yup.object().shape({
   //   .max(100, "Discount% cannot be more than 100")
   //   .nullable(),
 
-  expiry_date: yup.string().required("expiry date needed"),
+  // expiry_date: yup.string().required("expiry date needed"),
   amount: yup.number().nullable(),
   pack_size: yup.number().nullable(),
 });

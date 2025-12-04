@@ -1,10 +1,22 @@
 export const getPurchaseReportColumns = () => [
-  { header: "Invoice No", accessorKey: "invoice_no" },
-  { header: "Invoice Date", accessorKey: "invoice_date" },
-  { header: "Store", accessorKey: "store_name" },
-  { header: "Supplier", accessorKey: "supplier_name" },
+  { header: "Invoice No",
+   accessorFn: (row) => row.purchaseInvoice?.invoice_no || "",
+     accessorKey: "invoice_no" },
+  { header: "Invoice Date",
+    accessorFn: (row) => row.purchaseInvoice?.invoice_date || "",
+    accessorKey: "invoice_date" },
 
-  { header: "Item", accessorKey: "item_name" },
+  { header: "Store",
+    accessorFn: (row) => row.purchaseInvoice?.store?.store_name || "",
+
+    accessorKey: "store_name" },
+  { header: "Supplier",
+      accessorFn: (row) => row.purchaseInvoice?.supplier?.supplier_name || "",
+     accessorKey: "supplier_name" },
+
+  { header: "Item",
+      accessorFn: (row) => row.item?.name || "",
+     accessorKey: "name" },
   { header: "Batch", accessorKey: "batch_no" },
   { header: "Expiry", accessorKey: "expiry_date" },
 
@@ -14,7 +26,15 @@ export const getPurchaseReportColumns = () => [
 
   { header: "Taxable Amount", accessorKey: "taxable_amount" },
   { header: "GST %", accessorKey: "gst_percent" },
-  { header: "GST Amount", accessorKey: "gst_amount" },
+ {
+  header: "GST Amount",
+  accessorFn: (row) => {
+    const cgst = parseFloat(row.cgst) || 0;
+    const sgst = parseFloat(row.sgst) || 0;
+    return (cgst + sgst).toFixed(2);
+  },
+},
 
-  { header: "Total (With GST)", accessorKey: "line_total_with_gst" }
+
+  { header: "Total (With GST)", accessorKey: "total_amount" }
 ];

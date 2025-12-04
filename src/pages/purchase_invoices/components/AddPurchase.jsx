@@ -213,16 +213,39 @@ export default function AddPurchaseForm({ onClose }) {
     };
   };
 
-  const handleItemChange = (index, field, value) => {
-    const updatedRow = recalcRow({ ...watchedItems[index], [field]: value });
+ const handleItemChange = (index, field, value) => {
+  const updatedRow = recalcRow({ ...watchedItems[index], [field]: value });
 
-    Object.keys(updatedRow).forEach((key) => {
-      setValue(`items.${index}.${key}`, updatedRow[key], {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
+  // Update all fields of this row
+  Object.keys(updatedRow).forEach((key) => {
+    setValue(`items.${index}.${key}`, updatedRow[key], {
+      shouldValidate: true,
+      shouldDirty: true,
     });
-  };
+  });
+
+  // Recalculate totals immediately
+  const newItems = [...watchedItems];
+  newItems[index] = updatedRow;
+
+  let total_amount = 0;
+  let total_gst = 0;
+  let total_discount = 0;
+
+  newItems.forEach((r) => {
+    total_amount += Number(r.taxable_amount || 0);
+    total_discount += Number(r.discount_amount || 0);
+    total_gst += Number(r.cgst || 0) + Number(r.sgst || 0) + Number(r.igst || 0);
+  });
+
+  setTotals({
+    total_amount: Number(total_amount.toFixed(2)),
+    total_gst: Number(total_gst.toFixed(2)),
+    total_discount: Number(total_discount.toFixed(2)),
+    net_amount: Number((total_amount + total_gst).toFixed(2)),
+  });
+};
+
 
   const handleAddRow = () => append(emptyItemRow);
   const handleRemoveRow = (index) => {
@@ -236,6 +259,7 @@ export default function AddPurchaseForm({ onClose }) {
 
   // ===== SUBMIT =====
   const onSubmit = (data) => {
+     console.log("SUBMIT CALLED", data);
     if (!currentUser?.user_id) return;
 
     const validItems = (data.items || []).filter((r) => r.item_id);
@@ -290,6 +314,8 @@ export default function AddPurchaseForm({ onClose }) {
 
   // ===== UI =====
   return (
+   <form onSubmit={handleSubmit(onSubmit, (err) => console.log("FORM ERRORS", err))}>
+
     <Box gap={2} sx={{ display: "flex", flexDirection: "column", height: "calc(100vh - 64px)" }}>
       {/* HEADER */}
       <Box>
@@ -648,15 +674,12 @@ export default function AddPurchaseForm({ onClose }) {
 
         <Box mt={2} display="flex" justifyContent="flex-end" gap={1}>
           {onClose && <Button variant="outlined" onClick={onClose}>Cancel</Button>}
-          <Button
-            variant="contained"
-            onClick={handleSubmit(onSubmit)}
-            disabled={addpurchaseinvoice.isLoading}
-          >
-            {addpurchaseinvoice.isLoading ? "Saving..." : "Save Purchase"}
-          </Button>
+            <Button variant="contained" color="primary" type="submit">
+      Save
+    </Button>
         </Box>
       </Box>
     </Box>
+    </form>
   );
 }
