@@ -22,7 +22,7 @@ import { useQuery } from "@tanstack/react-query";
 import purchaseService from "@/services/purchaseService";
 import apiClient from "@/services/apiClient";
 import { useStores } from "@/hooks/useStore";
-import { usepurchaseitems } from "@/hooks/usePurchaseInvoice";
+import { usepurchaseinvoice, usepurchaseitems } from "@/hooks/usePurchaseInvoice";
 import { useCreatePurchaseReturn } from "@/hooks/usePurchaseReturn";
 import { showErrorToast, showSuccessToast } from "@/lib/toastService";
 import { useItem } from "@/hooks/useItem";
@@ -41,18 +41,14 @@ export default function PurchaseReturnForm({ onClose, onSubmit, editMode }) {
   // ------------------------------
   // LOAD DATA
   // ------------------------------
-
-  const { data: storeList = [] } = useStores();
-
-  const { data: purchaseList = [] } = useQuery({
-    queryKey: ["purchase-invoices"],
-    queryFn: purchaseService.getpurchaseInvoise,
-  });
-
-  const { data: items = [] } = useItem();
+const { data: storeList = [] } = useStores();
+const { data: purchaseList = [] } = usepurchaseinvoice();
+const { data: items = {} } = useItem();
+const { data: purchaseItems = [] } = usepurchaseitems();
+console.log(storeList,"storelist");
+console.log(purchaseList,"purchaseList");
 
 
-  const { data: purchaseItems = [] } = usepurchaseitems();
 
   const { data: currentUser } = useCurrentUser();
 
@@ -217,7 +213,7 @@ useEffect(() => {
           fullWidth
           size="small"
         >
-          {purchaseList.map((p) => (
+          {purchaseList?.data?.map((p) => (
             <MenuItem key={p.purchase_id} value={p.purchase_id}>
               {p.purchase_id} — {p.invoice_no}
             </MenuItem>
@@ -233,11 +229,12 @@ useEffect(() => {
           fullWidth
           size="small"
         >
-          {storeList.map((s) => (
-            <MenuItem key={s.store_id} value={s.store_id}>
-              {s.store_name}
-            </MenuItem>
-          ))}
+          {storeList?.stores?.map(store => (
+  <MenuItem key={store.store_id} value={store.store_id}>
+    {store.store_name}
+  </MenuItem>
+))}
+
         </TextField>
 
         <TextField
