@@ -4,8 +4,8 @@ import apiClient from "./apiClient";
 const stockService = {
  
     getStocks: async () => {
-      const { data } = await apiClient.get("/stock");
-      return data;
+      const res= await apiClient.get("/stock");
+      return res.data.data;
     },
 };
 
