@@ -1,12 +1,13 @@
 import apiClient from "./apiClient";
 
-
 const stockService = {
- 
-    getStocks: async () => {
-      const res= await apiClient.get("/stock");
-      return res.data.data;
-    },
+  getStocks: async (filters) => {
+    const res = await apiClient.get("/stock", {
+      params: filters,
+    });
+
+    return res.data; // keep full data with pagination
+  },
 };
 
 export default stockService;

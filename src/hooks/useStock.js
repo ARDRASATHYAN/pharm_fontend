@@ -1,14 +1,14 @@
 import stockService from "@/services/stockService";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-export function usestock() {
+export function usestock(filters) {
   return useQuery({
-    queryKey: ["stock"],
-    queryFn: stockService.getStocks,
-    staleTime: 1000 * 60 * 5, // 5 min cache
+    queryKey: ["stock", filters], // re-fetch on filter change
+    queryFn: () => stockService.getStocks(filters),
+    keepPreviousData: true,
+    staleTime: 1000 * 60 * 5,
   });
 }
-
 
 const fetchStoreStock = async ({ queryKey }) => {
   const [, { store_id, item_id }] = queryKey;

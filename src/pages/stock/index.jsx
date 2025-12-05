@@ -56,47 +56,10 @@ export default function StockMockApiHeader() {
   });
 
   console.log("data",stockData);
+
+
   
-  // const addInvoice = useAddPurchaseInvoice();
-  // const updateInvoice = useUpdatePurchaseInvoice();
-  // const deleteInvoice = useDeletePurchaseInvoice();
 
-  // ----------------------------
-  // Add / Update
-  // ----------------------------
-  const handleSubmit = (payload) => {
-    if (editMode && editingInvoice?.purchase_id) {
-      updateInvoice.mutate(
-        { id: editingInvoice.purchase_id, data: payload },
-        {
-          onSuccess: () => { showSuccessToast("Invoice updated"); setOpenForm(false); setEditMode(false); },
-          onError: () => showErrorToast("Failed to update invoice"),
-        }
-      );
-    } else {
-      addInvoice.mutate(payload, {
-        onSuccess: () => { showSuccessToast("Invoice created"); setOpenForm(false); },
-        onError: () => showErrorToast("Failed to create invoice"),
-      });
-    }
-  };
-
-  // ----------------------------
-  // Edit
-  // ----------------------------
-  const handleEdit = (invoice) => { setEditingInvoice(invoice); setEditMode(true); setOpenForm(true); };
-
-  // ----------------------------
-  // Delete
-  // ----------------------------
-  const handleDelete = (id) => { setSelectedInvoiceId(id); setDeleteDialogOpen(true); };
-  const confirmDelete = () => {
-    if (!selectedInvoiceId) return;
-    deleteInvoice.mutate(selectedInvoiceId, {
-      onSuccess: () => { showSuccessToast("Deleted"); setDeleteDialogOpen(false); setSelectedInvoiceId(null); },
-      onError: () => { showErrorToast("Delete failed"); setDeleteDialogOpen(false); },
-    });
-  };
 
   // ----------------------------
   // Filters & search
@@ -106,11 +69,11 @@ export default function StockMockApiHeader() {
   };
   const handlePageChange = (page) => setFilters(prev => ({ ...prev, page: Number(page) || 1 }));
 
-  const columns = getStockColumns(handleEdit, handleDelete);
+  const columns = getStockColumns();
 
   return (
     <>
-      <h2 className="text-xl font-bold text-blue-700 tracking-wide mb-2">Purchase Invoices</h2>
+      <h2 className="text-xl font-bold text-blue-700 tracking-wide mb-2">stock</h2>
 
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
         <TextField
@@ -119,42 +82,26 @@ export default function StockMockApiHeader() {
           value={filters.search}
           onChange={handleSearchChange}
         />
-        <Button
-          variant="contained"
-          color="primary"
-          size="small"
-          onClick={() => { setOpenForm(true); setEditMode(false); setEditingInvoice(null); }}
-        >
-          Add Invoice
-        </Button>
+       
       </Box>
 
       <BasicTable
         columns={columns}
-        data={stockData}
+        data={stockData?.data}
         loading={isLoading}
-        pagination={{
-          page: stockData?.page || 1,
-          perPage: filters.perPage,
-          totalPages: stockData?.totalPages || 1,
-          total: stockData?.total || 0,
-        }}
+       pagination={{
+    page: stockData?.pagination?.page || 1,
+    perPage: stockData?.pagination?.limit || filters.perPage,
+    totalPages: stockData?.pagination?.totalPages || 1,
+    total: stockData?.pagination?.total || 0,
+  }}
         rowPadding="py-2" 
         onPageChange={handlePageChange}
       />
 
     
 
-      <ConfirmDialog
-        open={deleteDialogOpen}
-        title="Delete Purchase Invoice"
-        description="Are you sure you want to delete this purchase invoice? This action cannot be undone."
-        confirmText="Delete"
-        cancelText="Cancel"
-        confirmColor="error"
-        onConfirm={confirmDelete}
-        onCancel={() => { setDeleteDialogOpen(false); setSelectedInvoiceId(null); }}
-      />
+     
     </>
   );
 }
