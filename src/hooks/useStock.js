@@ -2,13 +2,16 @@ import stockService from "@/services/stockService";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export function usestock(filters) {
+  const { search, page, perPage } = filters;
+
   return useQuery({
-    queryKey: ["stock", filters], // re-fetch on filter change
-    queryFn: () => stockService.getStocks(filters),
+    queryKey: ["stock", search, page, perPage], // primitive values only
+    queryFn: () => stockService.getStocks({ search, page, perPage }),
     keepPreviousData: true,
     staleTime: 1000 * 60 * 5,
   });
 }
+
 
 const fetchStoreStock = async ({ queryKey }) => {
   const [, { store_id, item_id }] = queryKey;
