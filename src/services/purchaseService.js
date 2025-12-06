@@ -20,8 +20,15 @@ const purchaseService = {
     getPurchaseById: async (id) => {
   const { data } = await apiClient.get(`/purchase/${id}`);
   return data;
-}
+},
 
+
+  getPurchaseItemsByPurchaseId: async (purchase_id) => {
+  const { data } = await apiClient.get(`/purchase/purchaseid-item`, {
+    params: { purchase_id }
+  });
+  return data;
+}
 };
 
 export default purchaseService;

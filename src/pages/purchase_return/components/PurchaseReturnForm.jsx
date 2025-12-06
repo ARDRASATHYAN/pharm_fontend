@@ -18,14 +18,12 @@ import {
 
 import { AddCircleOutline, DeleteOutline } from "@mui/icons-material";
 import { useCurrentUser } from "@/hooks/useAuth";
-import { useQuery } from "@tanstack/react-query";
-import purchaseService from "@/services/purchaseService";
-import apiClient from "@/services/apiClient";
 import { useStores } from "@/hooks/useStore";
-import { usepurchaseinvoice, usepurchaseitems } from "@/hooks/usePurchaseInvoice";
+import {
+  usepurchaseinvoice,
+  usePurchaseItemsByPurchaseId,
+} from "@/hooks/usePurchaseInvoice";
 import { useCreatePurchaseReturn } from "@/hooks/usePurchaseReturn";
-import { showErrorToast, showSuccessToast } from "@/lib/toastService";
-import { useItem } from "@/hooks/useItem";
 
 const emptyItemRow = {
   item_id: "",
@@ -37,28 +35,7 @@ const emptyItemRow = {
   expiry_date: "",
 };
 
-export default function PurchaseReturnForm({ onClose, onSubmit, editMode }) {
-  // ------------------------------
-  // LOAD DATA
-  // ------------------------------
-const { data: storeList = [] } = useStores();
-const { data: purchaseList = [] } = usepurchaseinvoice();
-const { data: items = {} } = useItem();
-const { data: purchaseItems = [] } = usepurchaseitems();
-console.log(storeList,"storelist");
-console.log(purchaseList,"purchaseList");
-
-
-
-  const { data: currentUser } = useCurrentUser();
-
-
-  const addpurchasereturn=useCreatePurchaseReturn()
-
-  // ------------------------------
-  // STATES
-  // ------------------------------
-
+export default function PurchaseReturnForm({ onClose, editMode }) {
   const [header, setHeader] = useState({
     purchase_id: "",
     store_id: "",
@@ -69,90 +46,107 @@ console.log(purchaseList,"purchaseList");
 
   const [rows, setRows] = useState([emptyItemRow]);
 
-  // ------------------------------
-  // AUTO-FILL STORE + ITEMS WHEN PURCHASE SELECTED
-  // ------------------------------
+  // ---------------- LOAD DATA ----------------
+  const { data: storeList = [] } = useStores();
+  const { data: purchaseData = [] } = usepurchaseinvoice();
+  const purchaseList = purchaseData?.data || [];
+  const { data } = usePurchaseItemsByPurchaseId(header.purchase_id);
+  const purchaseItems = data?.data || [];
 
-useEffect(() => {
-  if (!header.purchase_id) return;
+  const { data: currentUser } = useCurrentUser();
+  const addpurchasereturn = useCreatePurchaseReturn();
 
-  const selectedPurchase = purchaseList.find(
-    (p) => p.purchase_id == header.purchase_id
-  );
-
-  if (selectedPurchase) {
-    setHeader((prev) => ({
-      ...prev,
-      store_id: selectedPurchase.store_id,
-    }));
-  }
-
-  // 🔁 DO NOT touch rows here
-}, [header.purchase_id, purchaseList]);
-
-
-  // ------------------------------
-  // HANDLERS
-  // ------------------------------
-
+  // ---------------- HANDLE HEADER CHANGE ----------------
   const handleHeaderChange = (e) => {
     setHeader({ ...header, [e.target.name]: e.target.value });
   };
 
+  // ---------------- HANDLE ROW CHANGE ----------------
   const handleRowChange = (index, field, value) => {
     const updated = [...rows];
     updated[index][field] = value;
 
+
+    if (field === "qty") {
+      const maxQty = updated[index].maxQty || Infinity;
+      const qty = Math.min(parseFloat(value || 0), maxQty); // cannot exceed purchased qty
+      updated[index][field] = qty;
+    } else {
+      updated[index][field] = value;
+    }
+
+
     if (field === "qty" || field === "rate") {
       const qty = parseFloat(updated[index].qty || 0);
       const rate = parseFloat(updated[index].rate || 0);
-      updated[index].amount = (qty * rate).toFixed(2);
+
+      // Assume you have purchaseItem details (discount, GST, schemeDiscount)
+      const purchaseItem = purchaseItems.find(pi => pi.item_id == updated[index].item_id);
+      const discountPercent = parseFloat(purchaseItem?.discount_percent || 0);
+      const schemeDiscountPercent = parseFloat(purchaseItem?.scheme_discount_percent || 0);
+      const gstPercent = parseFloat(purchaseItem?.gst_percent || 0);
+
+      // Apply discount and scheme discount
+      const priceAfterDiscount = rate * (1 - discountPercent / 100) * (1 - schemeDiscountPercent / 100);
+
+      // Add GST
+      const priceWithGST = priceAfterDiscount * (1 + gstPercent / 100);
+
+      updated[index].amount = (qty * priceWithGST).toFixed(2);
     }
+
 
     setRows(updated);
   };
 
-  const handleAddRow = () => {
-    setRows([...rows, { ...emptyItemRow }]);
-  };
-
+  const handleAddRow = () => setRows([...rows, { ...emptyItemRow }]);
   const handleRemoveRow = (index) => {
     if (rows.length === 1) return;
     setRows(rows.filter((_, i) => i !== index));
   };
 
-  // ------------------------------
-  // AUTO TOTAL
-  // ------------------------------
-
+  // ---------------- AUTO TOTAL ----------------
   useEffect(() => {
-    const total = rows.reduce(
-      (sum, r) => sum + parseFloat(r.amount || 0),
-      0
-    );
-
+    const total = rows.reduce((sum, r) => sum + parseFloat(r.amount || 0), 0);
     setHeader((prev) => ({ ...prev, total_amount: total.toFixed(2) }));
   }, [rows]);
 
-  // ------------------------------
-  // SUBMIT
-  // ------------------------------
+  // ---------------- AUTO-FILL STORE ----------------
+  useEffect(() => {
+    if (!header.purchase_id) return;
 
+    const selectedPurchase = purchaseList.find(
+      (p) => p.purchase_id == header.purchase_id
+    );
 
+    if (selectedPurchase) {
+      setHeader((prev) => ({
+        ...prev,
+        store_id: selectedPurchase.store_id,
+      }));
+    }
+  }, [header.purchase_id, purchaseList]);
+
+  // ---------------- GET ITEM NAME ----------------
+  const getItemName = (item_id) => {
+    const found = purchaseItems.find((pi) => pi.item_id == item_id);
+    return found?.item?.name || "Unknown Item";
+  };
+
+  // ---------------- RESET FORM ----------------
   const resetForm = () => {
-  setHeader({
-    purchase_id: "",
-    store_id: "",
-    return_date: "",
-    reason: "",
-    total_amount: 0,
-  });
+    setHeader({
+      purchase_id: "",
+      store_id: "",
+      return_date: "",
+      reason: "",
+      total_amount: 0,
+    });
+    setRows([emptyItemRow]);
+  };
 
-  setRows([emptyItemRow]);
-};
-
-
-  const handleSubmit = async () => {
+  // ---------------- HANDLE SUBMIT ----------------
+  const handleSubmit = () => {
     try {
       const payload = {
         purchase_id: header.purchase_id,
@@ -168,33 +162,24 @@ useEffect(() => {
           item_reason: r.reason,
           expiry_date: r.expiry_date,
         })),
-      }
+      };
+
       addpurchasereturn.mutate(payload, {
         onSuccess: () => {
-          showSuccessToast("Purchased return  items updated successfully");
+          alert("Purchase return items updated successfully");
           resetForm();
           onClose?.();
         },
-        onError:(error)=>{
-          showErrorToast("purchasereturn not created")
-        }
+        onError: () => {
+          alert("Purchase return not created");
+        },
       });
     } catch (err) {
-     console.log(err);
-     
+      console.log(err);
     }
   };
 
-  const getItemName = (item_id) => {
-    const found = items.find((i) => i.item_id == item_id);
-    return found ? found.name : "";
-  };
-
-
-  // ------------------------------
-  // UI
-  // ------------------------------
-
+  // ---------------- RENDER ----------------
   return (
     <Box gap={3} sx={{ display: "flex", flexDirection: "column" }}>
       <Typography variant="h6" fontWeight={600}>
@@ -213,7 +198,7 @@ useEffect(() => {
           fullWidth
           size="small"
         >
-          {purchaseList?.data?.map((p) => (
+          {purchaseList?.map((p) => (
             <MenuItem key={p.purchase_id} value={p.purchase_id}>
               {p.purchase_id} — {p.invoice_no}
             </MenuItem>
@@ -229,12 +214,11 @@ useEffect(() => {
           fullWidth
           size="small"
         >
-          {storeList?.stores?.map(store => (
-  <MenuItem key={store.store_id} value={store.store_id}>
-    {store.store_name}
-  </MenuItem>
-))}
-
+          {storeList?.stores?.map((store) => (
+            <MenuItem key={store.store_id} value={store.store_id}>
+              {store.store_name}
+            </MenuItem>
+          ))}
         </TextField>
 
         <TextField
@@ -269,7 +253,6 @@ useEffect(() => {
           </IconButton>
         </Box>
         <Divider />
-
         <Paper sx={{ mt: 1, maxHeight: 350, overflow: "auto" }}>
           <Table size="small" stickyHeader>
             <TableHead>
@@ -287,45 +270,43 @@ useEffect(() => {
             <TableBody>
               {rows.map((row, index) => (
                 <TableRow key={index}>
-                 <TableCell>
-  <TextField
-    select
-    size="small"
-    fullWidth
-    value={row.item_id}
-    onChange={(e) => {
-      const itemId = e.target.value;
-      handleRowChange(index, "item_id", itemId);
+                  <TableCell>
+                    <TextField
+                      select
+                      size="small"
+                      fullWidth
+                      value={row.item_id}
+                      onChange={(e) => {
+                        const itemId = e.target.value;
+                        handleRowChange(index, "item_id", itemId);
 
-      // Optional: auto-fill batch, rate, expiry from purchaseItems
-      const purchaseItem = purchaseItems.find(
-        (pi) =>
-          pi.purchase_id == header.purchase_id &&
-          pi.item_id == itemId
-      );
+                        const purchaseItem = purchaseItems.find(
+                          (pi) => pi.item_id == itemId
+                        );
 
-      if (purchaseItem) {
-        const updated = [...rows];
-        updated[index] = {
-          ...updated[index],
-          batch_no: purchaseItem.batch_no || "",
-          rate: purchaseItem.purchase_rate || "",
-          expiry_date: purchaseItem.expiry_date || "",
-        };
-        setRows(updated);
-      }
-    }}
-  >
-    {purchaseItems
-      .filter((pi) => pi.purchase_id == header.purchase_id)
-      .map((pi) => (
-        <MenuItem key={pi.item_id} value={pi.item_id}>
-          {getItemName(pi.item_id)}
-        </MenuItem>
-      ))}
-  </TextField>
-</TableCell>
-
+                        if (purchaseItem) {
+                          const updated = [...rows];
+                          updated[index] = {
+                            ...updated[index],
+                            batch_no: purchaseItem.batch_no || "",
+                            rate: purchaseItem.purchase_rate || "",
+                            expiry_date: purchaseItem.expiry_date || "",
+                            maxQty: purchaseItem.qty,
+                          };
+                          setRows(updated);
+                        }
+                      }}
+                    >
+                      {purchaseItems.map((pi) => (
+                        <MenuItem
+                          key={pi.purchase_item_id}
+                          value={pi.item_id}
+                        >
+                          {pi.item?.name || "Unknown Item"}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  </TableCell>
 
                   <TableCell>
                     <TextField
@@ -340,7 +321,7 @@ useEffect(() => {
 
                   <TableCell>
                     <TextField
-                      type="number"
+                      type="text"
                       size="small"
                       fullWidth
                       value={row.qty}
@@ -366,8 +347,6 @@ useEffect(() => {
                     <TextField size="small" fullWidth value={row.amount} />
                   </TableCell>
 
-                
-
                   <TableCell>
                     <TextField
                       type="date"
@@ -392,7 +371,6 @@ useEffect(() => {
                 </TableRow>
               ))}
             </TableBody>
-
           </Table>
         </Paper>
       </Box>

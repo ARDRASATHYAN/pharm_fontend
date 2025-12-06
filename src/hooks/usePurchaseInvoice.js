@@ -14,6 +14,16 @@ export function usepurchaseinvoice(filters) {
 }
 
 
+export const usePurchaseItemsByPurchaseId = (purchase_id) => {
+  return useQuery({
+    queryKey: ["purchase-items", purchase_id],
+    queryFn: () => purchaseService.getPurchaseItemsByPurchaseId(purchase_id),
+    enabled: !!purchase_id,
+  });
+};
+
+
+
 
 export function usepurchaseitems() {
   return useQuery({

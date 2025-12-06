@@ -3,7 +3,7 @@ import apiClient from "./apiClient";
 
 const purchaseReturnService = {
   createPurchaseReturn: async (payload) => {
-    const { data } = await apiClient.post("/purchasereturn", payload);
+    const { data } = await apiClient.post("/purchase-return", payload);
     return data;
   },
 
