@@ -19,7 +19,7 @@ getpurchasereport: async (filters = {}) => {
     },
 
     getPurchaseReturnReport: async (filters = {}) => {
-      const { data } = await apiClient.get("/reports/purchase-return",{params: filters} );
+      const { data } = await apiClient.get("/purchase-return/purchase-return",{params: filters} );
       return data.data;
     },
 

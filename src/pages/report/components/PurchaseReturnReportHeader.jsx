@@ -1,60 +1,60 @@
-// src/pages/reports/components/purchaseReturnReportHeader.js
+// src/pages/reports/components/PurchaseReturnReportHeader.js
 
 export const getPurchaseReturnReportColumns = () => [
   {
     header: "Return Date",
-    accessorFn: (row) => row.purchaseReturn?.return_date || "",
-    id: "return_date",
+    accessorKey: "return_date",
   },
+
   {
     header: "Invoice No",
-    accessorFn: (row) => row.purchaseReturn?.purchase?.invoice_no || "",
+    accessorFn: (row) => row.purchase?.invoice_no || "",
     id: "invoice_no",
   },
   {
     header: "Invoice Date",
-    accessorFn: (row) => row.purchaseReturn?.purchase?.invoice_date || "",
+    accessorFn: (row) => row.purchase?.invoice_date || "",
     id: "invoice_date",
   },
+
+  // --- Backend sends only store_id ---
   {
     header: "Store",
-    accessorFn: (row) => row.purchaseReturn?.store?.store_name || "",
-    id: "store_name",
+    accessorFn: (row) => row.store_id || "",
+    id: "store",
   },
+
+  // --- Backend sends created_by ---
   {
     header: "Returned By",
-    accessorFn: (row) => row.purchaseReturn?.creator?.username || "",
+    accessorFn: (row) => row.created_by || "",
     id: "returned_by",
   },
-  {
-    header: "Item",
-    accessorFn: (row) => row.item?.name || "",
-    id: "item_name",
-  },
-  {
-    header: "Pack Size",
-    accessorFn: (row) => row.item?.pack_size || "",
-    id: "pack_size",
-  },
+
+  // --- Item Level Data ---
   {
     header: "Batch No",
-    accessorKey: "batch_no",
+    accessorFn: (row) => row.purchaseReturnItems?.[0]?.batch_no || "",
+    id: "batch_no",
   },
   {
     header: "Qty",
-    accessorKey: "qty",
+    accessorFn: (row) => row.purchaseReturnItems?.[0]?.qty || "",
+    id: "qty",
   },
   {
     header: "Rate",
-    accessorKey: "rate",
+    accessorFn: (row) => row.purchaseReturnItems?.[0]?.rate || "",
+    id: "rate",
   },
   {
     header: "Amount",
-    accessorKey: "amount",
+    accessorFn: (row) => row.purchaseReturnItems?.[0]?.amount || "",
+    id: "amount",
   },
+
   {
     header: "Reason",
-    accessorFn: (row) => row.purchaseReturn?.reason || "",
-    id: "reason",
+    accessorKey: "reason",
   },
 ];
