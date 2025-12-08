@@ -16,7 +16,6 @@ import {
   Button,
 } from "@mui/material";
 import { AddCircleOutline, DeleteOutline } from "@mui/icons-material";
-
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -26,156 +25,156 @@ import { useStores } from "@/hooks/useStore";
 import { useCurrentUser } from "@/hooks/useAuth";
 import { useAddDamagedStock } from "@/hooks/useDamagedStock";
 import { usestock } from "@/hooks/useStock";
-import { showSuccessToast } from "@/lib/toastService";
+import { showErrorToast, showSuccessToast } from "@/lib/toastService";
 import { useItem } from "@/hooks/useItem";
 
-const emptyRow = { item_id: "", batch_no: "", qty: "", reason: "", max_qty: null };
-
-const initialFormState = {
-  store_id: "",
-  bill_date: dayjs().toISOString(),
+const emptyRow = {
+  item_id: "",
+  batch_no: "",
+  qty: "",
+  reason: "",
+  max_qty: null,
 };
 
 export default function AddDamagedStockForm({ onClose }) {
-  const { data: store = [], isLoading: loadingStore } = useStores();
-  const { data: itemsMaster = [], isLoading: loadingItems } = useItem();
-  const { data: currentUserResponse } = useCurrentUser();
-  const { data: stock = [] } = usestock?.() || { data: [] };
+  // ------------------------------
+  // 1️⃣ State
+  // ------------------------------
+  const [rows, setRows] = useState([emptyRow]);
+  const [formData, setFormData] = useState({
+    store_id: "",
+    bill_date: dayjs().toISOString(),
+  });
+
+  // ------------------------------
+  // 2️⃣ Hooks
+  // ------------------------------
+
+  const { data: storeResponse = {} } = useStores();
+  const stores = storeResponse?.stores || [];
+
+  const { data:currentUser } = useCurrentUser();
+  console.log("user",currentUser);
+  
 
   const addDamagedStock = useAddDamagedStock();
 
-  const currentUser = Array.isArray(currentUserResponse)
-    ? currentUserResponse[0]
-    : currentUserResponse || null;
+  // Stock for selected store
+  const { data: stockResponse = {} } = usestock({ store_id: formData.store_id });
+  const storeStockData = Array.isArray(stockResponse.data)
+    ? stockResponse.data
+    : [];
+  
 
-  const [formData, setFormData] = useState(initialFormState);
-  const [rows, setRows] = useState([emptyRow]);
+  // All Items
+  const { data: itemRes = {} } = useItem();
+  const allItems = Array.isArray(itemRes.data) ? itemRes.data : [];
 
-  // Filter stock based on selected store
-  const storeStock = useMemo(() => {
-    if (!formData.store_id) return [];
-    return (stock || []).filter(
-      (s) => String(s.store_id) === String(formData.store_id)
-    );
-  }, [stock, formData.store_id]);
+  // ------------------------------
+  // 3️⃣ Derived Data
+  // ------------------------------
 
-  // Items available in this store (based on stock)
-  const storeItems = useMemo(() => {
-    const itemMap = new Map();
-    storeStock.forEach((s) => {
-      if (!itemMap.has(s.item_id)) {
-        const item = itemsMaster.find((it) => it.item_id === s.item_id);
-        itemMap.set(s.item_id, {
-          item_id: s.item_id,
-          item_name: item?.name || item?.item_name || `Item #${s.item_id}`,
-        });
-      }
-    });
-    return Array.from(itemMap.values());
-  }, [storeStock, itemsMaster]);
+  // Unique items in selected store
+const storeItems = useMemo(() => {
+  if (!formData.store_id) return [];
+
+  const itemsInStore = storeStockData.filter(
+    (s) => String(s.store_id) === String(formData.store_id)
+  );
+  console.log("itemsInStore",itemsInStore);
+  
+
+  const uniqueItems = [];
+
+  itemsInStore.forEach((s) => {
+    if (!uniqueItems.some((u) => String(u.item_id) === String(s.item_id))) {
+      uniqueItems.push({
+        item_id: s.item_id,
+        name: s.item.name,      // stock contains item_name
+      });
+    }
+  });
+
+  return uniqueItems;
+}, [storeStockData, formData.store_id]);
+
+
+  // ------------------------------
+  // 4️⃣ Handlers
+  // ------------------------------
 
   const handleHeaderChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
-    // If store changed, reset rows because stock list changes
-    if (name === "store_id") {
-      setRows([emptyRow]);
+    if (e.target.name === "store_id") {
+      setRows([emptyRow]); // reset rows when store changes
     }
-  };
-
-  const handleAddRow = () => {
-    setRows((prev) => [...prev, emptyRow]);
-  };
-
-  const handleRemoveRow = (index) => {
-    setRows((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleRowChange = (index, field, value) => {
     setRows((prev) => {
-      const newRows = [...prev];
-      newRows[index] = {
-        ...newRows[index],
-        [field]: value,
-      };
-      return newRows;
+      const updated = [...prev];
+      updated[index][field] = value;
+      return updated;
     });
   };
 
-  // 🔹 Reset form after success
-  const resetForm = () => {
-    setFormData((prev) => ({
-      ...initialFormState,
-      // if you want to keep same store after save, uncomment:
-      // store_id: prev.store_id,
-    }));
-    setRows([emptyRow]);
+  const handleAddRow = () => setRows((prev) => [...prev, emptyRow]);
+
+  const handleRemoveRow = (index) =>
+    setRows((prev) => prev.filter((_, i) => i !== index));
+
+  const handleSubmit = () => {
+
+    if (!currentUser) {
+    showErrorToast("Current user not loaded yet");
+    return;
+  }
+
+  const payload = {
+  store_id: formData.store_id,
+  entry_date: formData.bill_date,
+  created_by: currentUser.user_id,
+  items: rows.map((r) => ({
+    item_id: r.item_id,
+    batch_no: r.batch_no,
+    qty: Number(r.qty),
+    reason: r.reason,
+  }))
+};
+
+
+    addDamagedStock.mutate(payload, {
+      onSuccess: () => {
+        showSuccessToast("Damaged stock saved successfully!");
+
+          setFormData({
+    store_id: "",
+    bill_date: dayjs().toISOString(),
+    qty:"",
+    reason:""
+  });
+        onClose?.();
+      },
+    });
   };
 
-  const handleSubmit = async () => {
-    try {
-      if (!formData.store_id) {
-        alert("Please select a store");
-        return;
-      }
-
-      if (!currentUser?.user_id) {
-        alert("User not found");
-        return;
-      }
-
-      const items = rows
-        .filter((r) => r.item_id && r.batch_no && r.qty)
-        .map((r) => ({
-          item_id: Number(r.item_id),
-          batch_no: r.batch_no,
-          qty: Number(r.qty),
-          reason: r.reason || "",
-        }));
-
-      if (!items.length) {
-        alert("Please add at least one damaged item");
-        return;
-      }
-
-      await addDamagedStock.mutateAsync({
-        store_id: Number(formData.store_id),
-        entry_date: formData.bill_date,
-        created_by: currentUser.user_id,
-        items,
-      });
-
-     showSuccessToast("successfully created")
-      resetForm();          // 🔸 clear form and rows
-      onClose && onClose(); // 🔸 close dialog if provided
-    } catch (err) {
-      console.error(err);
-      const msg =
-        err?.response?.data?.message || "Error saving damaged stock entry";
-      alert(msg);
-    }
-  };
+  // ------------------------------
+  // 5️⃣ JSX
+  // ------------------------------
 
   return (
     <Box
       gap={3}
       sx={{ display: "flex", flexDirection: "column", height: "calc(100vh - 64px)" }}
     >
-      {/* Header */}
+      {/* HEADER SECTION */}
       <Box>
-        <Typography
-          variant="subtitle1"
-          fontWeight={600}
-          display="flex"
-          className="text-blue-700"
-        >
+        <Typography variant="subtitle1" fontWeight={600} className="text-blue-700">
           Damaged Stock Details
         </Typography>
         <Divider />
+
         <Box display="flex" gap={3} mt={1}>
           {/* Store */}
           <TextField
@@ -187,263 +186,185 @@ export default function AddDamagedStockForm({ onClose }) {
             fullWidth
             size="small"
           >
-            {loadingStore ? (
-              <MenuItem disabled>Loading...</MenuItem>
-            ) : (
-              store.map((s) => (
-                <MenuItem key={s.store_id} value={s.store_id}>
-                  {s.store_name || s.store_id}
-                </MenuItem>
-              ))
-            )}
+            <MenuItem value="">Select Store</MenuItem>
+            {stores.map((s) => (
+              <MenuItem key={s.store_id} value={s.store_id}>
+                {s.store_name}
+              </MenuItem>
+            ))}
           </TextField>
 
+          {/* Date */}
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DatePicker
               label="Entry Date"
-              value={formData.bill_date ? dayjs(formData.bill_date) : null}
-              onChange={(newValue) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  bill_date: newValue ? newValue.toISOString() : null,
-                }))
+              value={dayjs(formData.bill_date)}
+              onChange={(newDate) =>
+                setFormData((p) => ({ ...p, bill_date: newDate.toISOString() }))
               }
-              slotProps={{
-                textField: { fullWidth: true, size: "small", required: true },
-              }}
+              slotProps={{ textField: { fullWidth: true, size: "small" } }}
             />
           </LocalizationProvider>
 
+          {/* Created By */}
           <TextField
-            label="Created By"
-            value={currentUser?.username || currentUser?.user_id || ""}
             fullWidth
             size="small"
+            label="Created By"
+            value={currentUser?.username || currentUser?.user_id}
             InputProps={{ readOnly: true }}
           />
         </Box>
       </Box>
 
-      {/* Items Table */}
-      <Box mt={2} sx={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
-        <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography
-            variant="subtitle1"
-            fontWeight={600}
-            gutterBottom
-            className="text-blue-700"
-          >
+      {/* TABLE SECTION */}
+      <Box mt={2} sx={{ flex: 1, overflowY: "auto" }}>
+        <Box display="flex" justifyContent="space-between">
+          <Typography variant="subtitle1" fontWeight={600} className="text-blue-700">
             Damaged Items
           </Typography>
+
           <Tooltip title="Add Item">
-            <IconButton onClick={handleAddRow} size="small">
+            <IconButton onClick={handleAddRow}>
               <AddCircleOutline />
             </IconButton>
           </Tooltip>
         </Box>
+
         <Divider />
+
         <Paper variant="outlined" sx={{ mt: 1 }}>
-          <Box sx={{ overflowX: "auto" }}>
-            <Table size="small" stickyHeader>
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ minWidth: 160 }}>Item</TableCell>
-                  <TableCell sx={{ minWidth: 140 }}>Batch</TableCell>
-                  <TableCell sx={{ minWidth: 80 }}>Qty</TableCell>
-                  <TableCell sx={{ minWidth: 140 }}>Reason</TableCell>
-                  <TableCell sx={{ width: 50 }} align="center">
-                    Del
-                  </TableCell>
-                </TableRow>
-              </TableHead>
+          <Table size="small" stickyHeader>
+            <TableHead>
+              <TableRow>
+                <TableCell>Item</TableCell>
+                <TableCell>Batch</TableCell>
+                <TableCell>Qty</TableCell>
+                <TableCell>Reason</TableCell>
+                <TableCell align="center">Del</TableCell>
+              </TableRow>
+            </TableHead>
 
-              <TableBody>
-                {rows.map((row, index) => {
-                  const rowBatches = storeStock.filter(
-                    (s) =>
-                      String(s.item_id) === String(row.item_id) &&
-                      Number(s.qty_in_stock) > 0
-                  );
+            <TableBody>
+              {rows.map((row, index) => {
+                const batches = storeStockData.filter(
+                  (s) => s.item_id == row.item_id && s.store_id == formData.store_id
+                );
 
-                  return (
-                    <TableRow key={index}>
-                      {/* Item */}
-                      <TableCell padding="none" sx={{ p: 0.25 }}>
-                        <TextField
-                          select
-                          label="Item"
-                          name="item_id"
-                          value={row.item_id || ""}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            setRows((prev) => {
-                              const newRows = [...prev];
-                              newRows[index] = {
-                                ...newRows[index],
-                                item_id: value,
-                                batch_no: "",
-                                qty: "",
-                                reason: "",
-                                max_qty: null,
-                              };
-                              return newRows;
-                            });
-                          }}
-                          fullWidth
-                          size="small"
-                          required
-                          disabled={!formData.store_id}
-                        >
-                          {!formData.store_id && (
-                            <MenuItem disabled>Select store first</MenuItem>
-                          )}
+                return (
+                  <TableRow key={index}>
+                    {/* ITEM */}
+                    <TableCell>
+                      <TextField
+                        select
+                        size="small"
+                        fullWidth
+                        value={row.item_id}
+                        onChange={(e) => {
+                          const item = e.target.value;
+                          setRows((prev) => {
+                            const updated = [...prev];
+                            updated[index] = { ...emptyRow, item_id: item };
+                            return updated;
+                          });
+                        }}
+                      >
+                        <MenuItem value="">Select Item</MenuItem>
 
-                          {formData.store_id && storeItems.length === 0 && (
-                            <MenuItem disabled>No stock in this store</MenuItem>
-                          )}
+                        {storeItems.map((i) => (
+                          <MenuItem key={i.item_id} value={i.item_id}>
+                            {i.name}-{i.item_id}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    </TableCell>
 
-                          {formData.store_id &&
-                            storeItems.map((it) => (
-                              <MenuItem key={it.item_id} value={it.item_id}>
-                                {it.item_name || it.name || `Item #${it.item_id}`}
-                              </MenuItem>
-                            ))}
-                        </TextField>
-                      </TableCell>
+                    {/* BATCH */}
+                    <TableCell>
+                      <TextField
+                        select
+                        size="small"
+                        fullWidth
+                        value={row.batch_no}
+                        onChange={(e) => {
+                          const batch_no = e.target.value;
+                          const batch = batches.find((b) => b.batch_no === batch_no);
 
-                      {/* Batch */}
-                      <TableCell padding="none" sx={{ p: 0.25 }}>
-                        <TextField
-                          select
-                          label="Batch"
-                          name="batch_no"
-                          value={row.batch_no || ""}
-                          onChange={(e) => {
-                            const batchValue = e.target.value;
-                            const selectedStock = rowBatches.find(
-                              (b) => b.batch_no === batchValue
-                            );
+                          handleRowChange(index, "batch_no", batch_no);
+                          handleRowChange(index, "max_qty", batch?.qty_in_stock || 0);
+                        }}
+                      >
+                        <MenuItem value="">Select Batch</MenuItem>
 
-                            setRows((prev) => {
-                              const newRows = [...prev];
-                              const newRow = { ...newRows[index] };
-                              newRow.batch_no = batchValue;
+                        {batches.map((b) => (
+                          <MenuItem key={b.stock_id} value={b.batch_no}>
+                            {b.batch_no || "NO BATCH"} — Qty: {b.qty_in_stock}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    </TableCell>
 
-                              if (selectedStock) {
-                                newRow.max_qty = Number(
-                                  selectedStock.qty_in_stock || 0
-                                );
-                              }
+                    {/* QTY */}
+                    <TableCell>
+                      <TextField
+                        size="small"
+                        fullWidth
+                        value={row.qty}
+                        onChange={(e) => {
+                          let qty = Number(e.target.value);
 
-                              newRows[index] = newRow;
-                              return newRows;
-                            });
-                          }}
-                          fullWidth
-                          size="small"
-                          disabled={!row.item_id || !formData.store_id}
-                        >
-                          {(!formData.store_id || !row.item_id) && (
-                            <MenuItem disabled>
-                              Select store & item first
-                            </MenuItem>
-                          )}
-
-                          {row.item_id &&
-                            formData.store_id &&
-                            rowBatches.length === 0 && (
-                              <MenuItem disabled>No stock batches</MenuItem>
-                            )}
-
-                          {rowBatches.map((b) => (
-                            <MenuItem key={b.stock_id} value={b.batch_no}>
-                              {b.batch_no} – Qty: {b.qty_in_stock}
-                            </MenuItem>
-                          ))}
-                        </TextField>
-                      </TableCell>
-
-                      {/* Qty */}
-                      <TableCell padding="none" sx={{ p: 0.25 }}>
-                        <TextField
-                          name="qty"
-                          value={row.qty}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            setRows((prev) => {
-                              const newRows = [...prev];
-                              let newRow = { ...newRows[index], qty: val };
-
-                              if (newRow.max_qty != null) {
-                                const num = Number(val || 0);
-                                if (num > newRow.max_qty) {
-                                  newRow.qty = String(newRow.max_qty);
-                                }
-                              }
-
-                              newRows[index] = newRow;
-                              return newRows;
-                            });
-                          }}
-                          fullWidth
-                          size="small"
-                          inputProps={{ min: 0, step: "1" }}
-                          helperText={
-                            row.max_qty != null ? `Max: ${row.max_qty}` : ""
+                          if (row.max_qty && qty > row.max_qty) {
+                            qty = row.max_qty; // auto restrict
                           }
-                        />
-                      </TableCell>
 
-                      {/* Reason */}
-                      <TableCell padding="none" sx={{ p: 0.25 }}>
-                        <TextField
-                          name="reason"
-                          value={row.reason}
-                          onChange={(e) =>
-                            handleRowChange(index, "reason", e.target.value)
-                          }
-                          fullWidth
-                          multiline
-                          rows={2}
-                          size="small"
-                        />
-                      </TableCell>
+                          handleRowChange(index, "qty", qty);
+                        }}
+                      />
+                    </TableCell>
 
-                      {/* Delete */}
-                      <TableCell align="center" padding="none" sx={{ p: 0.25 }}>
-                        <IconButton
-                          size="small"
-                          onClick={() => handleRemoveRow(index)}
-                          disabled={rows.length === 1}
-                        >
-                          <DeleteOutline fontSize="small" />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </Box>
+                    {/* REASON */}
+                    <TableCell>
+                      <TextField
+                        size="small"
+                        fullWidth
+                        value={row.reason}
+                        onChange={(e) =>
+                          handleRowChange(index, "reason", e.target.value)
+                        }
+                      />
+                    </TableCell>
+
+                    {/* DELETE */}
+                    <TableCell align="center">
+                      <IconButton
+                        size="small"
+                        disabled={rows.length === 1}
+                        onClick={() => handleRemoveRow(index)}
+                      >
+                        <DeleteOutline />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
         </Paper>
       </Box>
 
-      {/* Footer */}
-      <Box mt={2}>
-        <Box mt={2} display="flex" justifyContent="flex-end" gap={1}>
-          {onClose && (
-            <Button variant="outlined" onClick={onClose}>
-              Cancel
-            </Button>
-          )}
-          <Button
-            variant="contained"
-            onClick={handleSubmit}
-            disabled={addDamagedStock.isLoading}
-          >
-            {addDamagedStock.isLoading ? "Saving..." : "Save Damaged Stock"}
-          </Button>
-        </Box>
+      {/* FOOTER SECTION */}
+      <Box display="flex" justifyContent="flex-end" mt={2} gap={1}>
+        <Button variant="outlined" onClick={onClose}>
+          Cancel
+        </Button>
+
+        <Button
+          variant="contained"
+          disabled={addDamagedStock.isLoading}
+          onClick={handleSubmit}
+        >
+          {addDamagedStock.isLoading ? "Saving..." : "Save Damaged Stock"}
+        </Button>
       </Box>
     </Box>
   );
