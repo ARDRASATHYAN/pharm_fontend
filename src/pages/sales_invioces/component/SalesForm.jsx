@@ -1,5 +1,5 @@
 // src/components/sales/AddSalesForm.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   TextField,
   MenuItem,
@@ -40,12 +40,12 @@ const emptySaleItemRow = {
   gst_percent: "",
   discount_percent: "",
   total_amount: "",
-  max_qty: null, // internal (from stock)
+  max_qty: null,
 };
 
 const initialFormData = {
   store_id: "",
-  customer_id: "", // selected customer (optional)
+  customer_id: "",
   created_by: "",
   bill_no: "",
   bill_date: null,
@@ -78,25 +78,27 @@ function recalcRow(row) {
 }
 
 export default function AddSalesForm({ onClose }) {
-  const { data: store = [], isLoading: loadingStore } = useStores();
-  const { data: itemsMaster = [] } = useItem();
+  const { data: storeResponse, isLoading: loadingStore } = useStores();
+  const { data: itemsMasterResponse = {} } = useItem({ page: 1, perPage: 1000 });
+  const itemsMaster = itemsMasterResponse.data || [];
+
   const { data: currentUserResponse } = useCurrentUser();
   const { data: customers = [], isLoading: loadingCustomers } = useCustomer();
-
   const addSalesInvoice = useAddSalesInvoice();
 
   const currentUser = Array.isArray(currentUserResponse)
     ? currentUserResponse[0]
     : currentUserResponse || null;
 
+  const store = storeResponse?.stores ?? [];
   const items = Array.isArray(itemsMaster) ? itemsMaster : [];
 
   const [formData, setFormData] = useState(initialFormData);
   const [rows, setRows] = useState([emptySaleItemRow]);
-  const [storeStock, setStoreStock] = useState([]); // all stock for selected store
+  const [storeStock, setStoreStock] = useState([]);
 
   useEffect(() => {
-    if (currentUser && currentUser.user_id) {
+    if (currentUser?.user_id) {
       setFormData((prev) => ({
         ...prev,
         created_by: prev.created_by || currentUser.user_id,
@@ -104,13 +106,16 @@ export default function AddSalesForm({ onClose }) {
     }
   }, [currentUser?.user_id]);
 
-  // items that have stock in selected store
-  const itemIdsWithStock = Array.from(
-    new Set(storeStock.map((s) => s.item_id))
-  );
-  const storeItems = items.filter((it) =>
-    itemIdsWithStock.includes(it.item_id)
-  );
+  // Compute items available in selected store
+  const storeItems = useMemo(() => {
+    if (!storeStock.length || !itemsMaster.length) return [];
+    const itemIdsWithStock = new Set(
+      storeStock
+        .filter((s) => Number(s.qty_in_stock) > 0)
+        .map((s) => Number(s.item_id))
+    );
+    return itemsMaster.filter((it) => itemIdsWithStock.has(Number(it.item_id)));
+  }, [storeStock, itemsMaster]);
 
   const handleHeaderChange = async (e) => {
     const { name, value } = e.target;
@@ -122,12 +127,11 @@ export default function AddSalesForm({ onClose }) {
         setRows([emptySaleItemRow]);
         return;
       }
-
       try {
         const res = await apiClient.get("/stock/store-stock", {
           params: { store_id: value },
         });
-        setStoreStock(res.data || []);
+        setStoreStock(res.data);
         setRows([emptySaleItemRow]);
       } catch (err) {
         console.error("Error loading store stock:", err);
@@ -155,31 +159,22 @@ export default function AddSalesForm({ onClose }) {
     });
   };
 
-  const handleAddRow = () => {
-    setRows((prev) => [...prev, emptySaleItemRow]);
-  };
-
+  const handleAddRow = () => setRows((prev) => [...prev, emptySaleItemRow]);
   const handleRemoveRow = (index) => {
-    setRows((prev) => {
-      if (prev.length === 1) return prev;
-      const newRows = [...prev];
-      newRows.splice(index, 1);
-      return newRows;
-    });
+    setRows((prev) => (prev.length === 1 ? prev : prev.filter((_, i) => i !== index)));
   };
 
   // Totals calculation
   useEffect(() => {
-    let total_amount = 0;
-    let total_gst = 0;
-    let total_discount = 0;
+    let total_amount = 0,
+      total_gst = 0,
+      total_discount = 0;
 
     rows.forEach((r) => {
       const qty = Number(r.qty || 0);
       const rate = Number(r.rate || 0);
       const discPercent = Number(r.discount_percent || 0);
       const gstPercent = Number(r.gst_percent || 0);
-
       if (!qty || !rate) return;
 
       const baseTotal = qty * rate;
@@ -206,7 +201,6 @@ export default function AddSalesForm({ onClose }) {
   const resetForm = () => {
     setFormData((prev) => ({
       ...initialFormData,
-     
       store_id: prev.store_id,
       created_by: prev.created_by,
     }));
@@ -215,18 +209,14 @@ export default function AddSalesForm({ onClose }) {
   };
 
   const handleSubmit = () => {
-    if (!formData.store_id) {
-      alert("Store is required");
-      return;
-    }
-    if (!rows.length || !rows.some((r) => r.item_id)) {
-      alert("Add at least one item with an Item selected");
-      return;
-    }
-    if (!currentUser?.user_id) {
-      alert("No logged in user found. Please login again.");
-      return;
-    }
+    if (!formData.store_id) return alert("Store is required");
+    if (!currentUser?.user_id) return alert("No logged in user found. Please login again.");
+
+    const validItems = rows.filter(
+      (r) => r.item_id && Number(r.qty) > 0 && Number(r.rate) > 0
+    );
+
+    if (validItems.length === 0) return alert("At least one sale item required");
 
     const payload = {
       store_id: Number(formData.store_id),
@@ -246,20 +236,19 @@ export default function AddSalesForm({ onClose }) {
         customer_name: formData.customer_name || undefined,
         phone: formData.customer_phone || undefined,
       },
-      items: rows
-        .filter((r) => r.item_id)
-        .map((r) => ({
-          item_id: Number(r.item_id),
-          batch_no: r.batch_no || null,
-          qty: Number(r.qty || 0),
-          rate: Number(r.rate || 0),
-          discount_percent: Number(r.discount_percent || 0),
-          gst_percent: Number(r.gst_percent || 0),
-          total_amount: Number(r.total_amount || 0),
-        })),
+      item: validItems.map((r) => ({
+        item_id: Number(r.item_id),
+        batch_no: r.batch_no || null,
+        qty: Number(r.qty),
+        rate: Number(r.rate),
+        discount_percent: Number(r.discount_percent || 0),
+        gst_percent: Number(r.gst_percent || 0),
+        total_amount: Number(r.total_amount || 0),
+      })),
     };
 
     console.log("CREATE SALES PAYLOAD:", payload);
+
     addSalesInvoice.mutate(payload, {
       onSuccess: () => {
         showSuccessToast("Sale saved successfully");
@@ -270,22 +259,10 @@ export default function AddSalesForm({ onClose }) {
   };
 
   return (
-    <Box
-      gap={3}
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        height: "calc(100vh - 64px)",
-      }}
-    >
+    <Box gap={3} sx={{ display: "flex", flexDirection: "column", height: "calc(100vh - 64px)" }}>
       {/* Header */}
       <Box>
-        <Typography
-          variant="subtitle1"
-          fontWeight={600}
-          display="flex"
-          className="text-blue-700"
-        >
+        <Typography variant="subtitle1" fontWeight={600} className="text-blue-700">
           Sales Invoice Details
         </Typography>
         <Divider />
@@ -308,13 +285,10 @@ export default function AddSalesForm({ onClose }) {
                   bill_date: newValue ? newValue.toISOString() : null,
                 }))
               }
-              slotProps={{
-                textField: { fullWidth: true, size: "small", required: true },
-              }}
+              slotProps={{ textField: { fullWidth: true, size: "small", required: true } }}
             />
           </LocalizationProvider>
 
-          {/* Customer select */}
           <TextField
             select
             label="Customer (optional)"
@@ -325,18 +299,15 @@ export default function AddSalesForm({ onClose }) {
             size="small"
           >
             <MenuItem value="">Walk-in / None</MenuItem>
-            {loadingCustomers ? (
-              <MenuItem disabled>Loading customers...</MenuItem>
-            ) : (
-              customers.map((c) => (
-                <MenuItem key={c.customer_id} value={c.customer_id}>
-                  {c.customer_name} {c.phone ? `(${c.phone})` : ""}
-                </MenuItem>
-              ))
-            )}
+            {loadingCustomers
+              ? <MenuItem disabled>Loading customers...</MenuItem>
+              : customers.map((c) => (
+                  <MenuItem key={c.customer_id} value={c.customer_id}>
+                    {c.customer_name} {c.phone ? `(${c.phone})` : ""}
+                  </MenuItem>
+                ))}
           </TextField>
 
-          {/* Store */}
           <TextField
             select
             label="Store"
@@ -346,19 +317,17 @@ export default function AddSalesForm({ onClose }) {
             fullWidth
             size="small"
           >
-            {loadingStore ? (
-              <MenuItem disabled>Loading...</MenuItem>
-            ) : (
-              store.map((s) => (
-                <MenuItem key={s.store_id} value={s.store_id}>
-                  {s.store_name || s.store_id}
-                </MenuItem>
-              ))
-            )}
+            {loadingStore
+              ? <MenuItem disabled>Loading...</MenuItem>
+              : store.map((s) => (
+                  <MenuItem key={s.store_id} value={s.store_id}>
+                    {s.store_name || s.store_id}
+                  </MenuItem>
+                ))}
           </TextField>
         </Box>
 
-        {/* New customer (optional) */}
+        {/* New Customer */}
         <Box display="flex" gap={3} mt={1}>
           <TextField
             label="New Customer Name (optional)"
@@ -379,7 +348,7 @@ export default function AddSalesForm({ onClose }) {
           />
         </Box>
 
-        {/* Doctor / prescription */}
+        {/* Doctor / Prescription */}
         <Box display="flex" gap={3} mt={1}>
           <TextField
             label="Doctor Name"
@@ -410,12 +379,7 @@ export default function AddSalesForm({ onClose }) {
       {/* Items Table */}
       <Box mt={2} sx={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
         <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography
-            variant="subtitle1"
-            fontWeight={600}
-            gutterBottom
-            className="text-blue-700"
-          >
+          <Typography variant="subtitle1" fontWeight={600} gutterBottom className="text-blue-700">
             Sales Items
           </Typography>
           <Tooltip title="Add Item">
@@ -437,18 +401,13 @@ export default function AddSalesForm({ onClose }) {
                   <TableCell sx={{ minWidth: 90 }}>GST%</TableCell>
                   <TableCell sx={{ minWidth: 90 }}>Disc%</TableCell>
                   <TableCell sx={{ minWidth: 100 }}>Line Total</TableCell>
-                  <TableCell sx={{ width: 50 }} align="center">
-                    Del
-                  </TableCell>
+                  <TableCell sx={{ width: 50 }} align="center">Del</TableCell>
                 </TableRow>
               </TableHead>
-
               <TableBody>
                 {rows.map((row, index) => {
                   const rowBatches = storeStock.filter(
-                    (s) =>
-                      String(s.item_id) === String(row.item_id) &&
-                      Number(s.qty_in_stock) > 0
+                    (s) => String(s.item_id) === String(row.item_id)
                   );
 
                   return (
@@ -457,23 +416,20 @@ export default function AddSalesForm({ onClose }) {
                       <TableCell padding="none" sx={{ p: 0.25 }}>
                         <TextField
                           select
-                          label="Item"
-                          name="item_id"
                           value={row.item_id || ""}
                           onChange={(e) => {
-                            const value = e.target.value;
+                            const selectedItemId = e.target.value ? Number(e.target.value) : "";
                             setRows((prev) => {
                               const newRows = [...prev];
-                              let newRow = {
+                              newRows[index] = {
                                 ...newRows[index],
-                                item_id: value,
+                                item_id: selectedItemId,
                                 batch_no: "",
                                 rate: "",
                                 gst_percent: "",
                                 max_qty: null,
+                                total_amount: "",
                               };
-                              newRow = recalcRow(newRow);
-                              newRows[index] = newRow;
                               return newRows;
                             });
                           }}
@@ -482,22 +438,15 @@ export default function AddSalesForm({ onClose }) {
                           required
                           disabled={!formData.store_id}
                         >
-                          {!formData.store_id && (
-                            <MenuItem disabled>Select store first</MenuItem>
-                          )}
-
+                          {!formData.store_id && <MenuItem disabled>Select store first</MenuItem>}
                           {formData.store_id && storeItems.length === 0 && (
                             <MenuItem disabled>No stock in this store</MenuItem>
                           )}
-
-                          {formData.store_id &&
-                            storeItems.map((it) => (
-                              <MenuItem key={it.item_id} value={it.item_id}>
-                                {it.item_name ||
-                                  it.name ||
-                                  `Item #${it.item_id}`}
-                              </MenuItem>
-                            ))}
+                          {storeItems.map((it) => (
+                            <MenuItem key={it.item_id} value={it.item_id}>
+                              {it.name || `Item #${it.item_id}`}
+                            </MenuItem>
+                          ))}
                         </TextField>
                       </TableCell>
 
@@ -506,32 +455,19 @@ export default function AddSalesForm({ onClose }) {
                         <TextField
                           select
                           label="Batch"
-                          name="batch_no"
                           value={row.batch_no || ""}
                           onChange={(e) => {
                             const batchValue = e.target.value;
-                            const selectedStock = rowBatches.find(
-                              (b) => b.batch_no === batchValue
-                            );
-
+                            const selectedStock = rowBatches.find((b) => b.batch_no === batchValue);
                             setRows((prev) => {
                               const newRows = [...prev];
                               let newRow = { ...newRows[index] };
                               newRow.batch_no = batchValue;
-
                               if (selectedStock) {
-                                newRow.rate =
-                                  selectedStock.sale_rate ??
-                                  selectedStock.mrp ??
-                                  newRow.rate;
-                                newRow.gst_percent =
-                                  selectedStock.gst_percent ??
-                                  newRow.gst_percent;
-                                newRow.max_qty = Number(
-                                  selectedStock.qty_in_stock || 0
-                                );
+                                newRow.rate = selectedStock.sale_rate ?? selectedStock.mrp ?? newRow.rate;
+                                newRow.gst_percent = selectedStock.gst_percent ?? newRow.gst_percent;
+                                newRow.max_qty = Number(selectedStock.qty_in_stock || 0);
                               }
-
                               newRow = recalcRow(newRow);
                               newRows[index] = newRow;
                               return newRows;
@@ -541,18 +477,12 @@ export default function AddSalesForm({ onClose }) {
                           size="small"
                           disabled={!row.item_id || !formData.store_id}
                         >
-                          {(!formData.store_id || !row.item_id) && (
-                            <MenuItem disabled>
-                              Select store & item first
-                            </MenuItem>
+                          {(!row.item_id || !formData.store_id) && (
+                            <MenuItem disabled>Select store & item first</MenuItem>
                           )}
-
-                          {row.item_id &&
-                            formData.store_id &&
-                            rowBatches.length === 0 && (
-                              <MenuItem disabled>No stock batches</MenuItem>
-                            )}
-
+                          {row.item_id && formData.store_id && rowBatches.length === 0 && (
+                            <MenuItem disabled>No stock batches</MenuItem>
+                          )}
                           {rowBatches.map((b) => (
                             <MenuItem key={b.stock_id} value={b.batch_no}>
                               {b.batch_no} – Qty: {b.qty_in_stock}
@@ -564,28 +494,20 @@ export default function AddSalesForm({ onClose }) {
                       {/* Qty */}
                       <TableCell padding="none" sx={{ p: 0.25 }}>
                         <TextField
-                          name="qty"
                           value={row.qty}
-                          onChange={(e) =>
-                            handleRowChange(index, "qty", e.target.value)
-                          }
+                          onChange={(e) => handleRowChange(index, "qty", e.target.value)}
                           fullWidth
                           size="small"
                           inputProps={{ min: 0, step: "1" }}
-                          helperText={
-                            row.max_qty != null ? `Max: ${row.max_qty}` : ""
-                          }
+                          helperText={row.max_qty != null ? `Max: ${row.max_qty}` : ""}
                         />
                       </TableCell>
 
                       {/* Rate */}
                       <TableCell padding="none" sx={{ p: 0.25 }}>
                         <TextField
-                          name="rate"
                           value={row.rate}
-                          onChange={(e) =>
-                            handleRowChange(index, "rate", e.target.value)
-                          }
+                          onChange={(e) => handleRowChange(index, "rate", e.target.value)}
                           fullWidth
                           size="small"
                           inputProps={{ min: 0, step: "0.01" }}
@@ -595,15 +517,8 @@ export default function AddSalesForm({ onClose }) {
                       {/* GST% */}
                       <TableCell padding="none" sx={{ p: 0.25 }}>
                         <TextField
-                          name="gst_percent"
                           value={row.gst_percent}
-                          onChange={(e) =>
-                            handleRowChange(
-                              index,
-                              "gst_percent",
-                              e.target.value
-                            )
-                          }
+                          onChange={(e) => handleRowChange(index, "gst_percent", e.target.value)}
                           fullWidth
                           size="small"
                           inputProps={{ min: 0, step: "0.01" }}
@@ -613,15 +528,8 @@ export default function AddSalesForm({ onClose }) {
                       {/* Disc% */}
                       <TableCell padding="none" sx={{ p: 0.25 }}>
                         <TextField
-                          name="discount_percent"
                           value={row.discount_percent}
-                          onChange={(e) =>
-                            handleRowChange(
-                              index,
-                              "discount_percent",
-                              e.target.value
-                            )
-                          }
+                          onChange={(e) => handleRowChange(index, "discount_percent", e.target.value)}
                           fullWidth
                           size="small"
                           inputProps={{ min: 0, step: "0.01" }}
@@ -630,22 +538,12 @@ export default function AddSalesForm({ onClose }) {
 
                       {/* Line Total */}
                       <TableCell padding="none" sx={{ p: 0.25 }}>
-                        <TextField
-                          name="total_amount"
-                          value={row.total_amount}
-                          fullWidth
-                          size="small"
-                          InputProps={{ readOnly: true }}
-                        />
+                        <TextField value={row.total_amount} fullWidth size="small" InputProps={{ readOnly: true }} />
                       </TableCell>
 
                       {/* Delete */}
                       <TableCell align="center" padding="none" sx={{ p: 0.25 }}>
-                        <IconButton
-                          size="small"
-                          onClick={() => handleRemoveRow(index)}
-                          disabled={rows.length === 1}
-                        >
+                        <IconButton size="small" onClick={() => handleRemoveRow(index)} disabled={rows.length === 1}>
                           <DeleteOutline fontSize="small" />
                         </IconButton>
                       </TableCell>
@@ -660,75 +558,28 @@ export default function AddSalesForm({ onClose }) {
 
       {/* Amount Summary */}
       <Box mt={2}>
-        <Typography
-          variant="subtitle1"
-          fontWeight={600}
-          gutterBottom
-          className="text-blue-700"
-        >
+        <Typography variant="subtitle1" fontWeight={600} gutterBottom className="text-blue-700">
           Amount Summary
         </Typography>
         <Divider />
         <Grid container spacing={2} mt={1} justifyContent="flex-end">
           <Grid item xs={12} sm={3}>
-            <TextField
-              label="Total Amount"
-              name="total_amount"
-              value={formData.total_amount}
-              type="number"
-              fullWidth
-              size="small"
-              InputProps={{ readOnly: true }}
-            />
+            <TextField label="Total Amount" value={formData.total_amount} type="number" fullWidth size="small" InputProps={{ readOnly: true }} />
           </Grid>
           <Grid item xs={12} sm={3}>
-            <TextField
-              label="Total GST"
-              name="total_gst"
-              value={formData.total_gst}
-              type="number"
-              fullWidth
-              size="small"
-              InputProps={{ readOnly: true }}
-            />
+            <TextField label="Total GST" value={formData.total_gst} type="number" fullWidth size="small" InputProps={{ readOnly: true }} />
           </Grid>
           <Grid item xs={12} sm={3}>
-            <TextField
-              label="Total Discount"
-              name="total_discount"
-              value={formData.total_discount}
-              type="number"
-              fullWidth
-              size="small"
-              InputProps={{ readOnly: true }}
-            />
+            <TextField label="Total Discount" value={formData.total_discount} type="number" fullWidth size="small" InputProps={{ readOnly: true }} />
           </Grid>
           <Grid item xs={12} sm={3}>
-            <TextField
-              label="Net Amount"
-              name="net_amount"
-              value={formData.net_amount}
-              type="number"
-              fullWidth
-              size="small"
-              InputProps={{ readOnly: true }}
-            />
+            <TextField label="Net Amount" value={formData.net_amount} type="number" fullWidth size="small" InputProps={{ readOnly: true }} />
           </Grid>
         </Grid>
 
         <Box mt={2} display="flex" justifyContent="flex-end" gap={1}>
-          {onClose && (
-            <Button variant="outlined" onClick={onClose}>
-              Cancel
-            </Button>
-          )}
-          <Button
-            variant="contained"
-            onClick={handleSubmit}
-            disabled={addSalesInvoice.isLoading}
-          >
-            Save Sale
-          </Button>
+          {onClose && <Button variant="outlined" onClick={onClose}>Cancel</Button>}
+          <Button variant="contained" onClick={handleSubmit} disabled={addSalesInvoice.isLoading}>Save Sale</Button>
         </Box>
       </Box>
     </Box>
