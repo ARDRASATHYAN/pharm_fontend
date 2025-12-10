@@ -43,7 +43,7 @@ const BasicTable = ({ columns, data = [], loading = false, pagination, onPageCha
                 </tr>
               ))
             : table.getRowModel().rows.map(row => (
-                <tr key={row.id} className="even:bg-gray-100 hover:bg-gray-200 cursor-pointer">
+                <tr key={row.id} className="even:bg-gray-100 hover:bg-gray-200 cursor-pointer data-row">
                   {row.getVisibleCells().map(cell => (
                     <td key={cell.id} className={`${rowPadding} py-1 px-2 text-xs text-gray-800`}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}

@@ -29,7 +29,8 @@ export default function PurchaseReport() {
   const adjustRowsByHeight = () => {
     const screenHeight = window.innerHeight;
     const headerHeight = 180;
-    const rowHeight = 34;
+ const row = document.querySelector(".data-row"); // your row class
+  const rowHeight = row ? row.clientHeight : 50;   // fallback 50px
 
     const rows = Math.floor((screenHeight - headerHeight) / rowHeight);
     const safeRows = Math.max(5, rows);
