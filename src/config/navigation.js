@@ -133,10 +133,10 @@ export const navigationItems = [
     href: "/stock",
     icon: Package,
   },
-  {
-    key: "customers",
-    label: "Customer",
-    href: "/customers",
-    icon: User,
-  },
+  // {
+  //   key: "customers",
+  //   label: "Customer",
+  //   href: "/customers",
+  //   icon: User,
+  // },
 ];
