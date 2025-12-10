@@ -235,6 +235,8 @@ export default function AddSalesForm({ onClose }) {
       customer: {
         customer_name: formData.customer_name || undefined,
         phone: formData.customer_phone || undefined,
+        doctor_name: formData.doctor_name || undefined,
+        prescription_no: formData.prescription_no || undefined,
       },
       item: validItems.map((r) => ({
         item_id: Number(r.item_id),
@@ -302,10 +304,10 @@ export default function AddSalesForm({ onClose }) {
             {loadingCustomers
               ? <MenuItem disabled>Loading customers...</MenuItem>
               : customers.map((c) => (
-                  <MenuItem key={c.customer_id} value={c.customer_id}>
-                    {c.customer_name} {c.phone ? `(${c.phone})` : ""}
-                  </MenuItem>
-                ))}
+                <MenuItem key={c.customer_id} value={c.customer_id}>
+                  {c.customer_name} {c.phone ? `(${c.phone})` : ""}
+                </MenuItem>
+              ))}
           </TextField>
 
           <TextField
@@ -320,10 +322,10 @@ export default function AddSalesForm({ onClose }) {
             {loadingStore
               ? <MenuItem disabled>Loading...</MenuItem>
               : store.map((s) => (
-                  <MenuItem key={s.store_id} value={s.store_id}>
-                    {s.store_name || s.store_id}
-                  </MenuItem>
-                ))}
+                <MenuItem key={s.store_id} value={s.store_id}>
+                  {s.store_name || s.store_id}
+                </MenuItem>
+              ))}
           </TextField>
         </Box>
 

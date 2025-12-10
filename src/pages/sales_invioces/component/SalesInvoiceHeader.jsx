@@ -18,11 +18,11 @@ export const getSalesInvoiceColumns = (onEdit, onDelete) => [
     },
        {
         header: "doctor_name",
-        accessorKey: "doctor_name",
+        accessorKey: "customer.doctor_name"||'doctor_name',
     },
     {
         header: "prescription_no",
-        accessorKey: "prescription_no"
+        accessorKey: "customer.prescription_no"||"prescription_no"
     },
      {
         header: "customer_id",
