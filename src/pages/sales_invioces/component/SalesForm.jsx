@@ -187,7 +187,8 @@ export default function AddSalesForm({ onClose }) {
       total_discount += discountAmount;
     });
 
-    const net_amount = total_amount - total_discount + total_gst;
+    // const net_amount = total_amount - total_discount + total_gst;
+     const net_amount = total_amount - total_discount;
 
     setFormData((prev) => ({
       ...prev,
