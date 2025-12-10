@@ -67,7 +67,7 @@ export const navigationItems = [
     children: [
       { key: "purchase-add", label: "Add Purchase", href: "/purchase/addpurchase" },
       { key: "purchase-invoice", label: "View Invoice", href: "/purchase/purchaceinvoice" },
-      { key: "purchase-items", label: "View Purchase Item", href: "/purchase/purchaceitem" },
+      // { key: "purchase-items", label: "View Purchase Item", href: "/purchase/purchaceitem" },
       { key: "purchase-report", label: "purchase-report", href: "/purchase/report" },
     ],
   },
@@ -78,8 +78,8 @@ export const navigationItems = [
     icon: RotateCcw,
     children: [
       { key: "preturn-add", label: "Add Return", href: "/return/addpurchasereturn" },
-      { key: "preturn-view", label: "View Return", href: "/purchase/purchacereturn" },
-      { key: "preturn-items", label: "View Return Item", href: "/return/returnitem" },
+      // { key: "preturn-view", label: "View Return", href: "/purchase/purchacereturn" },
+      // { key: "preturn-items", label: "View Return Item", href: "/return/returnitem" },
       { key: "return", label: "return Report", href: "/return/report" },
     ],
   },
@@ -90,23 +90,23 @@ export const navigationItems = [
     icon: ArrowRightLeft,
     children: [
       { key: "sales-add", label: "Add Sales", href: "/sales/add" },
-      { key: "sales-view", label: "View Sales", href: "/sales/list" },
-      { key: "sales-items", label: "View Sales Item", href: "/sales/items" },
-      { key: "sales-report", label: "Sales Report", href: "/sales/report" },
+      // { key: "sales-view", label: "View Sales", href: "/sales/list" },
+      // { key: "sales-items", label: "View Sales Item", href: "/sales/items" },
+      // { key: "sales-report", label: "Sales Report", href: "/sales/report" },
     ],
   },
-  {
-    key: "sales-return",
-    label: "Sales Return",
-    href: "/salesreturn/add",
-    icon: RotateCcw,
-    children: [
-      { key: "sreturn-add", label: "Add Sales Return", href: "/salesreturn/add" },
-      { key: "sreturn-view", label: "View Sales Return", href: "/salesreturn/list" },
-      { key: "sreturn-items", label: "View Sales Return Item", href: "/salesreturn/items" },
-       { key: "return", label: "return Report", href: "/salesreturn/report" },
-    ],
-  },
+  // {
+  //   key: "sales-return",
+  //   label: "Sales Return",
+  //   href: "/salesreturn/add",
+  //   icon: RotateCcw,
+  //   children: [
+  //     { key: "sreturn-add", label: "Add Sales Return", href: "/salesreturn/add" },
+  //     { key: "sreturn-view", label: "View Sales Return", href: "/salesreturn/list" },
+  //     { key: "sreturn-items", label: "View Sales Return Item", href: "/salesreturn/items" },
+  //      { key: "return", label: "return Report", href: "/salesreturn/report" },
+  //   ],
+  // },
   {
     key: "damaged",
     label: "Damaged Stock",
