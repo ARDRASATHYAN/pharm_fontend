@@ -215,6 +215,7 @@ console.log("items",items);
 
     const gross = qty * rate;
     const discountAmount = (gross * discPercent) / 100;
+    const mrpDiscountAmount = (qty * mrp * discPercent) / 100;
 
     // Scheme logic
     let schemeDiscountAmount = 0;
@@ -226,7 +227,7 @@ console.log("items",items);
     }
 
     const taxable = gross - discountAmount - schemeDiscountAmount;
-   const saleRate = mrp - (discountAmount + schemeDiscountAmount) / qty;
+   const saleRate = mrp - (mrpDiscountAmount) / qty;
     const gstAmount = (taxable * gstPercent) / 100;
     const cgst = gstAmount / 2;
     const sgst = gstAmount / 2;

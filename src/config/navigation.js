@@ -90,7 +90,7 @@ export const navigationItems = [
     icon: ArrowRightLeft,
     children: [
       { key: "sales-add", label: "Add Sales", href: "/sales/add" },
-      // { key: "sales-view", label: "View Sales", href: "/sales/list" },
+      { key: "sales-view", label: "View Sales", href: "/sales/list" },
       // { key: "sales-items", label: "View Sales Item", href: "/sales/items" },
       // { key: "sales-report", label: "Sales Report", href: "/sales/report" },
     ],
