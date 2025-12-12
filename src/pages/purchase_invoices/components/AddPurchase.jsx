@@ -315,6 +315,7 @@ sale_rate: isNaN(saleRate) ? "" : saleRate.toFixed(2),
         item_id: Number(r.item_id),
         batch_no: r.batch_no || null,
         expiry_date: r.expiry_date || null,
+        pack_size: r.pack_size,
         qty: Number(r.qty || 0),
         free_qty: Number(r.free_qty || 0),
         purchase_rate: Number(r.purchase_rate || 0),
@@ -491,7 +492,7 @@ sale_rate: isNaN(saleRate) ? "" : saleRate.toFixed(2),
                     <TableCell sx={{ minWidth: 110 }}>HSN</TableCell>
                     <TableCell sx={{ minWidth: 110 }}>Batch</TableCell>
                     <TableCell sx={{ minWidth: 90 }}>Expiry</TableCell>
-                    <TableCell sx={{ minWidth: 70 }}>Pack Sz</TableCell>
+                    <TableCell sx={{ minWidth: 70 }}>Pack Size</TableCell>
                     <TableCell sx={{ minWidth: 70 }}>Qty</TableCell>
                     <TableCell sx={{ minWidth: 70 }}>Free</TableCell>
                     <TableCell sx={{ minWidth: 90 }}>Purchase</TableCell>
