@@ -361,8 +361,8 @@ sale_rate: isNaN(saleRate) ? "" : saleRate.toFixed(2),
             Purchase Invoice
           </Typography>
           <Divider />
-          <Grid container spacing={2} mt={1}>
-            <Grid item xs={12} md={3}>
+          <Box container spacing={2} mt={1} display="flex" gap={1}>
+          
               <Controller
                 name="invoice_no"
                 control={control}
@@ -377,8 +377,7 @@ sale_rate: isNaN(saleRate) ? "" : saleRate.toFixed(2),
                   />
                 )}
               />
-            </Grid>
-            <Grid item xs={12} md={3}>
+           
               <Controller
                 name="invoice_date"
                 control={control}
@@ -403,8 +402,7 @@ sale_rate: isNaN(saleRate) ? "" : saleRate.toFixed(2),
                   </LocalizationProvider>
                 )}
               />
-            </Grid>
-            <Grid item xs={12} md={3}>
+           
               <Controller
                 name="supplier_id"
                 control={control}
@@ -430,8 +428,8 @@ sale_rate: isNaN(saleRate) ? "" : saleRate.toFixed(2),
                   </TextField>
                 )}
               />
-            </Grid>
-            <Grid item xs={12} md={3}>
+           
+           
               <Controller
                 name="store_id"
                 control={control}
@@ -457,8 +455,8 @@ sale_rate: isNaN(saleRate) ? "" : saleRate.toFixed(2),
                   </TextField>
                 )}
               />
-            </Grid>
-            <Grid item xs={12} md={3}>
+          
+          
               <TextField
                 label="Created By"
                 value={currentUser?.username || createdBy || ""}
@@ -466,8 +464,8 @@ sale_rate: isNaN(saleRate) ? "" : saleRate.toFixed(2),
                 size="small"
                 InputProps={{ readOnly: true }}
               />
-            </Grid>
-          </Grid>
+           
+          </Box>
         </Box>
 
         {/* ITEMS TABLE */}
