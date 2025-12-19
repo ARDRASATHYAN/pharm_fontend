@@ -1,4 +1,4 @@
-export const getPurchaseInvoiceColumns = (onEdit, onDelete) => [
+export const getPurchaseInvoiceColumns = (onEdit, onDelete,onItem) => [
   { header: "Invoice No", accessorKey: "invoice_no" },
   { header: "Invoice Date", accessorKey: "invoice_date" },
   {
@@ -42,6 +42,15 @@ export const getPurchaseInvoiceColumns = (onEdit, onDelete) => [
       <div style={{ display: "flex", gap: 4 }}>
         <button onClick={() => onEdit(row.original)}>Edit</button>
         <button onClick={() => onDelete(row.original.purchase_id)}>Delete</button>
+         <button
+  onClick={() => {
+    console.log("ROW DATA 👉", row.original);
+    onItem(row.original.purchase_id);
+  }}
+>
+  Item
+</button>
+
       </div>
     ),
   },

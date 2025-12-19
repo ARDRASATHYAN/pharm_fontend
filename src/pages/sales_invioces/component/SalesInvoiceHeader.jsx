@@ -1,9 +1,9 @@
 import { IconButton } from "@mui/material";
-import { Delete, Edit } from "lucide-react";
+import { Delete, Edit, Eye } from "lucide-react";
 
 
 
-export const getSalesInvoiceColumns = (onEdit, onDelete) => [
+export const getSalesInvoiceColumns = (onEdit, onDelete,onItem) => [
     {
         header: "Id",
         accessorKey: "sale_id"
@@ -76,11 +76,21 @@ export const getSalesInvoiceColumns = (onEdit, onDelete) => [
       <IconButton
         color="error"
         size="small"
-        onClick={() => onDelete(row.original.purchase_id)}
+        onClick={() => onDelete(row.original.sale_id)}
         sx={{ padding: "4px" }}
       >
         <Delete size={16} />
       </IconButton>
+       <IconButton
+        color="error"
+        size="small"
+        onClick={() => onItem(row.original.sale_id)}
+        sx={{ padding: "4px" }}
+      >
+        <Eye  size={16} />
+      </IconButton>
+
+
     </div>
   ),
 }

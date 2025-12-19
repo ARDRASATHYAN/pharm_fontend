@@ -4,7 +4,7 @@ import BasicTable from "@/components/commen/BasicTable";
 import { getPurchaseInvoiceColumns } from "./components/PurchaseInvoicesHeader";
 import ConfirmDialog from "@/components/commen/ConfirmDialog";
 import { showSuccessToast, showErrorToast } from "@/lib/toastService";
-import { usepurchaseinvoice } from "@/hooks/usePurchaseInvoice";
+import { usepurchaseinvoice, usePurchaseItemsByPurchaseId } from "@/hooks/usePurchaseInvoice";
 
 export default function AllPurchaseInvoices() {
   // ----------------------------
@@ -13,6 +13,8 @@ export default function AllPurchaseInvoices() {
   const [openForm, setOpenForm] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [editingInvoice, setEditingInvoice] = useState(null);
+  const [openItems, setOpenItems] = useState(false);
+
 
   // ----------------------------
   // Delete state
@@ -53,6 +55,15 @@ export default function AllPurchaseInvoices() {
     page: Number(filters.page),
     perPage: Number(filters.perPage),
   });
+
+
+  const {
+  data: purchaseItems,
+  isLoading:itemloading,
+  error,
+} = usePurchaseItemsByPurchaseId(selectedInvoiceId);
+console.log(purchaseItems,"invoice");
+
 
   // const addInvoice = useAddPurchaseInvoice();
   // const updateInvoice = useUpdatePurchaseInvoice();
@@ -95,6 +106,13 @@ export default function AllPurchaseInvoices() {
     });
   };
 
+
+  const handleItem=(id)=>{
+    setSelectedInvoiceId(id)
+    setOpenItems(true);
+    
+  }
+
   // ----------------------------
   // Filters & search
   // ----------------------------
@@ -103,7 +121,7 @@ export default function AllPurchaseInvoices() {
   };
   const handlePageChange = (page) => setFilters(prev => ({ ...prev, page: Number(page) || 1 }));
 
-  const columns = getPurchaseInvoiceColumns(handleEdit, handleDelete);
+  const columns = getPurchaseInvoiceColumns(handleEdit, handleDelete,handleItem);
 
   return (
     <>
@@ -139,6 +157,127 @@ export default function AllPurchaseInvoices() {
         rowPadding="py-2" 
         onPageChange={handlePageChange}
       />
+
+
+{openItems && (
+  <Box
+    sx={{
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+      background: "rgba(0,0,0,0.5)",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      zIndex: 1300,
+      overflowY: "auto",
+      p: 2,
+    }}
+  >
+    <Box
+      sx={{
+        background: "#fff",
+        p: 4,
+        width: "100%",
+        maxWidth: 1200,
+        borderRadius: 3,
+        boxShadow: 3,
+      }}
+    >
+      {/* Header */}
+      <Box sx={{ mb: 3, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <h3 style={{ margin: 0 }} className="font-bold">
+           Invoice No: {purchaseItems?.data?.[0]?.purchaseInvoice?.invoice_no}
+        </h3>
+        <Button variant="outlined" color="secondary" onClick={() => setOpenItems(false)}>
+          Close
+        </Button>
+      </Box>
+
+      {itemloading && <p>Loading items...</p>}
+
+      {!itemloading && purchaseItems?.data?.length === 0 && <p>No items found</p>}
+
+      {!itemloading && purchaseItems?.data?.length > 0 && (
+        <>
+          {/* Table */}
+          <Box sx={{ overflowX: "auto" }}>
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                textAlign: "center",
+              }}
+            >
+              <thead>
+                <tr style={{ background: "#1976d2", color: "#fff", position: "sticky", top: 0 }}>
+                  <th style={{ padding: "8px" }}>Item</th>
+                  <th style={{ padding: "8px" }}>HSN</th>
+                  <th style={{ padding: "8px" }}>Batch</th>
+                  <th style={{ padding: "8px" }}>QTY</th>
+                  <th style={{ padding: "8px" }}>Free</th>
+                  <th style={{ padding: "8px" }}>MRP</th>
+                  <th style={{ padding: "8px" }}>P-Rate</th>
+                  <th style={{ padding: "8px" }}>S-Discount</th>
+                  <th style={{ padding: "8px" }}>S-Rate</th>
+                  <th style={{ padding: "8px" }}>GST</th>
+                  <th style={{ padding: "8px" }}>Taxable Amount</th>
+                  <th style={{ padding: "8px" }}>Total Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {purchaseItems.data.map((row, index) => (
+                  <tr
+                    key={row.purchase_item_id || index}
+                    style={{
+                      background: index % 2 === 0 ? "#f5f5f5" : "#fff",
+                    }}
+                  >
+                    <td style={{ padding: "6px" }}>{row.item?.name}</td>
+                    <td style={{ padding: "6px" }}>{row.item?.hsn?.hsn_code}</td>
+                    <td style={{ padding: "6px" }}>{row.batch_no}</td>
+                    <td style={{ padding: "6px" }}>{row.qty}</td>
+                    <td style={{ padding: "6px" }}>{row.free_qty}</td>
+                    <td style={{ padding: "6px" }}>{row.mrp}</td>
+                    <td style={{ padding: "6px" }}>{row.purchase_rate}</td>
+                    <td style={{ padding: "6px" }}>{row.discount_percent}%</td>
+                    <td style={{ padding: "6px" }}>{row.sale_rate}</td>
+                    <td style={{ padding: "6px" }}>{row.gst_percent}%</td>
+                    <td style={{ padding: "6px" }}>{row.taxable_amount}</td>
+                    <td style={{ padding: "6px" }}>{row.total_amount}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Box>
+
+          {/* Totals */}
+          <Box
+            sx={{
+              mt: 3,
+              display: "flex",
+              justifyContent: "flex-end",
+              flexDirection: "column",
+              gap: 1,
+              background: "#f0f0f0",
+              p: 2,
+              borderRadius: 1,
+            }}
+          >
+            <p><strong>Total Amount:</strong> {purchaseItems.data[0]?.purchaseInvoice?.total_amount}</p>
+            <p><strong>Total Discount:</strong> {purchaseItems.data[0]?.purchaseInvoice?.total_discount}</p>
+            <p><strong>Total GST:</strong> {purchaseItems.data[0]?.purchaseInvoice?.total_gst}</p>
+            <p><strong>Net Amount:</strong> {purchaseItems.data[0]?.purchaseInvoice?.net_amount}</p>
+          </Box>
+        </>
+      )}
+    </Box>
+  </Box>
+)}
+
+
 
     
 

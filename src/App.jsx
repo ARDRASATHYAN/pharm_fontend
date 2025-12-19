@@ -32,6 +32,7 @@ import PurchaseReport from "./pages/report/PurchaseReport";
 import SalesReport from "./pages/report/SalesReport";
 import PurchaseReturnReport from "./pages/report/PurchaseReturnReport";
 import SalesReturnReport from "./pages/report/SalesReturnReport";
+import PurchaseBillEntry from "./pages/store_stock";
 
 
 
@@ -91,6 +92,7 @@ function App() {
 
           <Route path="/excess/add" element={< AddExcessStockForm />} />
           <Route path="/excess/list" element={< ExcessStockMockApiHeader />} />
+           <Route path="/purchase" element={<PurchaseBillEntry />} />
 
 
           

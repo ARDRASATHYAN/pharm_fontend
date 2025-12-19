@@ -17,6 +17,7 @@ const purchaseService = {
       const { data } = await apiClient.get("/purchase/items");
       return data;
     },
+    
     getPurchaseById: async (id) => {
   const { data } = await apiClient.get(`/purchase/${id}`);
   return data;

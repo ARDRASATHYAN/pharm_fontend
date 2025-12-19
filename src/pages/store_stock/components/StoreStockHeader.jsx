@@ -1,90 +1,33 @@
-import { IconButton } from "@mui/material";
-import { Delete, Edit } from "lucide-react";
+import React from 'react';
 
+// Props: totals (object containing totalTaxableValue, totalGst, totalDiscount, netAmount)
+const TotalsSummary = ({ totals }) => {
+    return (
+        <div className="mt-4 bg-white rounded-lg shadow-sm p-6">
+            <div className="flex justify-end">
+                <div className="w-96">
+                    <div className="space-y-3">
+                        <div className="flex justify-between items-center text-gray-700">
+                            <span className="font-medium">Total Taxable Value:</span>
+                            <span className="text-lg">₹{totals.totalTaxableValue}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-gray-700">
+                            <span className="font-medium">Total Discount:</span>
+                            <span className="text-lg text-red-600">- ₹{totals.totalDiscount}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-gray-700">
+                            <span className="font-medium">Total GST:</span>
+                            <span className="text-lg text-green-600">+ ₹{totals.totalGst}</span>
+                        </div>
+                        <div className="border-t-2 border-gray-300 pt-3 flex justify-between items-center">
+                            <span className="text-xl font-bold text-gray-800">Net Payable Amount:</span>
+                            <span className="text-2xl font-bold text-blue-600">₹{totals.netAmount}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
 
-
-export const getStoreStockColumns = (onEdit, onDelete) => [
-    {
-        header: "Id",
-        accessorKey: "stock_id"
-    },
-      {
-        header: "store_id",
-        accessorKey: "store_id"
-    },
-      {
-        header: "item_id",
-        accessorKey: "item_id"
-    },
-
-    {
-        header: "batch_no",
-        accessorKey: "batch_no",
-    },
-    {
-        header: "expiry_date",
-        accessorKey: "expiry_date"
-    },
-    {
-        header: "mrp",
-        accessorKey: "mrp"
-    },
-      {
-        header: "purchase_rate",
-        accessorKey: "purchase_rate"
-    },
-
-    {
-        header: "sale_rate",
-        accessorKey: "sale_rate",
-    },
-    {
-        header: "gst_percent",
-        accessorKey: "gst_percent"
-    },
-    // {
-    //     header: "schedule_id",
-    //     accessorKey: "schedule_id"
-    // },
-    // {
-    //     header: "manufacturer",
-    //     accessorKey: "manufacturer"
-    // },
-    // {
-    //     header: "item_type",
-    //     accessorKey: "item_type"
-    // },
-  // {
-  //       header: "created_at",
-  //       accessorKey: "created_at"
-  //   },
-  
-
-   {
-  header: "Actions",
-  id: "actions",
-  cell: ({ row }) => (
-    <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
-      <IconButton
-        color="primary"
-        size="small"
-        onClick={() => onEdit(row.original)}
-        sx={{ padding: "4px" }} // reduce default 8px
-      >
-        <Edit size={16} />
-      </IconButton>
-      <IconButton
-        color="error"
-        size="small"
-        onClick={() => onDelete(row.original.stock_id)}
-        sx={{ padding: "4px" }}
-      >
-        <Delete size={16} />
-      </IconButton>
-    </div>
-  ),
-}
-
-
-
-];
+export default TotalsSummary;

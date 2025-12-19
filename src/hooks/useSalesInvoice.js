@@ -48,15 +48,19 @@ export function useSalesItemsList() {
 
 
 export const useSaleItems = (saleId) => {
-  return useQuery(
-    {
-      queryKey: ["saleItems", saleId],
-      queryFn: async () => {
-        if (!saleId) return [];
-        const res = await apiClient.get(`/sales/${saleId}/items`);
-        return res.data; // [{ item_id, item_name, rate, qty }, ...]
-      },
-      enabled: !!saleId,
-    }
-  );
+  return useQuery({
+    queryKey: ["saleItems", saleId],
+    queryFn: async () => {
+      if (!saleId) return [];
+      
+      // Pass saleId as query parameter
+      const res = await apiClient.get(`/sales/saleid-item`, {
+        params: { sale_id: saleId },
+      });
+      
+      return res.data; // [{ item_id, item_name, rate, qty }, ...]
+    },
+    enabled: !!saleId, // only run if saleId exists
+  });
 };
+
