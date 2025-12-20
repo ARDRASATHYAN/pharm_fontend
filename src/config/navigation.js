@@ -102,7 +102,7 @@ export const navigationItems = [
     icon: RotateCcw,
     children: [
       { key: "sreturn-add", label: "Add Sales Return", href: "/salesreturn/add" },
-      // { key: "sreturn-view", label: "View Sales Return", href: "/salesreturn/list" },
+      { key: "sreturn-view", label: "View Sales Return", href: "/salesreturn/list" },
       // { key: "sreturn-items", label: "View Sales Return Item", href: "/salesreturn/items" },
       //  { key: "return", label: "return Report", href: "/salesreturn/report" },
     ],

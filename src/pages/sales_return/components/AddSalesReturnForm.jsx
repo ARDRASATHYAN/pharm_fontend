@@ -54,7 +54,7 @@ useEffect(() => {
       const prepared = Array.isArray(res.data?.data) ? res.data.data : [];
       const mapped = prepared.map(item => ({
         ...item,
-        return_qty: 0,
+        return_qty: "",
         amount: 0,
         gstAmount: 0,
         qty: Number(item.qty),
@@ -197,7 +197,7 @@ useEffect(() => {
                 <TableCell>{row.qty}</TableCell>
                 <TableCell>
                   <TextField
-                    type="number"
+                    type="text"
                     size="small"
                     value={row.return_qty}
                     onChange={e =>

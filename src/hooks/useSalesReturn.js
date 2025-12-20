@@ -27,7 +27,7 @@ export function useSalesReturnList() {
   return useQuery({
     queryKey: ["salesreturnlist"],
     queryFn: async () => {
-      const res = await apiClient.get("/sales-returns");
+      const res = await apiClient.get("/sales-return");
       return res.data;
     }
   });

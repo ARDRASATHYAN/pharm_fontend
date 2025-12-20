@@ -1,62 +1,76 @@
 // src/components/purchase/PurchaseInvoiceMockApiHeader.jsx
-import React, { useState } from "react";
-import { Button } from "@mui/material";
-import BasicTable from "@/components/commen/BasicTable"
+import React, { useState, useEffect, useLayoutEffect } from "react";
+import BasicTable from "@/components/commen/BasicTable";
 import { getSalesReturnColumns } from "./components/SalesReturnHeader";
 import { useSalesReturnList } from "@/hooks/useSalesReturn";
 
-
 export default function SalesReturnMockApiHeader() {
-
-  
- 
-
-
-  // 🧾 Invoice header state (formData)
-  const [formData, setFormData] = useState({
-    purchase_id: "",
-    invoice_no: "",
-    invoice_date: "",
-    supplier_id: "",
-    store_id: "",
-    user_id: "", // we can use for display; backend uses currentUser.user_id
-    total_amount: "",
-    total_discount: "",
-    total_gst: "",
-    net_amount: "",
+  const [filters, setFilters] = useState({
+    from_date: "",
+    to_date: "",
+    search: "",
   });
 
-  
-  
+  const [pagination, setPagination] = useState({
+    page: 1,
+    perPage: 10,
+  });
 
-  // ✏️ Edit Handler (for header row; items editing not wired yet)
+  // ----------------------------
+  // Auto rows by screen height
+  // ----------------------------
+  const adjustRowsByHeight = () => {
+    const screenHeight = window.innerHeight;
+    const headerHeight = 180;
+    const rowHeight = 34;
+    const rows = Math.floor((screenHeight - headerHeight) / rowHeight);
+
+    setPagination((prev) => ({
+      ...prev,
+      perPage: Math.max(5, rows),
+      page: 1,
+    }));
+  };
+
+  useLayoutEffect(() => {
+    adjustRowsByHeight();
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener("resize", adjustRowsByHeight);
+    return () => window.removeEventListener("resize", adjustRowsByHeight);
+  }, []);
+
+  // ----------------------------
+  // Fetch data
+  // ----------------------------
+  const { data: salesreturnlist = {}, isLoading } = useSalesReturnList({
+    ...filters,
+    page: pagination.page,
+    perPage: pagination.perPage,
+  });
+
+  const rows = Array.isArray(salesreturnlist?.data)
+    ? salesreturnlist.data
+    : [];
+
+  const totalPages = salesreturnlist?.pagination?.totalPages || 1;
+  const totalRecords = salesreturnlist?.pagination?.total || 0;
+
+  // ----------------------------
+  // Optional handlers
+  // ----------------------------
   const handleEdit = (row) => {
-    console.log("row", row);
-    setFormData({
-      purchase_id: row.purchase_id,
-      invoice_no: row.invoice_no,
-      invoice_date: row.invoice_date,
-      supplier_id: row.supplier_id,
-      store_id: row.store_id,
-      user_id: row.created_by,
-      total_amount: row.total_amount,
-      total_discount: row.total_discount,
-      total_gst: row.total_gst,
-      net_amount: row.net_amount,
-    });
-    
+    console.log("Edit", row);
   };
 
-  // ❌ Delete Handler
-  const handleDelete = (id) => {
-    if (
-      window.confirm("Are you sure you want to delete this purchase invoice?")
-    ) {
-      // deletepurchaseinvoice.mutate(id);
-    }
+  const handleDelete = (row) => {
+    console.log("Delete", row);
   };
-const { data:salesreturnlist= [], isLoading } = useSalesReturnList();
-  
+
+  // ----------------------------
+  // Render
+  // ----------------------------
   return (
     <>
       <div
@@ -67,18 +81,28 @@ const { data:salesreturnlist= [], isLoading } = useSalesReturnList();
         }}
       >
         <h2 className="text-xl font-bold text-blue-700 tracking-wide">
-       Sales return List
+          Sales Return List
         </h2>
-       
       </div>
 
       <BasicTable
         columns={getSalesReturnColumns(handleEdit, handleDelete)}
-        data={salesreturnlist}
-        loading={isLoading }
+        data={rows}
+        loading={isLoading}
+        pagination={{
+          page: pagination.page,
+          perPage: pagination.perPage,
+          totalPages,
+          total: totalRecords,
+        }}
+        rowPadding="py-2"
+        onPageChange={(page) =>
+          setPagination((prev) => ({ ...prev, page }))
+        }
+        onPerPageChange={(perPage) =>
+          setPagination({ page: 1, perPage })
+        }
       />
-
-   
     </>
   );
 }
