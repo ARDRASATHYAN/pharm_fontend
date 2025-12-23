@@ -223,6 +223,8 @@ console.log(purchaseItems,"invoice");
                   <th style={{ padding: "8px" }}>S-Discount</th>
                   <th style={{ padding: "8px" }}>S-Rate</th>
                   <th style={{ padding: "8px" }}>GST</th>
+                  <th style={{ padding: "8px" }}>CGST</th>
+                  <th style={{ padding: "8px" }}>SGST</th>
                   <th style={{ padding: "8px" }}>Taxable Amount</th>
                   <th style={{ padding: "8px" }}>Total Amount</th>
                 </tr>
@@ -245,6 +247,8 @@ console.log(purchaseItems,"invoice");
                     <td style={{ padding: "6px" }}>{row.discount_percent}%</td>
                     <td style={{ padding: "6px" }}>{row.sale_rate}</td>
                     <td style={{ padding: "6px" }}>{row.gst_percent}%</td>
+                    <td style={{ padding: "6px" }}>{row.cgst}</td>
+                     <td style={{ padding: "6px" }}>{row.sgst}</td>
                     <td style={{ padding: "6px" }}>{row.taxable_amount}</td>
                     <td style={{ padding: "6px" }}>{row.total_amount}</td>
                   </tr>

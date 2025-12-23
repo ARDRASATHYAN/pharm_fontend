@@ -3,7 +3,7 @@ import { Delete, Edit } from "lucide-react";
 
 
 
-export const getSalesReturnColumns = (onEdit, onDelete) => [
+export const getSalesReturnColumns = (onEdit, onDelete,onItem) => [
     {
         header: "Id",
         accessorKey: "return_id"
@@ -51,7 +51,16 @@ export const getSalesReturnColumns = (onEdit, onDelete) => [
       <IconButton
         color="error"
         size="small"
-        onClick={() => onDelete(row.original.purchase_id)}
+        onClick={() => onDelete(row.original.return_id)}
+        sx={{ padding: "4px" }}
+      >
+        <Delete size={16} />
+      </IconButton>
+
+      <IconButton
+        color="error"
+        size="small"
+        onClick={() => onItem(row.original.return_id)}
         sx={{ padding: "4px" }}
       >
         <Delete size={16} />

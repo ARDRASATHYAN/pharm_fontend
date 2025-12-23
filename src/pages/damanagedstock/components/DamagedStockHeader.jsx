@@ -11,11 +11,11 @@ export const getDamagedStockColumns = (onEdit, onDelete) => [
     },
       {
         header: "store_id",
-        accessorKey: "store_id"
+        accessorKey: "store.store_name"
     },
       {
         header: "item_id",
-        accessorKey: "item_id"
+        accessorKey: "item.name"
     },
        {
         header: "batch_no",

@@ -33,13 +33,17 @@ export function useSalesReturnList() {
   });
 }
 
-export function usesalesreturnitems() {
+export function usesalesreturnitems(returnId) {
   return useQuery({
-    queryKey: ["salesreturnitem"],
+    queryKey: ["salesreturnitem",returnId],
    queryFn: async () => {
-      const res = await apiClient.get("/sales-returns/items");
+      if (!returnId) return [];
+      const res = await apiClient.get("/sales-return/item", {
+        params: {return_id: returnId },
+      });
       return res.data;
-    }
+    },
+     enabled: !!returnId,
   });
 }
 
