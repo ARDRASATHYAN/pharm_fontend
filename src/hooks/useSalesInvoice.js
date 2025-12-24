@@ -64,3 +64,53 @@ export const useSaleItems = (saleId) => {
   });
 };
 
+
+
+export const useTotalCustomers = (storeId) => {
+  return useQuery({
+    queryKey: ["totalcustomers", storeId],
+    queryFn: async () => {
+      if (!storeId) return [];
+      
+      // Pass saleId as query parameter
+      const res = await apiClient.get(`/sales/sale-customer`, {
+        params: { store_id: storeId },
+      });
+      
+      return res.data; // [{ item_id, item_name, rate, qty }, ...]
+    },
+    enabled: !!storeId, // only run if saleId exists
+  });
+};
+
+export const useTotalNetAmount = ({ store_id }) => {
+  return useQuery({
+    queryKey: ["totalNetAmount", store_id],
+    queryFn: async () => {
+      const res = await apiClient.get("/sales/total-sales", {
+        params: { store_id },
+      });
+      return res.data; // { totalNetAmount: number }
+    },
+    enabled: !!store_id,
+  });
+};
+
+
+export const useTodayNetAmount = ({ store_id }) => {
+  return useQuery({
+    queryKey: ["todayNetAmount", store_id],
+    queryFn: async () => {
+      const res = await apiClient.get("/sales/today-sales", {
+        params: { store_id },
+      });
+      return res.data; // { totalNetAmount: number }
+    },
+    enabled: !!store_id,
+  });
+};
+
+
+
+
+

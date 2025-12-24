@@ -32,3 +32,44 @@ export const useStoreStock = (store_id, item_id) => {
     enabled: !!store_id && !!item_id, // only fetch when both exist
   });
 };
+
+
+export function useLowStock({ limit = 10, store_id } = {}) {
+  return useQuery({
+    queryKey: ["lowstock", limit, store_id],
+    queryFn: () =>
+      stockService.getLowStock({
+        limit,
+        store_id,
+      }),
+    keepPreviousData: true,
+    staleTime: 1000 * 60 * 5,
+  });
+}
+
+
+
+export function useExpiringStock({ limit = 10, store_id } = {}) {
+  return useQuery({
+    queryKey: ["expiringstock", limit, store_id],
+    queryFn: () =>
+      stockService.getExpiringStock({
+        limit,
+        store_id,
+      }),
+    keepPreviousData: true,
+    staleTime: 1000 * 60 * 5,
+  });
+}
+
+export function useTotalMedicine({ store_id } = {}) {
+  return useQuery({
+    queryKey: ["totalmedicine",store_id],
+    queryFn: () =>
+      stockService.gettotalmedicine({
+        store_id,
+      }),
+    keepPreviousData: true,
+    staleTime: 1000 * 60 * 5,
+  });
+}

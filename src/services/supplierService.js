@@ -35,5 +35,11 @@ supplierCreate: async (data) => {
     return data;
   },
 
+
+  gettotalsupplier:async(params)=>{
+  const res=await apiClient.get("/supplier/total-supplier")
+  return res.data;
+ }
+
 }
 export default supplierService;

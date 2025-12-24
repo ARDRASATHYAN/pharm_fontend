@@ -63,24 +63,28 @@ const initialFormData = {
 
 function recalcRow(row) {
   const qty = Number(row.qty || 0);
-  const rate = Number(row.rate || 0);
+  const rate = Number(row.rate || 0);          // GST-inclusive rate
   const gstPercent = Number(row.gst_percent || 0);
   const mrp = Number(row.mrp || 0);
   const packSize = Number(row.pack_size || 1);
 
+  if (!qty || !rate || !mrp) return { ...row, total_amount: "", discount_amount: "", baseTotal: "", gstAmount: "" };
+
+  const rowTotal = qty * rate;                  // total including GST
+  const baseTotal = rowTotal / (1 + gstPercent / 100); // price before GST
+  const gstAmount = rowTotal - baseTotal;      // GST portion
   const unitMRP = mrp / packSize;
   const discountAmount = Math.max(0, (unitMRP - rate) * qty);
 
-  const baseTotal = qty * rate;
-  const gstAmount = (baseTotal * gstPercent) / 100;
-  const lineTotal = baseTotal + gstAmount;
-
   return {
     ...row,
-    total_amount: isNaN(lineTotal) ? "" : lineTotal.toFixed(2),
-    discount_amount: isNaN(discountAmount) ? "" : discountAmount.toFixed(2),
+    total_amount: rowTotal.toFixed(2),         // total including GST
+    discount_amount: discountAmount.toFixed(2),
+    baseTotal: baseTotal.toFixed(2),
+    gstAmount: gstAmount.toFixed(2),
   };
 }
+
 
 export default function AddSalesForm({ onClose }) {
   const { data: storeResponse, isLoading: loadingStore } = useStores();
@@ -162,40 +166,43 @@ export default function AddSalesForm({ onClose }) {
   };
 
   // Totals calculation
-  useEffect(() => {
-    let total_amount = 0,
+useEffect(() => {
+  let total_base = 0,
       total_gst = 0,
       total_discount = 0;
+    
 
-    rows.forEach((r) => {
-      const qty = Number(r.qty || 0);
-      const rate = Number(r.rate || 0);
-      const gstPercent = Number(r.gst_percent || 0);
-      const mrp = Number(r.mrp || 0);
-      const packSize = Number(r.pack_size || 1);
+  rows.forEach((r) => {
+    const qty = Number(r.qty || 0);
+    const rate = Number(r.rate || 0);          // GST-inclusive
+    const gstPercent = Number(r.gst_percent || 0);
+    const mrp = Number(r.mrp || 0);
+    const packSize = Number(r.pack_size || 1);
 
-      if (!qty || !rate || !mrp) return;
+    if (!qty || !rate || !mrp) return;
 
-      const unitMRP = mrp / packSize;
-      const baseTotal = qty * rate;
-      const gstAmount = (baseTotal * gstPercent) / 100;
-      const discountAmount = Math.max(0, (unitMRP - rate) * qty);
+    const unitMRP = mrp / packSize;
+    const rowTotal = qty * rate;                 // already includes GST
+    const baseTotal = rowTotal / (1 + gstPercent / 100);
+    const gstAmount = rowTotal - baseTotal;
+    const discountAmount = Math.max(0, (unitMRP - rate) * qty);
 
-      total_amount += baseTotal;
-      total_gst += gstAmount;
-      total_discount += discountAmount;
-    });
+    total_base += baseTotal;
+    total_gst += gstAmount;
+    total_discount += discountAmount;
+  });
 
-    const net_amount = total_amount + total_gst;
+  const net_amount = total_base + total_gst;    // or sum of rowTotals
 
-    setFormData((prev) => ({
-      ...prev,
-      total_amount: total_amount.toFixed(2),
-      total_gst: total_gst.toFixed(2),
-      total_discount: total_discount.toFixed(2),
-      net_amount: net_amount.toFixed(2),
-    }));
-  }, [rows]);
+  setFormData((prev) => ({
+    ...prev,
+    total_amount: total_base.toFixed(2),        // total base amount
+    total_gst: total_gst.toFixed(2),
+    total_discount: total_discount.toFixed(2),
+    net_amount: net_amount.toFixed(2),
+  }));
+}, [rows]);
+
 
   const resetForm = () => {
     setFormData((prev) => ({

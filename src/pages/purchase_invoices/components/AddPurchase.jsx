@@ -32,8 +32,10 @@ import { showErrorToast, showSuccessToast } from "@/lib/toastService";
 
 import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { purchaseSchema } from "../validation/purchaseSchema";
+
 import { useInfiniteItem, useItem } from "@/hooks/useItem";
+import { Columns, ColumnsIcon } from "lucide-react";
+import { purchaseSchema } from "../validation/purchaseSchema";
 
 const emptyItemRow = {
   item_id: "",
@@ -47,6 +49,9 @@ const emptyItemRow = {
   sale_rate: "",
   discount_percent: "",
   discount_amount: "",
+  p_discount_type: "percent",
+  p_discount_percent: "",
+  p_discount_amount: "",
   scheme_discount_percent: "",
   scheme_discount_amount: "",
   scheme_discount_type: "percent",
@@ -61,33 +66,33 @@ const emptyItemRow = {
 };
 
 export default function AddPurchaseForm({ onClose }) {
-  const [search,setSearch]=useState()
+  const [search, setSearch] = useState()
   const { data: storesRes = {}, isLoading: loadingStore } = useStores();
   const { data: suppliersRes = {}, isLoading: loadingSupplier } = useSupplier();
-const {
-  data,
-  fetchNextPage,
-  hasNextPage,
-  isFetchingNextPage,
-} = useInfiniteItem({ search });
-console.log("item",data);
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteItem({ search });
+  console.log("item", data);
 
 
-const items = data?.pages.flatMap((p) => p.data) ?? [];
-console.log("items",items);
+  const items = data?.pages.flatMap((p) => p.data) ?? [];
+  console.log("items", items);
 
 
   const { data: currentUserResponse } = useCurrentUser();
   const addpurchaseinvoice = useAddpurchaseinvoice();
 
   const handleScroll = (e) => {
-  const bottom =
-    e.target.scrollHeight - e.target.scrollTop === e.target.clientHeight;
+    const bottom =
+      e.target.scrollHeight - e.target.scrollTop === e.target.clientHeight;
 
-  if (bottom && hasNextPage && !isFetchingNextPage) {
-    fetchNextPage();
-  }
-};
+    if (bottom && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  };
 
 
   const stores = Array.isArray(storesRes?.stores)
@@ -206,51 +211,76 @@ console.log("items",items);
   };
 
   // ===== PER-ROW CALCULATION =====
-  const recalcRow = (row) => {
+  const recalcRow = (row, changedField = null) => {
     const qty = Number(row.qty || 0);
     const rate = Number(row.purchase_rate || 0);
-     const mrp = Number(row.mrp || 0);
-    const discPercent = Number(row.discount_percent || 0);
+    const mrp = Number(row.mrp || 0);
+
+    const discountPercent = Number(row.discount_percent || 0); // SALES/BILL %
+    const schemeDiscPercent = Number(row.scheme_discount_percent || 0);
     const gstPercent = Number(row.gst_percent || 0);
 
+    // ---------- GROSS ----------
     const gross = qty * rate;
-    const discountAmount = (gross * discPercent) / 100;
-    const mrpDiscountAmount = (qty * mrp * discPercent) / 100;
 
-    // Scheme logic
-    let schemeDiscountAmount = 0;
-    if (row.scheme_discount_type === "percent") {
-      schemeDiscountAmount = (gross * Number(row.scheme_discount_percent || 0)) / 100;
-    } else {
-      // User input: preserve typed value
-      schemeDiscountAmount = row.scheme_discount_amount ? Number(row.scheme_discount_amount) : 0;
+    // ---------- BILL / SALES DISCOUNT ----------
+    const discountAmount = (mrp * discountPercent) / 100;
+
+    // ---------- P-DISCOUNT ----------
+    let pDiscountAmount = row.p_discount_amount;
+    let pDiscountPercent = row.p_discount_percent;
+
+    if (row.p_discount_type === "percent" && changedField !== "p_discount_amount") {
+      pDiscountAmount = (gross * pDiscountPercent) / 100;
+    } else if (row.p_discount_type === "amount" && changedField !== "p_discount_percent") {
+      // DON'T overwrite amount, calculate percent if needed
+      pDiscountPercent = gross > 0 ? (pDiscountAmount / gross) * 100 : 0;
     }
 
-    const taxable = gross - discountAmount - schemeDiscountAmount;
-   const saleRate = mrp - (mrpDiscountAmount) / qty;
+    // ---------- SCHEME DISCOUNT ----------
+    let schemeDiscountAmount = 0;
+    if (row.scheme_discount_type === "percent") {
+      schemeDiscountAmount = (gross * schemeDiscPercent) / 100;
+    } else {
+      schemeDiscountAmount = Number(row.scheme_discount_amount || 0);
+    }
+
+    // ---------- TAXABLE ----------
+    const taxable = gross - pDiscountAmount - schemeDiscountAmount;
+
+    // ---------- GST ----------
     const gstAmount = (taxable * gstPercent) / 100;
     const cgst = gstAmount / 2;
     const sgst = gstAmount / 2;
     const igst = 0;
+
+    // ---------- TOTAL ----------
     const total = taxable + gstAmount;
-    
+
+    // ---------- SALE RATE (SAFE) ----------
+    const mrpDiscountAmount = (qty * mrp * discountPercent) / 100;
+    const saleRate = qty > 0 ? mrp - mrpDiscountAmount / qty : mrp;
 
     return {
       ...row,
-      discount_amount: isNaN(discountAmount) ? "" : discountAmount,
-      scheme_discount_amount: isNaN(schemeDiscountAmount) ? "" : schemeDiscountAmount,
-      taxable_amount: isNaN(taxable) ? "" : taxable.toFixed(2),
-cgst: isNaN(cgst) ? "" : cgst.toFixed(2),
-sgst: isNaN(sgst) ? "" : sgst.toFixed(2),
-igst: isNaN(igst) ? "" : igst.toFixed(2),
-total_amount: isNaN(total) ? "" : total.toFixed(2),
-sale_rate: isNaN(saleRate) ? "" : saleRate.toFixed(2),
+      discount_amount: discountAmount,
+      p_discount_amount: pDiscountAmount,
+      p_discount_percent: pDiscountPercent,
+      scheme_discount_amount: schemeDiscountAmount.toFixed(2),
+      taxable_amount: taxable.toFixed(2),
+      cgst: cgst.toFixed(2),
+      sgst: sgst.toFixed(2),
+      igst: igst.toFixed(2),
+      total_amount: total.toFixed(2),
+      sale_rate: saleRate.toFixed(2),
+
     };
   };
 
 
 
-  const handleItemChange = (index, field, value) => {
+
+ const handleItemChange = (index, field, value) => {
     const updatedRow = recalcRow({ ...watchedItems[index], [field]: value });
 
     // Update all fields of this row
@@ -271,7 +301,7 @@ sale_rate: isNaN(saleRate) ? "" : saleRate.toFixed(2),
 
     newItems.forEach((r) => {
       total_amount += Number(r.taxable_amount || 0);
-      total_discount += Number(r.discount_amount || 0);
+      total_discount += Number(r.p_discount_amount || 0);
       total_gst += Number(r.cgst || 0) + Number(r.sgst || 0) + Number(r.igst || 0);
     });
 
@@ -282,6 +312,7 @@ sale_rate: isNaN(saleRate) ? "" : saleRate.toFixed(2),
       net_amount: Number((total_amount + total_gst).toFixed(2)),
     });
   };
+
 
 
   const handleAddRow = () => append(emptyItemRow);
@@ -323,6 +354,9 @@ sale_rate: isNaN(saleRate) ? "" : saleRate.toFixed(2),
         sale_rate: r.sale_rate ? Number(r.sale_rate) : null,
         discount_percent: Number(r.discount_percent || 0),
         discount_amount: Number(r.discount_amount || 0),
+        p_discount_type: r.p_discount_type || "percent",
+        p_discount_percent: Number(r.p_discount_percent || 0),
+        p_discount_amount: Number(r.p_discount_amount || 0),
         scheme_discount_percent: Number(r.scheme_discount_percent || 0),
         scheme_discount_amount: Number(r.scheme_discount_amount || 0),
         taxable_amount: Number(r.taxable_amount || 0),
@@ -361,48 +395,52 @@ sale_rate: isNaN(saleRate) ? "" : saleRate.toFixed(2),
             Purchase Invoice
           </Typography>
           <Divider />
-          <Box container spacing={2} mt={1} display="flex" gap={1}>
-          
-              <Controller
-                name="invoice_no"
+          <Box
+            display="flex"
+            flexDirection="row"
+            gap={2}
+            sx={{ width: "100%", mt: "5px" }}
+          >
+             {/* Column 1 */}
+            <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 1 }}>
+               <Controller
+                name="store_id"
                 control={control}
                 render={({ field }) => (
                   <TextField
                     {...field}
-                    label="Invoice No"
+                    select
+                    label="Store"
                     fullWidth
                     size="small"
-                    error={!!errors.invoice_no}
-                    helperText={errors.invoice_no?.message}
-                  />
+                    error={!!errors.store_id}
+                    helperText={errors.store_id?.message}
+                  >
+                    {loadingStore ? (
+                      <MenuItem disabled>Loading...</MenuItem>
+                    ) : (
+                      stores.map((s) => (
+                        <MenuItem key={s.store_id} value={s.store_id}>
+                          {s.store_name}
+                        </MenuItem>
+                      ))
+                    )}
+                  </TextField>
                 )}
               />
-           
-              <Controller
-                name="invoice_date"
-                control={control}
-                render={({ field }) => (
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker
-                      label="Invoice Date"
-                      value={field.value ? dayjs(field.value) : null}
-                      onChange={(newValue) =>
-                        field.onChange(newValue ? newValue.format("YYYY-MM-DD") : null)
-                      }
-                      slotProps={{
-                        textField: {
-                          fullWidth: true,
-                          size: "small",
-                          required: true,
-                          error: !!errors.invoice_date,
-                          helperText: errors.invoice_date?.message,
-                        },
-                      }}
-                    />
-                  </LocalizationProvider>
-                )}
+               <TextField
+                label="Created By"
+                value={currentUser?.username || createdBy || ""}
+                fullWidth
+                size="small"
+                InputProps={{ readOnly: true }}
               />
-           
+             
+
+             
+            </Box>
+             {/* Column 2*/}
+            <Box sx={{ flex: 1 }}>
               <Controller
                 name="supplier_id"
                 control={control}
@@ -421,64 +459,70 @@ sale_rate: isNaN(saleRate) ? "" : saleRate.toFixed(2),
                     ) : (
                       suppliers.map((s) => (
                         <MenuItem key={s.supplier_id} value={s.supplier_id}>
-                          {s.supplier_name || s.supplier_id}
+                          {s.supplier_name}
                         </MenuItem>
                       ))
                     )}
                   </TextField>
                 )}
               />
-           
-           
+            </Box>
+            {/* Column 3 */}
+            <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 1 }}>
               <Controller
-                name="store_id"
+                name="invoice_no"
                 control={control}
                 render={({ field }) => (
                   <TextField
                     {...field}
-                    select
-                    label="Store"
+                    label="Invoice No"
                     fullWidth
                     size="small"
-                    error={!!errors.store_id}
-                    helperText={errors.store_id?.message}
-                  >
-                    {loadingStore ? (
-                      <MenuItem disabled>Loading...</MenuItem>
-                    ) : (
-                      stores.map((s) => (
-                        <MenuItem key={s.store_id} value={s.store_id}>
-                          {s.store_name || s.store_id}
-                        </MenuItem>
-                      ))
-                    )}
-                  </TextField>
+                    error={!!errors.invoice_no}
+                    helperText={errors.invoice_no?.message}
+                  />
                 )}
               />
-          
-          
-              <TextField
-                label="Created By"
-                value={currentUser?.username || createdBy || ""}
-                fullWidth
-                size="small"
-                InputProps={{ readOnly: true }}
+
+              <Controller
+                name="invoice_date"
+                control={control}
+                render={({ field }) => (
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                      label="Invoice Date"
+                      value={field.value ? dayjs(field.value) : null}
+                      onChange={(newValue) =>
+                        field.onChange(newValue ? newValue.format("YYYY-MM-DD") : null)
+                      }
+                      slotProps={{
+                        textField: {
+                          fullWidth: true,
+                          size: "small",
+                          error: !!errors.invoice_date,
+                          helperText: errors.invoice_date?.message,
+                        },
+                      }}
+                    />
+                  </LocalizationProvider>
+                )}
               />
+            </Box>
+
+           
+
            
           </Box>
+
         </Box>
 
         {/* ITEMS TABLE */}
-        <Box mt={2} sx={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
+        <Box mt={2}  >
           <Box display="flex" justifyContent="space-between" alignItems="center">
             <Typography variant="subtitle1" fontWeight={600} gutterBottom className="text-blue-700">
               Purchase Items
             </Typography>
-            <Tooltip title="Add Item">
-              <IconButton onClick={handleAddRow} size="small">
-                <AddCircleOutline />
-              </IconButton>
-            </Tooltip>
+
           </Box>
           <Divider />
           <Paper variant="outlined" sx={{ mt: 1 }}>
@@ -486,19 +530,19 @@ sale_rate: isNaN(saleRate) ? "" : saleRate.toFixed(2),
               <Table size="small" stickyHeader>
                 <TableHead>
                   <TableRow>
-                    <TableCell sx={{ minWidth: 160 }}>Item</TableCell>
-                    <TableCell sx={{ minWidth: 110 }}>HSN</TableCell>
-                    <TableCell sx={{ minWidth: 110 }}>Batch</TableCell>
-                    <TableCell sx={{ minWidth: 90 }}>Expiry</TableCell>
-                    <TableCell sx={{ minWidth: 70 }}>Pack Size</TableCell>
-                    <TableCell sx={{ minWidth: 70 }}>Qty</TableCell>
-                    <TableCell sx={{ minWidth: 70 }}>Free</TableCell>
-                    <TableCell sx={{ minWidth: 90 }}>Purchase</TableCell>
-                    <TableCell sx={{ minWidth: 90 }}>MRP</TableCell>
-                    <TableCell sx={{ minWidth: 90 }}>Sale</TableCell>
-                    <TableCell sx={{ minWidth: 70 }}>GST%</TableCell>
-                    <TableCell sx={{ minWidth: 100 }}>Total</TableCell>
-                    <TableCell sx={{ minWidth: 120 }} align="center">Actions</TableCell>
+                    <TableCell sx={{ width: 220 }}>Item Name</TableCell>
+                    <TableCell sx={{ width: 100 }}>HSN</TableCell>
+                    <TableCell sx={{ width: 100 }}>Batch</TableCell>
+                    <TableCell sx={{ width: 110 }}>Expiry</TableCell>
+                    <TableCell sx={{ width: 70 }}>Pack</TableCell>
+                    <TableCell sx={{ width: 60 }}>Qty</TableCell>
+                    <TableCell sx={{ width: 50 }}>Free</TableCell>
+                    <TableCell sx={{ width: 90 }}>P-Rate</TableCell>
+                    <TableCell sx={{ width: 90 }}>MRP</TableCell>
+                    <TableCell sx={{ width: 90 }}>s-dis%</TableCell>
+                    <TableCell sx={{ width: 65 }}>GST%</TableCell>
+                    <TableCell sx={{ width: 100 }}>Total</TableCell>
+                    <TableCell sx={{ width: 90 }} align="center">Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -512,62 +556,66 @@ sale_rate: isNaN(saleRate) ? "" : saleRate.toFixed(2),
                         <TableRow>
                           {/* Item */}
                           <TableCell padding="none" sx={{ p: 0.25 }}>
-                      <Controller
-  name={`items.${index}.item_id`}
-  control={control}
-  render={({ field: itemField }) => {
-    // Use local state for Autocomplete
-    const [localItem, setLocalItem] = React.useState(() =>
-      items.find(it => Number(it.item_id) === Number(itemField.value)) || null
-    );
+                            <Controller
+                              name={`items.${index}.item_id`}
+                              control={control}
+                              render={({ field: itemField }) => {
+                                // Use local state for Autocomplete
+                                const [localItem, setLocalItem] = React.useState(() =>
+                                  items.find(it => Number(it.item_id) === Number(itemField.value)) || null
+                                );
 
-    React.useEffect(() => {
-      // Sync RHF value when localItem changes
-      itemField.onChange(localItem?.item_id || "");
-    }, [localItem]);
+                                React.useEffect(() => {
+                                  // Sync RHF value when localItem changes
+                                  itemField.onChange(localItem?.item_id || "");
+                                }, [localItem]);
 
-    return (
-      <Autocomplete
-        value={localItem}
-        onChange={(e, newValue) => {
-          setLocalItem(newValue || null);
+                                return (
+                                  <Autocomplete
+                                    value={localItem}
+                                    onChange={(e, newValue) => {
+                                      setLocalItem(newValue || null);
 
-          if (!newValue) return;
+                                      if (!newValue) return;
 
-          const currentRow = { ...watchedItems[index] };
-          const updatedRow = recalcRow({
-            ...currentRow,
-            item_id: newValue.item_id,
-            pack_size: newValue.pack_size,
-            mrp: newValue.mrp,
-            sale_rate: newValue.sale_rate,
-            hsn_id: newValue.hsn?.hsn_id,
-            hsn_code: newValue.hsn?.hsn_code,
-            gst_percent: newValue.hsn?.gst_percent,
-          });
+                                      const currentRow = { ...watchedItems[index] };
+                                      const updatedRow = recalcRow({
+                                        ...currentRow,
+                                        item_id: newValue.item_id,
+                                        pack_size: newValue.pack_size,
+                                        mrp: newValue.mrp,
+                                        sale_rate: newValue.sale_rate,
+                                        hsn_id: newValue.hsn?.hsn_id,
+                                        hsn_code: newValue.hsn?.hsn_code,
+                                        gst_percent: newValue.hsn?.gst_percent,
+                                      });
 
-          setValue(`items.${index}`, { ...updatedRow }, {
-            shouldValidate: true,
-            shouldDirty: true,
-          });
-        }}
-        onInputChange={(e, val) => setSearch(val)}
-        options={items}
-        getOptionLabel={(option) => option.name || ""}
-        loading={isFetchingNextPage}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label="Item"
-            size="small"
-            error={!!errors.items?.[index]?.item_id}
-            helperText={errors.items?.[index]?.item_id?.message}
-          />
-        )}
-      />
-    );
+                                      setValue(`items.${index}`, { ...updatedRow }, {
+                                        shouldValidate: true,
+                                        shouldDirty: true,
+                                      });
+                                    }}
+                                    onInputChange={(e, val) => setSearch(val)}
+                                    options={items}
+                                    getOptionLabel={(option) => option.name || ""}
+                                    loading={isFetchingNextPage}
+                                    renderInput={(params) => (
+                                      <TextField   sx={{
+       // minimum width to prevent too small cells
+    whiteSpace: "normal",  // allow wrapping
+    wordBreak: "break-word" // break long words
   }}
-/>
+                                        {...params}
+                                        label="Item"
+                                        size="small"
+                                        error={!!errors.items?.[index]?.item_id}
+                                        helperText={errors.items?.[index]?.item_id?.message}
+                                      />
+                                    )}
+                                  />
+                                );
+                              }}
+                            />
 
 
 
@@ -617,7 +665,15 @@ sale_rate: isNaN(saleRate) ? "" : saleRate.toFixed(2),
 
                           {/* Sale */}
                           <TableCell padding="none" sx={{ p: 0.25 }}>
-                            <TextField fullWidth size="small" value={rowValue.sale_rate || ""} onChange={(e) => handleItemChange(index, "sale_rate", e.target.value)} />
+                            <TextField
+                              fullWidth
+                              size="small"
+                              value={rowValue.discount_percent || ""}
+                              onChange={(e) =>
+                                handleItemChange(index, "discount_percent", e.target.value)
+                              }
+                            />
+
                           </TableCell>
 
                           {/* GST */}
@@ -653,26 +709,63 @@ sale_rate: isNaN(saleRate) ? "" : saleRate.toFixed(2),
                                   value={rowValue.taxable_amount || ""}
                                   InputProps={{ readOnly: true }}
                                 />
-
-                                <TextField sx={{ p: 0.25, whiteSpace: "nowrap" }}
-                                  label="Discount %"
+                                <TextField label="sale-rate" sx={{ p: 0.25, whiteSpace: "nowrap" }}
                                   fullWidth
-                                  size="small"
-                                  value={rowValue.discount_percent || ""}
-                                  onChange={(e) => handleItemChange(index, "discount_percent", e.target.value)}
-                                />
-
-                                <TextField sx={{ p: 0.25, whiteSpace: "nowrap" }}
-                                  label="Discount Amount"
-                                  fullWidth
-                                  size="small"
-                                  value={rowValue.discount_amount || ""}
-                                  InputProps={{ readOnly: true }}
-                                />
+                                  size="small" value={rowValue.sale_rate || ""} InputProps={{ readOnly: true }} />
 
                                 <TextField sx={{ p: 0.25, whiteSpace: "nowrap" }}
                                   select
-                                  label="Scheme Type"
+                                  label="P-Dis Type"
+                                  fullWidth
+                                  size="small"
+                                  value={rowValue.p_discount_type || "percent"}
+                                  onChange={(e) =>
+                                    handleItemChange(index, "p_discount_type", e.target.value)
+                                  }
+                                >
+                                  <MenuItem value="percent">Percent (%)</MenuItem>
+                                  <MenuItem value="amount">Amount (₹)</MenuItem>
+                                </TextField>
+
+                                <TextField sx={{ p: 0.25, whiteSpace: "nowrap" }}
+                                  label="P-Discount %"
+                                  fullWidth
+                                  size="small"
+                                  value={rowValue.p_discount_percent ?? ""}
+                                  onChange={(e) =>
+                                    handleItemChange(
+                                      index,
+                                      "p_discount_percent",
+                                      e.target.value,
+                                      "p_discount_percent"
+                                    )
+                                  }
+                                  disabled={rowValue.p_discount_type === "amount"}
+                                />
+
+                                <TextField sx={{ p: 0.25, whiteSpace: "nowrap" }}
+                                  label="P-Discount Amount"
+                                  fullWidth
+                                  size="small"
+                                  value={rowValue.p_discount_amount ?? ""}
+                                  onChange={(e) =>
+                                    handleItemChange(
+                                      index,
+                                      "p_discount_amount",
+                                      e.target.value,
+                                      "p_discount_amount"
+                                    )
+                                  }
+                                  disabled={rowValue.p_discount_type === "percent"}
+
+                                />
+
+
+
+
+                                <TextField sx={{ p: 0.25, whiteSpace: "nowrap" }}
+                                  select
+                                  label="Scheme-Type"
                                   fullWidth
                                   size="small"
                                   value={rowValue.scheme_discount_type || "percent"}
@@ -723,11 +816,16 @@ sale_rate: isNaN(saleRate) ? "" : saleRate.toFixed(2),
               </Table>
             </Box>
           </Paper>
+          <Tooltip title="Add Item">
+            <IconButton onClick={handleAddRow} size="small">
+              <AddCircleOutline />ADD
+            </IconButton>
+          </Tooltip>
         </Box>
 
         {/* SUMMARY */}
         <Box mt={2}>
-          <Typography variant="subtitle1" fontWeight={600} gutterBottom className="text-blue-700">
+          <Typography variant="subtitle1" fontWeight={600} className="text-blue-700">
             Amount Summary
           </Typography>
           <Divider />

@@ -30,5 +30,17 @@ purchaseInvoiceCreate: async (data) => {
     return data;
   },
 
+
+   getTodayNetAmount:async(params)=>{
+  const res=await apiClient.get("/purchase/today-netamount",{params})
+  return res.data;
+ },
+
+
+    getTotalNetAmount:async(params)=>{
+  const res=await apiClient.get("/purchase/total-netamount",{params})
+  return res.data;
+ }
+
 }
 export default purchaseInvoiceService;

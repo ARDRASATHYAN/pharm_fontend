@@ -72,3 +72,29 @@ export function useDeletepurchaseinvoice() {
     onSuccess: () => queryClient.invalidateQueries(["purchaseinvoice"]),
   });
 }
+
+
+export function usePurchaseTodayNetAmount({ store_id } = {}) {
+  return useQuery({
+    queryKey: ["todayNetamount",store_id],
+    queryFn: () =>
+      purchaseInvoiceService.getTodayNetAmount({
+        store_id,
+      }),
+    keepPreviousData: true,
+    staleTime: 1000 * 60 * 5,
+  });
+}
+
+
+export function usePurchaseTotalNetAmount({ store_id } = {}) {
+  return useQuery({
+    queryKey: ["totalNetamount",store_id],
+    queryFn: () =>
+      purchaseInvoiceService.getTotalNetAmount({
+        store_id,
+      }),
+    keepPreviousData: true,
+    staleTime: 1000 * 60 * 5,
+  });
+}
