@@ -133,10 +133,25 @@ export const navigationItems = [
     href: "/stock",
     icon: Package,
   },
-  // {
-  //   key: "customers",
-  //   label: "Customer",
-  //   href: "/customers",
-  //   icon: User,
-  // },
+  {
+    key: "gst",
+    label: "Gst/Tax Reports",
+    href: "/gst/sales",
+    icon: User,
+     children: [
+      { key: "excess-gst-sale", label: "GST Sales Report", href:  "/gst/sales" },
+      { key: "gst-purchase", label: "GST Purchase Report", href: "/gst/purchase" },
+    ],
+  },
+  {
+    key: "salesreport",
+    label: "Sales Reports",
+    href: "/sale-report/item-wise",
+    icon: User,
+     children: [
+      { key: "item-wise-sale", label: "Item Wise Sales Report", href:  "/sale-report/item-wise" },
+      { key: "mrpsaleprice", label: "Mrp V/S SalePrice", href: "/sale-report/mrp-salesprice" },
+       { key: "profit", label: "Profit/margin Report", href: "/sale-report/profit" },
+    ],
+  },
 ];

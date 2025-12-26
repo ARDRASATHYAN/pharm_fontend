@@ -33,6 +33,11 @@ import SalesReport from "./pages/report/SalesReport";
 import PurchaseReturnReport from "./pages/report/PurchaseReturnReport";
 import SalesReturnReport from "./pages/report/SalesReturnReport";
 import PurchaseBillEntry from "./pages/store_stock";
+import GstSalesReport from "./pages/tax_reports/Gst_Sales_Report";
+import GstPurchaseReport from "./pages/tax_reports/Gst_Purchase_Report";
+import ItemWiseSalesReport from "./pages/sales_reports/Item_Wise_Sales_Report";
+import MrpVsSalesPriceReport from "./pages/sales_reports/Mrp_Vs_Sales_Rate_Report";
+import ProfitReport from "./pages/sales_reports/Profit_Report";
 
 
 
@@ -64,7 +69,7 @@ function App() {
           <Route path="/purchase/purchaceinvoice" element={<PurchaseInvoiceMockApiHeader />} />
           <Route path="/purchase/purchaceitem" element={<PurchaseItemMockApiHeader />} />
           <Route path="/purchase/addpurchase" element={<AddPurchaseForm />} />
-           <Route path="/purchase/report" element={<PurchaseReport/>} />
+          <Route path="/purchase/report" element={<PurchaseReport />} />
 
           <Route path="/stock" element={<StockMockApiHeader />} />
 
@@ -72,7 +77,7 @@ function App() {
           <Route path="/return/addpurchasereturn" element={<PurchaseReturnForm />} />
           <Route path="/purchase/purchacereturn" element={<PurchaseReturnMockApiHeader />} />
           <Route path="/return/returnitem" element={<PurchaseREturnItemMockApiHeader />} />
-            <Route path="/return/report" element={<PurchaseReturnReport/>} />
+          <Route path="/return/report" element={<PurchaseReturnReport />} />
 
           <Route path="/sales/add" element={<SalesForm />} />
           <Route path="/sales/list" element={<SalesInvoiceMockApiHeader />} />
@@ -83,7 +88,7 @@ function App() {
           <Route path="/salesreturn/add" element={<AddSalesReturnForm />} />
           <Route path="/salesreturn/list" element={< SalesReturnMockApiHeader />} />
           <Route path="/salesreturn/items" element={< SalesReturnItemMockApiHeader />} />
-          <Route path="/salesreturn/report" element={<SalesReturnReport/>} />
+          <Route path="/salesreturn/report" element={<SalesReturnReport />} />
 
 
           <Route path="/damaged/add" element={< AddDamagedStockForm />} />
@@ -92,11 +97,21 @@ function App() {
 
           <Route path="/excess/add" element={< AddExcessStockForm />} />
           <Route path="/excess/list" element={< ExcessStockMockApiHeader />} />
-           <Route path="/purchase" element={<PurchaseBillEntry />} />
+          <Route path="/purchase" element={<PurchaseBillEntry />} />
 
 
-          
- 
+          <Route path="/gst/sales" element={<GstSalesReport />} />
+          <Route path="/gst/purchase" element={<GstPurchaseReport />} />
+
+          <Route path="/sale-report/item-wise" element={<ItemWiseSalesReport />} />
+          <Route path="/sale-report/mrp-salesprice" element={<MrpVsSalesPriceReport />} />
+          <Route path="/sale-report/profit" element={<ProfitReport />} />
+
+
+
+
+
+
 
         </Route>
       </Routes>
@@ -113,7 +128,7 @@ function App() {
         theme="colored"            // "light" | "dark" | "colored"
       />
     </BrowserRouter>
-    
+
   );
 }
 
