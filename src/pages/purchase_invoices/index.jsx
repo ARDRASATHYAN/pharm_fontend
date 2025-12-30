@@ -125,7 +125,7 @@ console.log(purchaseItems,"invoice");
 
   return (
     <>
-      <h2 className="text-xl font-bold text-blue-700 tracking-wide mb-2">Purchase Invoices</h2>
+      <h2 className="text-xl font-bold text-blue-700 tracking-wide mb-2">Invoice Wise Purchase Report</h2>
 
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
         <TextField
@@ -134,14 +134,14 @@ console.log(purchaseItems,"invoice");
           value={filters.search}
           onChange={handleSearchChange}
         />
-        <Button
+        {/* <Button
           variant="contained"
           color="primary"
           size="small"
           onClick={() => { setOpenForm(true); setEditMode(false); setEditingInvoice(null); }}
         >
           Add Invoice
-        </Button>
+        </Button> */}
       </Box>
 
       <BasicTable

@@ -95,7 +95,7 @@ export default function PurchaseReport() {
   return (
     <>
       <h2 className="text-xl font-bold text-blue-700 tracking-wide p-0">
-        Purchase Report
+        Item-Wise Purchase Report
       </h2>
 
       {/* TOP BAR */}
