@@ -38,6 +38,8 @@ import GstPurchaseReport from "./pages/tax_reports/Gst_Purchase_Report";
 import ItemWiseSalesReport from "./pages/sales_reports/Item_Wise_Sales_Report";
 import MrpVsSalesPriceReport from "./pages/sales_reports/Mrp_Vs_Sales_Rate_Report";
 import ProfitReport from "./pages/sales_reports/Profit_Report";
+import CurrentStockReport from "./pages/inventory_reports/Current_Stock";
+import OutOffStockReport from "./pages/inventory_reports/OutOff_Stock";
 
 
 
@@ -107,6 +109,10 @@ function App() {
           <Route path="/sale-report/mrp-salesprice" element={<MrpVsSalesPriceReport />} />
           <Route path="/sale-report/profit" element={<ProfitReport />} />
 
+
+
+ <Route path="/stock/current-stock" element={<CurrentStockReport />} />
+ <Route path="/stock/outoff-stock" element={<OutOffStockReport />} />
 
 
 

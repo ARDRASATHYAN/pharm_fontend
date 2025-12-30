@@ -73,3 +73,33 @@ export function useTotalMedicine({ store_id } = {}) {
     staleTime: 1000 * 60 * 5,
   });
 }
+
+
+export function useCurrentStock({ page = 1, perPage = 10, store_id } = {}) {
+  return useQuery({
+    queryKey: ["currentstock", page, perPage, store_id],
+    queryFn: () =>
+      stockService.getCurrentstock({
+        store_id,
+        page,
+        perPage,
+      }),
+    keepPreviousData: true,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+}
+
+
+export function useOutOfftStock({ page = 1, perPage = 10, store_id } = {}) {
+  return useQuery({
+    queryKey: ["outoffstock", page, perPage, store_id],
+    queryFn: () =>
+      stockService.getOutOffstock({
+        store_id,
+        page,
+        perPage,
+      }),
+    keepPreviousData: true,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+}

@@ -1,3 +1,6 @@
+import { IconButton } from "@mui/material";
+import { Eye } from "lucide-react";
+
 export const getPurchaseInvoiceColumns = (onEdit, onDelete,onItem) => [
   { header: "Invoice No", accessorKey: "invoice_no" },
   { header: "Invoice Date", accessorKey: "invoice_date" },
@@ -40,16 +43,24 @@ export const getPurchaseInvoiceColumns = (onEdit, onDelete,onItem) => [
     id: "actions",
     cell: ({ row }) => (
       <div style={{ display: "flex", gap: 4 }}>
-        <button onClick={() => onEdit(row.original)}>Edit</button>
-        <button onClick={() => onDelete(row.original.purchase_id)}>Delete</button>
-         <button
+        {/* <button onClick={() => onEdit(row.original)}>Edit</button>
+        <button onClick={() => onDelete(row.original.purchase_id)}>Delete</button> */}
+        <IconButton
+        color="error"
+        size="small"
+        onClick={() => onItem(row.original.purchase_id)}
+        sx={{ padding: "4px" }}
+      >
+        <Eye  size={16} />
+      </IconButton>
+         {/* <button
   onClick={() => {
     console.log("ROW DATA 👉", row.original);
     onItem(row.original.purchase_id);
   }}
 >
   Item
-</button>
+</button> */}
 
       </div>
     ),

@@ -65,7 +65,7 @@ export const getSalesInvoiceColumns = (onEdit, onDelete,onItem) => [
   id: "actions",
   cell: ({ row }) => (
     <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
-      <IconButton
+      {/* <IconButton
         color="primary"
         size="small"
         onClick={() => onEdit(row.original)}
@@ -80,7 +80,7 @@ export const getSalesInvoiceColumns = (onEdit, onDelete,onItem) => [
         sx={{ padding: "4px" }}
       >
         <Delete size={16} />
-      </IconButton>
+      </IconButton> */}
        <IconButton
         color="error"
         size="small"

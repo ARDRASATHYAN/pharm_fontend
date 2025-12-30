@@ -9,7 +9,7 @@ export const getProfitReportColumns = () => [
   },
   {
     header: "Item",
-    accessorKey: "item.name",
+    accessorKey: "item_name",
   },
   {
     header: "Batch",

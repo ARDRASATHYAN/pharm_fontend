@@ -154,7 +154,7 @@ console.log(purchaseItems,"invoice");
           totalPages: purchaseData?.totalPages || 1,
           total: purchaseData?.total || 0,
         }}
-        rowPadding="py-2" 
+        rowPadding="py-1" 
         onPageChange={handlePageChange}
       />
 

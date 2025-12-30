@@ -2,7 +2,7 @@ import React from "react";
 import { useReactTable, flexRender, getCoreRowModel } from "@tanstack/react-table";
 import { Skeleton } from "@mui/material";
 
-const BasicTable = ({ columns, data = [], loading = false, pagination, onPageChange ,rowPadding}) => {
+const BasicTable = ({ columns, data = [], loading = false, pagination, onPageChange ,rowPadding,getRowClassName}) => {
   const { page = 1, perPage = 10, totalPages = 1, total = 0 } = pagination;
 
   const table = useReactTable({
@@ -43,9 +43,9 @@ const BasicTable = ({ columns, data = [], loading = false, pagination, onPageCha
                 </tr>
               ))
             : table.getRowModel().rows.map(row => (
-                <tr key={row.id} className="even:bg-gray-100 hover:bg-gray-200 cursor-pointer data-row">
+                <tr key={row.id}  className={`even:bg-gray-100 hover:bg-gray-200 cursor-pointer data-row ${getRowClassName ? getRowClassName(row.original) : ""}`}>
                   {row.getVisibleCells().map(cell => (
-                    <td key={cell.id} className={`${rowPadding} py-1 px-2 text-xs text-gray-800`}>
+                    <td key={cell.id} className={`${rowPadding} py-1 px-2 text-xs`}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}
