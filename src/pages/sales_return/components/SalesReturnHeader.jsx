@@ -25,6 +25,7 @@ export const getSalesReturnColumns = (onEdit, onDelete,onItem) => [
         header: "reason",
         accessorKey: "reason"
     },
+    
     {
         header: "total_amount",
         accessorKey: "total_amount"

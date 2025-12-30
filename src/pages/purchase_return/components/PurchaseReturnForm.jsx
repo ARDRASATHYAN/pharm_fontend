@@ -20,6 +20,7 @@ import { AddCircleOutline, DeleteOutline } from "@mui/icons-material";
 import { useCurrentUser } from "@/hooks/useAuth";
 import { useStores } from "@/hooks/useStore";
 import {
+  useInfinitepurchaseinvoice,
   usepurchaseinvoice,
   usePurchaseItemsByPurchaseId,
 } from "@/hooks/usePurchaseInvoice";
@@ -48,8 +49,19 @@ export default function PurchaseReturnForm({ onClose, editMode }) {
 
   // ---------------- LOAD DATA ----------------
   const { data: storeList = [] } = useStores();
-  const { data: purchaseData = [] } = usepurchaseinvoice();
-  const purchaseList = purchaseData?.data || [];
+const {
+  data: purchaseData,
+  fetchNextPage,
+  hasNextPage,
+  isFetchingNextPage,
+} = useInfinitepurchaseinvoice();
+
+
+const purchaseList = purchaseData?.pages
+  ? purchaseData.pages.flatMap(p => p.data)
+  : [];
+
+
   const { data } = usePurchaseItemsByPurchaseId(header.purchase_id);
   const purchaseItems = data?.data || [];
 
@@ -62,42 +74,59 @@ export default function PurchaseReturnForm({ onClose, editMode }) {
   };
 
   // ---------------- HANDLE ROW CHANGE ----------------
-  const handleRowChange = (index, field, value) => {
-    const updated = [...rows];
-    updated[index][field] = value;
+const handleRowChange = (index, field, value) => {
+  setRows((prev) => {
+    const updated = [...prev];
+    const row = { ...updated[index] };
 
+    // ✅ allow free typing (keep qty as string)
+    row[field] = value;
 
-    if (field === "qty") {
-      const maxQty = updated[index].maxQty || Infinity;
-      const qty = Math.min(parseFloat(value || 0), maxQty); // cannot exceed purchased qty
-      updated[index][field] = qty;
-    } else {
-      updated[index][field] = value;
-    }
-
-
+    // calculate amount only when qty or rate changes
     if (field === "qty" || field === "rate") {
-      const qty = parseFloat(updated[index].qty || 0);
-      const rate = parseFloat(updated[index].rate || 0);
+      const qty = Number(row.qty);
+      const rate = Number(row.rate);
 
-      // Assume you have purchaseItem details (discount, GST, schemeDiscount)
-      const purchaseItem = purchaseItems.find(pi => pi.item_id == updated[index].item_id);
-      const discountPercent = parseFloat(purchaseItem?.discount_percent || 0);
-      const schemeDiscountPercent = parseFloat(purchaseItem?.scheme_discount_percent || 0);
-      const gstPercent = parseFloat(purchaseItem?.gst_percent || 0);
+      if (!isNaN(qty) && !isNaN(rate)) {
+        const purchaseItem = purchaseItems.find(
+          (pi) => pi.item_id == row.item_id
+        );
 
-      // Apply discount and scheme discount
-      const priceAfterDiscount = rate * (1 - discountPercent / 100) * (1 - schemeDiscountPercent / 100);
+        const discount = Number(purchaseItem?.discount_percent || 0);
+        const scheme = Number(purchaseItem?.scheme_discount_percent || 0);
+        const gst = Number(purchaseItem?.gst_percent || 0);
 
-      // Add GST
-      const priceWithGST = priceAfterDiscount * (1 + gstPercent / 100);
+        const priceAfterDiscount =
+          rate * (1 - discount / 100) * (1 - scheme / 100);
 
-      updated[index].amount = (qty * priceWithGST).toFixed(2);
+        const priceWithGST =
+          priceAfterDiscount * (1 + gst / 100);
+
+        row.amount = (qty * priceWithGST).toFixed(2);
+      }
     }
 
+    updated[index] = row;
+    return updated;
+  });
+};
+const handleQtyBlur = (index) => {
+  setRows((prev) => {
+    const updated = [...prev];
+    const row = { ...updated[index] };
 
-    setRows(updated);
-  };
+    const maxQty = row.maxQty || Infinity;
+    const qty = Number(row.qty || 0);
+
+    // ✅ clamp AFTER typing finished
+    row.qty = Math.min(qty, maxQty);
+
+    updated[index] = row;
+    return updated;
+  });
+};
+
+
 
   const handleAddRow = () => setRows([...rows, { ...emptyItemRow }]);
   const handleRemoveRow = (index) => {
@@ -189,21 +218,48 @@ export default function PurchaseReturnForm({ onClose, editMode }) {
 
       {/* HEADER */}
       <Box display="flex" gap={2}>
-        <TextField
-          select
-          label="Purchase ID"
-          name="purchase_id"
-          value={header.purchase_id}
-          onChange={handleHeaderChange}
-          fullWidth
-          size="small"
-        >
-          {purchaseList?.map((p) => (
-            <MenuItem key={p.purchase_id} value={p.purchase_id}>
-              {p.purchase_id} — {p.invoice_no}
-            </MenuItem>
-          ))}
-        </TextField>
+       <TextField
+  select
+  label="Purchase ID"
+  name="purchase_id"
+  value={header.purchase_id}
+  onChange={handleHeaderChange}
+  fullWidth
+  size="small"
+  SelectProps={{
+    MenuProps: {
+      PaperProps: {
+        sx: { maxHeight: 250 },
+        onScroll: (e) => {
+          const list = e.currentTarget;
+
+          const isBottom =
+            list.scrollHeight - list.scrollTop <=
+            list.clientHeight + 10;
+
+          if (isBottom && hasNextPage && !isFetchingNextPage) {
+            fetchNextPage(); // 🔥 LOAD NEXT 5
+          }
+        },
+      },
+    },
+  }}
+>
+  {purchaseList.map((p) => (
+    <MenuItem
+      key={p.purchase_id}
+      value={p.purchase_id}
+      sx={{ height: 36 }}
+    >
+      {p.purchase_id} — {p.invoice_no}
+    </MenuItem>
+  ))}
+
+  {isFetchingNextPage && (
+    <MenuItem disabled>Loading more...</MenuItem>
+  )}
+</TextField>
+
 
         <TextField
           select
@@ -271,41 +327,42 @@ export default function PurchaseReturnForm({ onClose, editMode }) {
               {rows.map((row, index) => (
                 <TableRow key={index}>
                   <TableCell>
-                    <TextField
-                      select
-                      size="small"
-                      fullWidth
-                      value={row.item_id}
-                      onChange={(e) => {
-                        const itemId = e.target.value;
-                        handleRowChange(index, "item_id", itemId);
+                   <TextField
+  select
+  size="small"
+  fullWidth
+  value={row.item_id}
+  onChange={(e) => {
+    const itemId = e.target.value;
 
-                        const purchaseItem = purchaseItems.find(
-                          (pi) => pi.item_id == itemId
-                        );
+    setRows((prev) => {
+      const updated = [...prev];
+      const purchaseItem = purchaseItems.find(
+        (pi) => pi.item_id == itemId
+      );
 
-                        if (purchaseItem) {
-                          const updated = [...rows];
-                          updated[index] = {
-                            ...updated[index],
-                            batch_no: purchaseItem.batch_no || "",
-                            rate: purchaseItem.purchase_rate || "",
-                            expiry_date: purchaseItem.expiry_date || "",
-                            maxQty: purchaseItem.qty,
-                          };
-                          setRows(updated);
-                        }
-                      }}
-                    >
-                      {purchaseItems.map((pi) => (
-                        <MenuItem
-                          key={pi.purchase_item_id}
-                          value={pi.item_id}
-                        >
-                          {pi.item?.name || "Unknown Item"}
-                        </MenuItem>
-                      ))}
-                    </TextField>
+      updated[index] = {
+        ...updated[index],
+        item_id: itemId,                       // ✅ KEEP item_id
+        batch_no: purchaseItem?.batch_no || "",
+        rate: purchaseItem?.purchase_rate || "",
+        expiry_date: purchaseItem?.expiry_date || "",
+        maxQty: purchaseItem?.qty || Infinity,
+        qty: "",                               // optional reset
+        amount: "",
+      };
+
+      return updated;
+    });
+  }}
+>
+  {purchaseItems.map((pi) => (
+    <MenuItem key={pi.purchase_item_id} value={pi.item_id}>
+      {pi.item?.name}
+    </MenuItem>
+  ))}
+</TextField>
+
                   </TableCell>
 
                   <TableCell>
@@ -320,15 +377,17 @@ export default function PurchaseReturnForm({ onClose, editMode }) {
                   </TableCell>
 
                   <TableCell>
-                    <TextField
-                      type="text"
-                      size="small"
-                      fullWidth
-                      value={row.qty}
-                      onChange={(e) =>
-                        handleRowChange(index, "qty", e.target.value)
-                      }
-                    />
+                   <TextField
+  type="text"
+  size="small"
+  fullWidth
+  value={row.qty}
+  onChange={(e) =>
+    handleRowChange(index, "qty", e.target.value)
+  }
+  onBlur={() => handleQtyBlur(index)}   // ✅ ADD THIS
+/>
+
                   </TableCell>
 
                   <TableCell>

@@ -73,7 +73,8 @@ useEffect(() => {
 
     const returnQty = Math.min(qty, item.qty);
     const amount = returnQty * item.rate;
-    const gstAmount = (amount * item.gst_percent) / 100;
+    const gstPerUnit = item.rate - item.rate / (1 + item.gst_percent / 100);
+  const gstAmount = gstPerUnit * returnQty;
 
     item.return_qty = returnQty;
     item.amount = amount;
@@ -85,13 +86,14 @@ useEffect(() => {
 
   /* ---------------- TOTAL CALC ---------------- */
   const calculateTotals = (data) => {
-    const amount = data.reduce((a, i) => a + i.amount, 0);
     const gst = data.reduce((a, i) => a + i.gstAmount, 0);
+    const amount = data.reduce((a, i) => a + i.amount, 0)-gst;
+    
 
     setTotals({
       amount,
       gst,
-      net: amount + gst,
+      net: amount+gst,
     });
   };
 
@@ -128,10 +130,9 @@ useEffect(() => {
 
   return (
     <Box p={3}>
-      <Typography variant="h6">Sales Return</Typography>
+      <Typography variant="subtitle1" fontWeight={600} className="text-blue-700">Sales Return</Typography>
 
-      <Grid container spacing={2} mt={1}>
-        <Grid item xs={3}>
+      <Box display='flex' gap={2}>
           <TextField
             select
             fullWidth
@@ -147,9 +148,7 @@ useEffect(() => {
             ))}
 
           </TextField>
-        </Grid>
-
-        <Grid item xs={3}>
+       
           <TextField
   select
   fullWidth
@@ -164,17 +163,14 @@ useEffect(() => {
   ))}
 </TextField>
 
-        </Grid>
-
-        <Grid item xs={6}>
+      
           <TextField
             fullWidth
             label="Reason"
             value={reason}
             onChange={e => setReason(e.target.value)}
           />
-        </Grid>
-      </Grid>
+     </Box>
 
       <Paper sx={{ mt: 3 }}>
         <Table>
@@ -215,7 +211,7 @@ useEffect(() => {
       </Paper>
 
       <Box mt={2} textAlign="right">
-        <Typography>Total Amount: {totals.amount.toFixed(2)}</Typography>
+        <Typography>Taxable Amount: {totals.amount.toFixed(2)}</Typography>
         <Typography>Total GST: {totals.gst.toFixed(2)}</Typography>
         <Typography fontWeight="bold">
           Net Amount: {totals.net.toFixed(2)}

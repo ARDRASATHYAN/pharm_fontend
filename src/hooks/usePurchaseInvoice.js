@@ -2,7 +2,7 @@
 import itemService from "@/services/itemService";
 import purchaseInvoiceService from "@/services/purchaseInvoiceService";
 import purchaseService from "@/services/purchaseService";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 
 export function usepurchaseinvoice(filters) {
   return useQuery({
@@ -12,6 +12,26 @@ export function usepurchaseinvoice(filters) {
     staleTime: 1000 * 60 * 5,
   });
 }
+
+export function useInfinitepurchaseinvoice({ search = "" } = {}) {
+  return useInfiniteQuery({
+    queryKey: ["purchaseinvoice", search],
+
+    queryFn: ({ pageParam = 1 }) =>
+      purchaseService.getpurchaseInvoise({
+        search,
+        page: pageParam,
+        perPage: 10, // keep consistent
+      }),
+
+    getNextPageParam: (lastPage) => {
+      return lastPage.page < lastPage.totalPages
+        ? lastPage.page + 1
+        : undefined;
+    },
+  });
+}
+
 
 
 export const usePurchaseItemsByPurchaseId = (purchase_id) => {
