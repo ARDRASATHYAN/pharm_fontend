@@ -39,7 +39,18 @@ const stockService = {
   getOutOffstock: async (params) => {
     const res = await apiClient.get("/stock/outoff-stock", { params })
     return res.data
-  }
+  },
+
+
+   getDeadstock: async (params) => {
+    const res = await apiClient.get("/stock/dead-stock", { params })
+    return res.data
+  },
+
+  getFastMovestock: async (params) => {
+    const res = await apiClient.get("/stock/fast-move-stock", { params })
+    return res.data
+  },
 
 }
 

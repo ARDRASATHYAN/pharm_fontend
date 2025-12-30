@@ -40,6 +40,8 @@ import MrpVsSalesPriceReport from "./pages/sales_reports/Mrp_Vs_Sales_Rate_Repor
 import ProfitReport from "./pages/sales_reports/Profit_Report";
 import CurrentStockReport from "./pages/inventory_reports/Current_Stock";
 import OutOffStockReport from "./pages/inventory_reports/OutOff_Stock";
+import DeadStockReport from "./pages/inventory_reports/Dead_Stock";
+import FastMoveStockReport from "./pages/inventory_reports/Fast_Move_Stock";
 
 
 
@@ -113,6 +115,8 @@ function App() {
 
  <Route path="/stock/current-stock" element={<CurrentStockReport />} />
  <Route path="/stock/outoff-stock" element={<OutOffStockReport />} />
+  <Route path="/stock/dead-stock" element={<DeadStockReport />} />
+   <Route path="/stock/fast-move-stock" element={<FastMoveStockReport />} />
 
 
 

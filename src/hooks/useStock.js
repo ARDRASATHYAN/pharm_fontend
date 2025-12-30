@@ -103,3 +103,32 @@ export function useOutOfftStock({ page = 1, perPage = 10, store_id } = {}) {
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }
+
+
+export function useDeadtStock({ page = 1, perPage = 10, store_id } = {}) {
+  return useQuery({
+    queryKey: ["deadstock", page, perPage, store_id],
+    queryFn: () =>
+      stockService.getDeadstock({
+        store_id,
+        page,
+         limit: perPage,
+      }),
+    keepPreviousData: true,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+}
+
+export function useFastMoveStock({ page = 1, perPage = 10, store_id } = {}) {
+  return useQuery({
+    queryKey: ["fastmovestock", page, perPage, store_id],
+    queryFn: () =>
+      stockService.getFastMovestock({
+        store_id,
+        page,
+         limit: perPage,
+      }),
+    keepPreviousData: true,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+}

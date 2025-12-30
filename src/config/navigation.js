@@ -141,8 +141,8 @@ export const navigationItems = [
     label: "Gst/Tax Reports",
     href: "/gst/sales",
     icon: ReceiptText,
-     children: [
-      { key: "excess-gst-sale", label: "GST Sales Report", href:  "/gst/sales" },
+    children: [
+      { key: "excess-gst-sale", label: "GST Sales Report", href: "/gst/sales" },
       { key: "gst-purchase", label: "GST Purchase Report", href: "/gst/purchase" },
     ],
   },
@@ -151,10 +151,10 @@ export const navigationItems = [
     label: "Sales Reports",
     href: "/sale-report/item-wise",
     icon: TrendingUp,
-     children: [
-      { key: "item-wise-sale", label: "Item Wise Sales Report", href:  "/sale-report/item-wise" },
+    children: [
+      { key: "item-wise-sale", label: "Item Wise Sales Report", href: "/sale-report/item-wise" },
       { key: "mrpsaleprice", label: "Mrp V/S SalePrice", href: "/sale-report/mrp-salesprice" },
-       { key: "profit", label: "Profit/margin Report", href: "/sale-report/profit" },
+      { key: "profit", label: "Profit/margin Report", href: "/sale-report/profit" },
     ],
   },
   {
@@ -162,9 +162,11 @@ export const navigationItems = [
     label: "Inventory Reports",
     href: "/stock/current-stock",
     icon: PackageCheck,
-     children: [
-      { key: "current-stock", label: "Current Stock", href:  "/stock/current-stock" },
-      { key: "outoff-stock", label: "OutOff Report", href: "/stock/outoff-stock" },
+    children: [
+      { key: "current-stock", label: "Current Stock", href: "/stock/current-stock" },
+      { key: "outoff-stock", label: "OutOff Stock Report", href: "/stock/outoff-stock" },
+      { key: "dead-stock", label: "Dead Stock Report", href: "/stock/dead-stock" },
+      { key: "fst-move-stock", label: "Fast Move Report", href: "/stock/fast-move-stock" },
     ],
   },
 ];
