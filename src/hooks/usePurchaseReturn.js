@@ -3,12 +3,15 @@ import purchaseReturnService from "@/services/purchaseReturnService";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 
-export function usePurchaseReturnList() {
+export function usePurchaseReturnList({ page, perPage }) {
   return useQuery({
-    queryKey: ["purchase-return-list"],
-    queryFn: purchaseReturnService.getPurchaseReturnList,
+    queryKey: ["purchase-return-list", page, perPage], // 🔴 THIS IS REQUIRED
+    queryFn: () =>
+      purchaseReturnService.getPurchaseReturnList({ page, perPage }),
+    keepPreviousData: true, // ✅ smooth pagination
   });
 }
+
 
 
 // 🔹 Create purchase return

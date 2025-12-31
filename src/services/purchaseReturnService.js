@@ -8,10 +8,11 @@ const purchaseReturnService = {
   },
 
   // 📄 List Purchase Returns
-  getPurchaseReturnList: async () => {
-    const { data } = await apiClient.get("/purchasereturn");
-    return data;
-  },
+getPurchaseReturnList: async (params) => {
+  const { data } = await apiClient.get("/purchasereturn", { params });
+  return data;
+},
+
 
   // 📦 Get Purchase Return Items
   getPurchaseReturnItems: async () => {

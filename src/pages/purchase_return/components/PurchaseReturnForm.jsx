@@ -187,6 +187,7 @@ const handleQtyBlur = (index) => {
           item_id: r.item_id,
           batch_no: r.batch_no,
           qty: Number(r.qty),
+          pack_size: Number(r.pack_size),
           rate: Number(r.rate),
           item_reason: r.reason,
           expiry_date: r.expiry_date,
@@ -315,6 +316,7 @@ const handleQtyBlur = (index) => {
               <TableRow>
                 <TableCell>Item</TableCell>
                 <TableCell>Batch</TableCell>
+                <TableCell>qty(unit)</TableCell>
                 <TableCell>Qty</TableCell>
                 <TableCell>Rate</TableCell>
                 <TableCell>Amount</TableCell>
@@ -340,6 +342,7 @@ const handleQtyBlur = (index) => {
       const purchaseItem = purchaseItems.find(
         (pi) => pi.item_id == itemId
       );
+      const packSize = Number(purchaseItem?.item?.pack_size || 1);
 
       updated[index] = {
         ...updated[index],
@@ -348,6 +351,7 @@ const handleQtyBlur = (index) => {
         rate: purchaseItem?.purchase_rate || "",
         expiry_date: purchaseItem?.expiry_date || "",
         maxQty: purchaseItem?.qty || Infinity,
+        pack_size: packSize,    
         qty: "",                               // optional reset
         amount: "",
       };
@@ -375,6 +379,12 @@ const handleQtyBlur = (index) => {
                       }
                     />
                   </TableCell>
+                  <TableCell>
+  {row.qty && row.pack_size
+    ? row.qty * row.pack_size
+    : 0} units
+</TableCell>
+
 
                   <TableCell>
                    <TextField

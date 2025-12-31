@@ -1,5 +1,5 @@
 // src/components/purchase/PurchaseInvoiceMockApiHeader.jsx
-import React, { useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import { Button } from "@mui/material";
 import BasicTable from "@/components/commen/BasicTable"
 
@@ -8,6 +8,38 @@ import { usePurchaseReturnList } from "@/hooks/usePurchaseReturn";
 
 
 export default function PurchaseReturnMockApiHeader() {
+
+
+
+    // ----------------------------
+    const [filters, setFilters] = useState({
+      search: "",
+      page: 1,
+      perPage: 10,
+    });
+  
+    // Dynamically calculate perPage based on screen height
+    const adjustRowsByHeight = () => {
+      const screenHeight = window.innerHeight;
+      const headerHeight = 180; // filters + table header
+      const rowHeight = 34;
+      const rows = Math.floor((screenHeight - headerHeight) / rowHeight);
+      setFilters(prev => ({ ...prev, perPage: Math.max(5, rows), page: 1 }));
+    };
+  
+    useLayoutEffect(() => {
+      adjustRowsByHeight();
+    }, []);
+  
+    useEffect(() => {
+      window.addEventListener("resize", adjustRowsByHeight);
+      return () => window.removeEventListener("resize", adjustRowsByHeight);
+    }, []);
+  
+ 
+  
+    
+  
 
   
  
@@ -56,7 +88,16 @@ export default function PurchaseReturnMockApiHeader() {
       // deletepurchaseinvoice.mutate(id);
     }
   };
-const { data:purchasereturn= [], isLoading } = usePurchaseReturnList();
+const { data: purchasereturnData, isLoading } = usePurchaseReturnList({
+  page: Number(filters.page),
+  perPage: Number(filters.perPage)
+});
+
+// purchasereturnData contains both `data` and `pagination`
+
+
+      const handlePageChange = (page) => setFilters(prev => ({ ...prev, page: Number(page) || 1 }));
+  
   
   return (
     <>
@@ -72,14 +113,19 @@ const { data:purchasereturn= [], isLoading } = usePurchaseReturnList();
         </h2>
        
       </div>
+<BasicTable
+  columns={getPurchaseReturnColumns(handleEdit, handleDelete)}
+  data={purchasereturnData?.data || []}
+  loading={isLoading}
+  pagination={{
+    page: purchasereturnData?.pagination?.page || 1,
+    perPage: purchasereturnData?.pagination?.limit || filters.perPage,
+    total: purchasereturnData?.pagination?.total || 0,
+    totalPages: purchasereturnData?.pagination?.totalPages || 1,
+  }}
+  onPageChange={handlePageChange}
+/>
 
-      <BasicTable
-        columns={getPurchaseReturnColumns(handleEdit, handleDelete)}
-        data={purchasereturn}
-        loading={isLoading }
-      />
-
-   
     </>
   );
 }
